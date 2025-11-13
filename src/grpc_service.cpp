@@ -5,8 +5,8 @@
 #include <fstream>
 #include <shared_mutex>
 
-// 注意：这个实现目前是模拟的，因为还没有 protobuf 生成的代码
-// 在实际项目中，需要先生成 gRPC proto 文件，然后实现真实的服务
+// Note: This implementation is currently a mock because we don't have protobuf generated code yet
+// In a real project, we need to generate gRPC proto files first, then implement the actual services
 
 namespace croupier {
 namespace sdk {
@@ -23,7 +23,7 @@ GrpcClientManager::GrpcClientManager(const ClientConfig& config)
     , heartbeat_running_(false)
     , local_port_(0)
 {
-    std::cout << "初始化 gRPC 客户端管理器 for game: " << config_.game_id
+    std::cout << "Initializing gRPC client manager for game: " << config_.game_id
               << ", env: " << config_.env << std::endl;
 }
 
@@ -41,30 +41,30 @@ bool GrpcClientManager::Connect() {
     state_ = ConnectionState::CONNECTING;
 
     try {
-        // 创建 gRPC 频道
+        // Create gRPC channel
         agent_channel_ = CreateChannel();
         if (!agent_channel_) {
             HandleError("Failed to create gRPC channel");
             return false;
         }
 
-        // 创建客户端 stub
+        // Create client stub
         agent_stub_ = std::make_unique<LocalControlServiceStub>(agent_channel_);
 
-        // 验证连接
+        // Validate connection
         if (!ValidateConnection()) {
             HandleError("Failed to validate connection to agent");
             return false;
         }
 
-        // 启动本地服务器
+        // Start local server
         if (!StartLocalServer()) {
             HandleError("Failed to start local gRPC server");
             return false;
         }
 
         state_ = ConnectionState::CONNECTED;
-        std::cout << "✅ 成功连接到 Agent: " << config_.agent_addr << std::endl;
+        std::cout << "✅ Successfully connected to Agent: " << config_.agent_addr << std::endl;
 
         return true;
 
@@ -80,19 +80,19 @@ void GrpcClientManager::Disconnect() {
 
     should_reconnect_ = false;
 
-    // 停止心跳
+    // Stop heartbeat
     StopHeartbeatLoop();
 
-    // 停止本地服务器
+    // Stop local server
     StopLocalServer();
 
-    // 清理连接
+    // Cleanup connections
     agent_stub_.reset();
     agent_channel_.reset();
 
     state_ = ConnectionState::DISCONNECTED;
 
-    std::cout << "📴 已断开与 Agent 的连接" << std::endl;
+    std::cout << "📴 Disconnected from Agent" << std::endl;
 }
 
 bool GrpcClientManager::IsConnected() const {
@@ -110,35 +110,40 @@ bool GrpcClientManager::RegisterWithAgent(
     std::string& session_id) {
 
     if (!IsConnected()) {
-        std::cerr << "❌ 未连接到 Agent，无法注册" << std::endl;
+        std::cerr << "❌ Not connected to Agent, cannot register" << std::endl;
         return false;
     }
 
-    std::string error_message;
-    bool success = agent_stub_->RegisterLocal(
-        config_.service_id,
-        "1.0.0",
-        local_address_,
-        functions,
-        session_id,
-        error_message
-    );
+    try {
+        std::string error_message;
+        bool success = agent_stub_->RegisterLocal(
+            config_.service_id,
+            "1.0.0", // version
+            local_address_,
+            functions,
+            session_id,
+            error_message
+        );
 
-    if (success) {
-        std::cout << "✅ 成功注册到 Agent，session_id: " << session_id << std::endl;
-        std::cout << "📋 注册信息:" << std::endl;
-        std::cout << "   - 函数数量: " << functions.size() << std::endl;
-        std::cout << "   - 虚拟对象: " << objects.size() << std::endl;
-        std::cout << "   - 组件数量: " << components.size() << std::endl;
-        std::cout << "   - 本地地址: " << local_address_ << std::endl;
+        if (success) {
+            std::cout << "✅ Successfully registered with Agent, session_id: " << session_id << std::endl;
+            std::cout << "📋 Registration info:" << std::endl;
+            std::cout << "   - Functions: " << functions.size() << std::endl;
+            std::cout << "   - Virtual objects: " << objects.size() << std::endl;
+            std::cout << "   - Components: " << components.size() << std::endl;
+            std::cout << "   - Local address: " << local_address_ << std::endl;
 
-        // 启动心跳
-        StartHeartbeatLoop(session_id);
-    } else {
-        std::cerr << "❌ 注册失败: " << error_message << std::endl;
+            // Start heartbeat
+            StartHeartbeatLoop(session_id);
+            return true;
+        } else {
+            std::cerr << "❌ Registration failed: " << error_message << std::endl;
+            return false;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Registration exception: " << e.what() << std::endl;
+        return false;
     }
-
-    return success;
 }
 
 bool GrpcClientManager::SendHeartbeat(const std::string& session_id) {
@@ -146,81 +151,62 @@ bool GrpcClientManager::SendHeartbeat(const std::string& session_id) {
         return false;
     }
 
-    std::string error_message;
-    bool success = agent_stub_->Heartbeat(
-        config_.service_id,
-        session_id,
-        error_message
-    );
+    try {
+        std::string error_message;
+        bool success = agent_stub_->Heartbeat(config_.service_id, session_id, error_message);
 
-    if (!success) {
-        std::cerr << "💓 心跳失败: " << error_message << std::endl;
-        // 可能需要重连
-        should_reconnect_ = true;
-    }
-
-    return success;
-}
-
-void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
-    if (heartbeat_running_) {
-        return;
-    }
-
-    heartbeat_running_ = true;
-    heartbeat_thread_ = std::thread([this, session_id]() {
-        HeartbeatLoop(session_id);
-    });
-}
-
-void GrpcClientManager::StopHeartbeatLoop() {
-    heartbeat_running_ = false;
-
-    if (heartbeat_thread_.joinable()) {
-        heartbeat_thread_.join();
+        if (!success) {
+            std::cerr << "💓 Heartbeat failed: " << error_message << std::endl;
+            // May need to reconnect
+            return false;
+        }
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Heartbeat exception: " << e.what() << std::endl;
+        return false;
     }
 }
 
 bool GrpcClientManager::StartLocalServer() {
     try {
-        // 解析监听地址
+        // Parse listen address
         std::string host;
-        int port = 0;
+        int port;
 
-        auto colon_pos = config_.local_listen.find(':');
-        if (colon_pos != std::string::npos) {
-            host = config_.local_listen.substr(0, colon_pos);
-            std::string port_str = config_.local_listen.substr(colon_pos + 1);
-            port = std::stoi(port_str);
+        if (config_.local_listen.empty()) {
+            host = "127.0.0.1";
+            port = 0; // Auto-assign port
         } else {
-            host = config_.local_listen;
-            port = 0; // 自动分配
+            auto pos = config_.local_listen.rfind(':');
+            if (pos == std::string::npos) {
+                throw std::runtime_error("Invalid local_listen format");
+            }
+            host = config_.local_listen.substr(0, pos);
+            std::string port_str = config_.local_listen.substr(pos + 1);
+            port = port_str.empty() ? 0 : std::stoi(port_str);
         }
 
-        // 如果端口为 0，自动分配端口
+        // If port is 0, auto-assign port
         if (port == 0) {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> dis(20000, 30000);
-            port = dis(gen);
+            port = 19001; // Default starting port for local services
         }
 
-        // 创建本地服务实现
-        std::map<std::string, FunctionHandler> empty_handlers; // 初始为空，后续会更新
-        local_service_ = std::make_unique<LocalFunctionServiceImpl>(empty_handlers);
-
-        // 构建服务器地址
-        local_address_ = host + ":" + std::to_string(port);
         local_port_ = port;
 
-        // 这里应该启动真实的 gRPC 服务器
-        // 现在先模拟成功
-        std::cout << "🚀 本地 gRPC 服务器启动在: " << local_address_ << std::endl;
+        // Create local service implementation
+        std::map<std::string, FunctionHandler> empty_handlers; // Initially empty, will be updated later
+        local_service_ = std::make_unique<LocalFunctionServiceImpl>(empty_handlers);
+
+        // Build server address
+        local_address_ = host + ":" + std::to_string(port);
+
+        // TODO: Start real gRPC server here
+        // For now, just mock success
+        std::cout << "🚀 Local gRPC server started on: " << local_address_ << std::endl;
 
         return true;
-
     } catch (const std::exception& e) {
-        std::cerr << "❌ 启动本地服务器失败: " << e.what() << std::endl;
+        std::cerr << "❌ Failed to start local server: " << e.what() << std::endl;
         return false;
     }
 }
@@ -232,7 +218,7 @@ void GrpcClientManager::StopLocalServer() {
     }
 
     local_service_.reset();
-    std::cout << "🛑 本地 gRPC 服务器已停止" << std::endl;
+    std::cout << "🛑 Local gRPC server stopped" << std::endl;
 }
 
 std::string GrpcClientManager::GetLocalServerAddress() const {
@@ -247,15 +233,11 @@ void GrpcClientManager::SetReconnectCallback(std::function<void()> callback) {
     reconnect_callback_ = callback;
 }
 
-//==============================================================================
-// Private Methods
-//==============================================================================
-
 std::shared_ptr<grpc::Channel> GrpcClientManager::CreateChannel() {
+    auto channel_args = CreateChannelArguments();
     auto credentials = CreateCredentials();
-    auto args = CreateChannelArguments();
 
-    return grpc::CreateCustomChannel(config_.agent_addr, credentials, args);
+    return grpc::CreateCustomChannel(config_.agent_addr, credentials, channel_args);
 }
 
 bool GrpcClientManager::ValidateConnection() {
@@ -263,30 +245,27 @@ bool GrpcClientManager::ValidateConnection() {
         return false;
     }
 
-    // 检查频道状态
-    auto state = agent_channel_->GetState(true);
+    // Check channel state
+    grpc_connectivity_state state = agent_channel_->GetState(false);
 
-    // 等待连接建立
-    auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(10);
-    bool connected = agent_channel_->WaitForConnected(deadline);
-
-    if (!connected) {
-        std::cerr << "⏰ 连接超时，无法连接到 Agent" << std::endl;
+    // Wait for connection to be established
+    auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(config_.timeout_seconds);
+    if (!agent_channel_->WaitForConnected(deadline)) {
+        std::cerr << "⏰ Connection timeout, unable to connect to Agent" << std::endl;
         return false;
     }
 
-    std::cout << "🔗 gRPC 频道连接成功" << std::endl;
+    std::cout << "🔗 gRPC channel connected successfully" << std::endl;
     return true;
 }
 
 void GrpcClientManager::HandleError(const std::string& error) {
-    std::cerr << "🚨 gRPC 错误: " << error << std::endl;
-
+    std::cerr << "🚨 gRPC error: " << error << std::endl;
     if (error_callback_) {
         error_callback_(error);
     }
 
-    // 如果配置了自动重连，启动重连逻辑
+    // If auto-reconnect is configured, start reconnect logic
     if (should_reconnect_) {
         DoReconnect();
     }
@@ -299,24 +278,24 @@ void GrpcClientManager::NotifyReconnect() {
 }
 
 void GrpcClientManager::DoReconnect() {
-    if (state_ == ConnectionState::RECONNECTING) {
-        return; // 已经在重连中
+    // Spawn reconnect thread if not already running
+    if (reconnect_thread_.joinable()) {
+        return; // Already reconnecting
     }
 
-    state_ = ConnectionState::RECONNECTING;
-
+    should_reconnect_ = true;
     reconnect_thread_ = std::thread([this]() {
-        int attempts = 0;
         const int max_attempts = 10;
-        const auto interval = std::chrono::seconds(5);
+        int attempts = 0;
 
         while (should_reconnect_ && attempts < max_attempts) {
-            std::cout << "🔄 尝试重连 Agent... (第 " << (attempts + 1) << " 次)" << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait 5 seconds between attempts
 
-            std::this_thread::sleep_for(interval);
+            std::cout << "🔄 Attempting to reconnect to Agent... (attempt " << (attempts + 1) << ")" << std::endl;
 
             if (Connect()) {
-                std::cout << "✅ 重连成功！" << std::endl;
+                should_reconnect_ = false;
+                std::cout << "✅ Reconnection successful!" << std::endl;
                 NotifyReconnect();
                 return;
             }
@@ -324,46 +303,57 @@ void GrpcClientManager::DoReconnect() {
             attempts++;
         }
 
-        if (attempts >= max_attempts) {
-            std::cerr << "❌ 重连失败，已达到最大尝试次数" << std::endl;
-            state_ = ConnectionState::ERROR;
+        if (should_reconnect_) {
+            std::cerr << "❌ Reconnection failed, max attempts reached" << std::endl;
         }
     });
 }
 
-void GrpcClientManager::HeartbeatLoop(const std::string& session_id) {
-    const auto interval = std::chrono::seconds(60); // 60秒心跳间隔
-
-    while (heartbeat_running_) {
-        std::this_thread::sleep_for(interval);
-
-        if (!heartbeat_running_) {
-            break;
-        }
-
-        if (!SendHeartbeat(session_id)) {
-            std::cerr << "💔 心跳失败，可能需要重连" << std::endl;
-            break;
-        }
-
-        // 静默心跳，只在失败时输出
-        // std::cout << "💓 心跳发送成功" << std::endl;
+void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
+    if (heartbeat_running_) {
+        return;
     }
 
-    std::cout << "💓 心跳循环已停止" << std::endl;
+    heartbeat_running_ = true;
+    heartbeat_thread_ = std::thread([this, session_id]() {
+        const auto interval = std::chrono::seconds(60); // 60 second heartbeat interval
+
+        while (heartbeat_running_) {
+            std::this_thread::sleep_for(interval);
+
+            if (!heartbeat_running_) break;
+
+            if (!SendHeartbeat(session_id)) {
+                std::cerr << "💔 Heartbeat failed, may need reconnection" << std::endl;
+                break;
+            }
+
+            // Silent heartbeat, only log on failure
+            // std::cout << "💓 Heartbeat sent successfully" << std::endl;
+        }
+
+        std::cout << "💓 Heartbeat loop stopped" << std::endl;
+    });
+}
+
+void GrpcClientManager::StopHeartbeatLoop() {
+    heartbeat_running_ = false;
+    if (heartbeat_thread_.joinable()) {
+        heartbeat_thread_.join();
+    }
 }
 
 grpc::ChannelArguments GrpcClientManager::CreateChannelArguments() {
     grpc::ChannelArguments args;
 
-    // 设置超时
+    // Set timeout
     args.SetInt(GRPC_ARG_KEEPALIVE_TIME_MS, 30000);
     args.SetInt(GRPC_ARG_KEEPALIVE_TIMEOUT_MS, 5000);
     args.SetInt(GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS, 1);
 
-    // 设置最大消息大小
-    args.SetMaxReceiveMessageSize(16 * 1024 * 1024); // 16MB
-    args.SetMaxSendMessageSize(16 * 1024 * 1024);    // 16MB
+    // Set max message size
+    args.SetMaxReceiveMessageSize(4 * 1024 * 1024); // 4MB
+    args.SetMaxSendMessageSize(4 * 1024 * 1024);    // 4MB
 
     return args;
 }
@@ -373,31 +363,26 @@ std::shared_ptr<grpc::ChannelCredentials> GrpcClientManager::CreateCredentials()
         return grpc::InsecureChannelCredentials();
     }
 
-    // TLS 配置
+    // TLS configuration
     grpc::SslCredentialsOptions ssl_options;
 
     if (!config_.ca_file.empty()) {
         std::ifstream ca_file(config_.ca_file);
-        if (ca_file.good()) {
-            std::string ca_content((std::istreambuf_iterator<char>(ca_file)),
-                                  std::istreambuf_iterator<char>());
-            ssl_options.pem_root_certs = ca_content;
-        }
+        std::stringstream ca_buffer;
+        ca_buffer << ca_file.rdbuf();
+        ssl_options.pem_root_certs = ca_buffer.str();
     }
 
     if (!config_.cert_file.empty() && !config_.key_file.empty()) {
         std::ifstream cert_file(config_.cert_file);
+        std::stringstream cert_buffer;
+        cert_buffer << cert_file.rdbuf();
+        ssl_options.pem_cert_chain = cert_buffer.str();
+
         std::ifstream key_file(config_.key_file);
-
-        if (cert_file.good() && key_file.good()) {
-            std::string cert_content((std::istreambuf_iterator<char>(cert_file)),
-                                   std::istreambuf_iterator<char>());
-            std::string key_content((std::istreambuf_iterator<char>(key_file)),
-                                  std::istreambuf_iterator<char>());
-
-            ssl_options.pem_cert_chain = cert_content;
-            ssl_options.pem_private_key = key_content;
-        }
+        std::stringstream key_buffer;
+        key_buffer << key_file.rdbuf();
+        ssl_options.pem_private_key = key_buffer.str();
     }
 
     return grpc::SslCredentials(ssl_options);
@@ -412,32 +397,28 @@ LocalFunctionServiceImpl::LocalFunctionServiceImpl(
     : handlers_(handlers)
     , total_calls_(0)
     , successful_calls_(0)
-    , failed_calls_(0)
-{
-    std::cout << "🎯 本地函数服务初始化，处理器数量: " << handlers_.size() << std::endl;
+    , failed_calls_(0) {
+    std::cout << "🎯 Local function service initialized, handler count: " << handlers_.size() << std::endl;
 }
 
-void LocalFunctionServiceImpl::UpdateHandlers(
-    const std::map<std::string, FunctionHandler>& handlers) {
-    std::unique_lock<std::shared_mutex> lock(handlers_mutex_);
+void LocalFunctionServiceImpl::UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
+    std::lock_guard<std::shared_mutex> lock(handlers_mutex_);
     handlers_ = handlers;
-    std::cout << "🔄 更新函数处理器，当前数量: " << handlers_.size() << std::endl;
+    std::cout << "🔄 Updated function handlers, current count: " << handlers_.size() << std::endl;
 }
 
-void LocalFunctionServiceImpl::AddHandler(
-    const std::string& function_id,
-    FunctionHandler handler) {
-    std::unique_lock<std::shared_mutex> lock(handlers_mutex_);
+void LocalFunctionServiceImpl::AddHandler(const std::string& function_id, FunctionHandler handler) {
+    std::lock_guard<std::shared_mutex> lock(handlers_mutex_);
     handlers_[function_id] = handler;
-    std::cout << "➕ 添加函数处理器: " << function_id << std::endl;
+    std::cout << "➕ Added function handler: " << function_id << std::endl;
 }
 
 void LocalFunctionServiceImpl::RemoveHandler(const std::string& function_id) {
-    std::unique_lock<std::shared_mutex> lock(handlers_mutex_);
+    std::lock_guard<std::shared_mutex> lock(handlers_mutex_);
     auto it = handlers_.find(function_id);
     if (it != handlers_.end()) {
         handlers_.erase(it);
-        std::cout << "➖ 移除函数处理器: " << function_id << std::endl;
+        std::cout << "➖ Removed function handler: " << function_id << std::endl;
     }
 }
 
@@ -454,33 +435,28 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
     total_calls_++;
 
     std::shared_lock<std::shared_mutex> lock(handlers_mutex_);
-    auto it = handlers_.find(function_id);
 
+    auto it = handlers_.find(function_id);
     if (it == handlers_.end()) {
         failed_calls_++;
-        std::string error = R"({"error": "Function not found: )" + function_id + R"("})";
-        std::cerr << "❌ 函数不存在: " << function_id << std::endl;
-        return error;
+        std::cerr << "❌ Function not found: " << function_id << std::endl;
+        return R"({"error": "Function not found", "function_id": ")" + function_id + R"("})";
     }
 
+    auto handler = it->second;
+    lock.unlock(); // Release lock to allow concurrent execution
+
     try {
-        lock.unlock(); // 释放锁，允许并发执行
-
-        std::cout << "🎯 执行函数: " << function_id << std::endl;
-        std::string result = it->second(context, payload);
-
+        std::cout << "🎯 Executing function: " << function_id << std::endl;
+        std::string result = handler(context, payload);
         successful_calls_++;
-        std::cout << "✅ 函数执行成功: " << function_id << std::endl;
-
+        std::cout << "✅ Function executed successfully: " << function_id << std::endl;
         return result;
-
     } catch (const std::exception& e) {
         failed_calls_++;
-        std::string error = R"({"error": "Function execution failed: )" +
-                           std::string(e.what()) + R"("})";
-        std::cerr << "❌ 函数执行失败: " << function_id
-                  << ", 错误: " << e.what() << std::endl;
-        return error;
+        std::cerr << "❌ Function execution failed: " << function_id
+                  << ", error: " << e.what() << std::endl;
+        return R"({"error": ")" + std::string(e.what()) + R"(", "function_id": ")" + function_id + R"("})";
     }
 }
 
@@ -490,10 +466,9 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
 
 LocalControlServiceStub::LocalControlServiceStub(std::shared_ptr<grpc::Channel> channel)
     : channel_(channel)
-    , default_timeout_(30000) // 30秒超时
+    , default_timeout_(30000) // 30 second timeout
 {
-    // 这里会在有 proto 文件生成后初始化真实的 stub
-    // stub_ = LocalControlService::NewStub(channel_);
+    // Real stub will be initialized here after proto file generation
 }
 
 bool LocalControlServiceStub::RegisterLocal(
@@ -505,25 +480,19 @@ bool LocalControlServiceStub::RegisterLocal(
     std::string& error_message) {
 
     try {
-        auto context = CreateContext();
+        // This is a mock implementation, real implementation needs proto files
+        // Now generating a mock session_id
+        session_id = "mock_session_" + service_id + "_" + std::to_string(std::time(nullptr));
 
-        // 这是模拟实现，真实实现需要 proto 文件
-        // 现在生成一个模拟的 session_id
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(100000, 999999);
-        session_id = "session_" + std::to_string(dis(gen));
+        std::cout << "📡 Registering service with Agent:" << std::endl;
+        std::cout << "   Service ID: " << service_id << std::endl;
+        std::cout << "   Version: " << version << std::endl;
+        std::cout << "   RPC Address: " << rpc_addr << std::endl;
+        std::cout << "   Functions: " << functions.size() << std::endl;
+        std::cout << "   Session ID: " << session_id << std::endl;
 
-        std::cout << "📡 向 Agent 注册服务:" << std::endl;
-        std::cout << "   - service_id: " << service_id << std::endl;
-        std::cout << "   - version: " << version << std::endl;
-        std::cout << "   - rpc_addr: " << rpc_addr << std::endl;
-        std::cout << "   - functions: " << functions.size() << std::endl;
-        std::cout << "   - session_id: " << session_id << std::endl;
-
-        // 模拟成功注册
+        // Mock successful registration
         return true;
-
     } catch (const std::exception& e) {
         error_message = "Registration failed: " + std::string(e.what());
         return false;
@@ -536,13 +505,11 @@ bool LocalControlServiceStub::Heartbeat(
     std::string& error_message) {
 
     try {
-        auto context = CreateContext();
+        // This is a mock implementation
+        // Real implementation will call agent's Heartbeat RPC
 
-        // 这是模拟实现
-        // 实际实现会调用 agent 的 Heartbeat RPC
-
+        // Mock successful heartbeat
         return true;
-
     } catch (const std::exception& e) {
         error_message = "Heartbeat failed: " + std::string(e.what());
         return false;
@@ -554,12 +521,9 @@ bool LocalControlServiceStub::ListLocal(
     std::string& error_message) {
 
     try {
-        auto context = CreateContext();
-
-        // 模拟实现
+        // Mock implementation
         functions.clear();
         return true;
-
     } catch (const std::exception& e) {
         error_message = "List functions failed: " + std::string(e.what());
         return false;
@@ -572,13 +536,11 @@ bool LocalControlServiceStub::UnregisterLocal(
     std::string& error_message) {
 
     try {
-        auto context = CreateContext();
-
-        std::cout << "📡 从 Agent 注销服务: " << service_id
+        std::cout << "📡 Unregistering service from Agent: " << service_id
                   << ", session: " << session_id << std::endl;
 
+        // Mock successful unregistration
         return true;
-
     } catch (const std::exception& e) {
         error_message = "Unregistration failed: " + std::string(e.what());
         return false;
@@ -588,8 +550,9 @@ bool LocalControlServiceStub::UnregisterLocal(
 std::unique_ptr<grpc::ClientContext> LocalControlServiceStub::CreateContext() {
     auto context = std::make_unique<grpc::ClientContext>();
 
-    // 设置超时
-    context->set_deadline(std::chrono::system_clock::now() + default_timeout_);
+    // Set timeout
+    auto deadline = std::chrono::system_clock::now() + default_timeout_;
+    context->set_deadline(deadline);
 
     return context;
 }

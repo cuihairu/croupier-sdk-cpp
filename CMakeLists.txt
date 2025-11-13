@@ -100,42 +100,64 @@ else()
 endif()
 
 # ========== Generated Proto Files ==========
+set(GENERATED_PROTO_SOURCES "")
+set(GENERATED_PROTO_HEADERS "")
+
 if(ENABLE_GRPC)
-    # Proto files from main project
+    # Proto files from main project (optional - only if available)
     set(PROTO_FILES
         ../../proto/croupier/agent/local/v1/local.proto
         ../../proto/croupier/function/v1/function.proto
         ../../proto/croupier/control/v1/control.proto
     )
 
-    # Generated proto sources
-    set(PROTO_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
-    file(MAKE_DIRECTORY ${PROTO_GENERATED_DIR})
-
-    # Generate proto sources
+    # Check if proto files exist
+    set(PROTO_FILES_EXIST TRUE)
     foreach(PROTO_FILE ${PROTO_FILES})
-        get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
-        get_filename_component(PROTO_PATH ${PROTO_FILE} DIRECTORY)
-
-        set(PROTO_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.cc)
-        set(PROTO_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.h)
-        set(GRPC_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.cc)
-        set(GRPC_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.h)
-
-        add_custom_command(
-            OUTPUT ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS} ${GRPC_HDRS}
-            COMMAND protobuf::protoc
-                --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/../../proto
-                --cpp_out=${PROTO_GENERATED_DIR}
-                --grpc_out=${PROTO_GENERATED_DIR}
-                --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
-                ${PROTO_FILE}
-            DEPENDS ${PROTO_FILE}
-        )
-
-        list(APPEND GENERATED_PROTO_SOURCES ${PROTO_SRCS} ${GRPC_SRCS})
-        list(APPEND GENERATED_PROTO_HEADERS ${PROTO_HDRS} ${GRPC_HDRS})
+        if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_FILE})
+            set(PROTO_FILES_EXIST FALSE)
+            message(STATUS "Proto file not found: ${PROTO_FILE}")
+        endif()
     endforeach()
+
+    if(PROTO_FILES_EXIST)
+        message(STATUS "All proto files found, generating gRPC code...")
+
+        # Generated proto sources
+        set(PROTO_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+        file(MAKE_DIRECTORY ${PROTO_GENERATED_DIR})
+
+        # Generate proto sources
+        foreach(PROTO_FILE ${PROTO_FILES})
+            get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+            get_filename_component(PROTO_PATH ${PROTO_FILE} DIRECTORY)
+
+            set(PROTO_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.cc)
+            set(PROTO_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.h)
+            set(GRPC_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.cc)
+            set(GRPC_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.h)
+
+            add_custom_command(
+                OUTPUT ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS} ${GRPC_HDRS}
+                COMMAND protobuf::protoc
+                    --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/../../proto
+                    --cpp_out=${PROTO_GENERATED_DIR}
+                    --grpc_out=${PROTO_GENERATED_DIR}
+                    --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
+                    ${PROTO_FILE}
+                DEPENDS ${PROTO_FILE}
+            )
+
+            list(APPEND GENERATED_PROTO_SOURCES ${PROTO_SRCS} ${GRPC_SRCS})
+            list(APPEND GENERATED_PROTO_HEADERS ${PROTO_HDRS} ${GRPC_HDRS})
+        endforeach()
+
+        # Add compile definition for real gRPC
+        add_compile_definitions(CROUPIER_SDK_ENABLE_REAL_GRPC)
+        message(STATUS "Enabled real gRPC code generation")
+    else()
+        message(STATUS "Proto files not available, using mock gRPC implementation")
+    endif()
 endif()
 
 # ========== Source Files ==========
@@ -143,17 +165,28 @@ endif()
 set(SDK_SOURCES
     src/croupier_client.cpp
     src/grpc_service.cpp
+    src/config_driven_loader.cpp
+    src/utils/json_utils.cpp
+    src/utils/file_utils.cpp
+    src/config/client_config_loader.cpp
 )
 
 set(SDK_HEADERS
     include/croupier/sdk/croupier_client.h
     include/croupier/sdk/grpc_service.h
+    include/croupier/sdk/config_driven_loader.h
+    include/croupier/sdk/utils/json_utils.h
+    include/croupier/sdk/utils/file_utils.h
+    include/croupier/sdk/config/client_config_loader.h
 )
 
-# Add generated proto files if gRPC is enabled
-if(ENABLE_GRPC)
+# Add generated proto files if gRPC is enabled AND proto files exist
+if(ENABLE_GRPC AND GENERATED_PROTO_SOURCES)
     list(APPEND SDK_SOURCES ${GENERATED_PROTO_SOURCES})
     list(APPEND SDK_HEADERS ${GENERATED_PROTO_HEADERS})
+    message(STATUS "Added generated proto files to build")
+else()
+    message(STATUS "Building without generated proto files (using mock implementation)")
 endif()
 
 # ========== Library Targets ==========
@@ -296,8 +329,15 @@ if(BUILD_EXAMPLES)
             croupier::sdk
     )
 
+    # Advanced Configuration Example
+    add_executable(croupier-config-example examples/config_example.cpp)
+    target_link_libraries(croupier-config-example
+        PRIVATE
+            croupier::sdk
+    )
+
     # Set output directory for examples
-    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example PROPERTIES
+    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example croupier-config-example PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()
