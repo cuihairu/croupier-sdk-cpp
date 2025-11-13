@@ -15,11 +15,6 @@
     },
     {
       "name": "nlohmann-json"
-    },
-    {
-      "name": "gtest",
-      "features": ["main"],
-      "$comment": "Only needed for testing"
     }
   ],
   "features": {
@@ -27,8 +22,7 @@
       "description": "Build unit tests",
       "dependencies": [
         {
-          "name": "gtest",
-          "features": ["main"]
+          "name": "gtest"
         }
       ]
     },

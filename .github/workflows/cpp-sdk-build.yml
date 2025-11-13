@@ -174,7 +174,18 @@ jobs:
     # ========== Platform-specific Setup ==========
     - name: Setup Windows Environment
       if: runner.os == 'Windows'
-      uses: microsoft/setup-msbuild@v2
+      run: |
+        # Install ninja build system
+        choco install ninja
+        # Verify installation
+        ninja --version
+        cmake --version
+
+    - name: Setup Linux Environment
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build
 
     - name: Setup Linux Cross-compilation
       if: matrix.cross_compile && runner.os == 'Linux'
@@ -205,9 +216,16 @@ jobs:
           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     # ========== CMake Configure ==========
-    - name: Configure CMake
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DENABLE_VCPKG=ON -DENABLE_GRPC=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=OFF -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
       run: |
         cmake -B build \
+          -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
           -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet }} \
@@ -229,8 +247,7 @@ jobs:
     - name: Run Tests
       if: matrix.arch == 'x64' && !matrix.cross_compile
       run: |
-        cd build
-        ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+        cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
 
     # ========== Package ==========
     - name: Create Separate Static and Dynamic Packages
