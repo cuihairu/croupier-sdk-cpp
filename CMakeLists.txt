@@ -139,12 +139,15 @@ if(ENABLE_GRPC)
 endif()
 
 # ========== Source Files ==========
-set(SDK_HEADERS
-    include/croupier/sdk/croupier_client.h
-)
-
+# SDK source and header files
 set(SDK_SOURCES
     src/croupier_client.cpp
+    src/grpc_service.cpp
+)
+
+set(SDK_HEADERS
+    include/croupier/sdk/croupier_client.h
+    include/croupier/sdk/grpc_service.h
 )
 
 # Add generated proto files if gRPC is enabled
@@ -273,21 +276,21 @@ endif()
 # ========== Example Programs ==========
 if(BUILD_EXAMPLES)
     # Basic example
-    add_executable(croupier-example examples/example.cpp)
+    add_executable(croupier-example examples/virtual_object_demo.cpp)
     target_link_libraries(croupier-example
         PRIVATE
             croupier::sdk
     )
 
-    # Virtual object demo
-    add_executable(virtual-object-demo examples/virtual_object_demo.cpp)
-    target_link_libraries(virtual-object-demo
+    # Complete Example with gRPC
+    add_executable(croupier-complete-example examples/complete_example.cpp)
+    target_link_libraries(croupier-complete-example
         PRIVATE
             croupier::sdk
     )
 
     # Set output directory for examples
-    set_target_properties(croupier-example virtual-object-demo PROPERTIES
+    set_target_properties(croupier-example croupier-complete-example PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()

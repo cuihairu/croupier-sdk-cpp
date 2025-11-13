@@ -1,4 +1,5 @@
 #include "croupier/sdk/croupier_client.h"
+#include "croupier/sdk/grpc_service.h"
 #include <iostream>
 #include <thread>
 #include <atomic>
@@ -109,6 +110,10 @@ public:
     std::map<std::string, VirtualObjectDescriptor> objects_;
     std::map<std::string, ComponentDescriptor> components_;
 
+    // gRPC 管理器
+    std::unique_ptr<grpc_service::GrpcClientManager> grpc_manager_;
+    std::string session_id_;
+
     std::atomic<bool> running_{false};
     std::atomic<bool> connected_{false};
     std::thread server_thread_;
@@ -128,6 +133,22 @@ public:
 
         std::cout << "Initialized CroupierClient for game '" << config_.game_id
                   << "' in '" << config_.env << "' environment" << std::endl;
+
+        // 初始化 gRPC 管理器
+        grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
+
+        // 设置错误回调
+        grpc_manager_->SetErrorCallback([this](const std::string& error) {
+            std::cerr << "🚨 gRPC 错误: " << error << std::endl;
+            // 可以在这里实现错误处理逻辑
+        });
+
+        // 设置重连回调
+        grpc_manager_->SetReconnectCallback([this]() {
+            std::cout << "🔄 gRPC 重连成功，重新注册函数..." << std::endl;
+            // 重新注册所有函数
+            RegisterAllFunctions();
+        });
     }
 
     ~Impl() {
@@ -314,53 +335,131 @@ public:
         return true;
     }
 
+    // 重新注册所有函数到 gRPC 管理器
+    void RegisterAllFunctions() {
+        if (!grpc_manager_->IsConnected()) {
+            return;
+        }
+
+        // 收集所有函数描述符
+        std::vector<FunctionDescriptor> all_functions;
+        for (const auto& desc : descriptors_) {
+            all_functions.push_back(desc.second);
+        }
+
+        // 收集所有虚拟对象
+        std::vector<VirtualObjectDescriptor> all_objects;
+        for (const auto& obj : objects_) {
+            all_objects.push_back(obj.second);
+        }
+
+        // 收集所有组件
+        std::vector<ComponentDescriptor> all_components;
+        for (const auto& comp : components_) {
+            all_components.push_back(comp.second);
+        }
+
+        // 向 Agent 注册
+        std::string new_session_id;
+        if (grpc_manager_->RegisterWithAgent(all_functions, all_objects, all_components, new_session_id)) {
+            session_id_ = new_session_id;
+            std::cout << "✅ 重新注册成功，session_id: " << session_id_ << std::endl;
+        } else {
+            std::cerr << "❌ 重新注册失败" << std::endl;
+        }
+    }
+
     bool Connect() {
         if (connected_) return true;
 
-        std::cout << "Connecting to agent at: " << config_.agent_addr << std::endl;
+        std::cout << "🔌 连接到 Croupier Agent: " << config_.agent_addr << std::endl;
 
-        // TODO: Implement actual gRPC connection to agent
-        // For now, simulate connection success
-
-        // Start local gRPC server
-        if (!StartLocalServer()) {
-            std::cerr << "Failed to start local server" << std::endl;
+        // 使用 gRPC 管理器连接
+        if (!grpc_manager_->Connect()) {
+            std::cerr << "❌ 无法连接到 Agent" << std::endl;
             return false;
         }
 
-        // TODO: Register with agent via gRPC
-        // For now, simulate registration
-        std::cout << "Registered " << handlers_.size() << " functions with agent" << std::endl;
+        // 收集所有已注册的函数、对象和组件
+        std::vector<FunctionDescriptor> all_functions;
+        for (const auto& desc : descriptors_) {
+            all_functions.push_back(desc.second);
+        }
+
+        std::vector<VirtualObjectDescriptor> all_objects;
+        for (const auto& obj : objects_) {
+            all_objects.push_back(obj.second);
+        }
+
+        std::vector<ComponentDescriptor> all_components;
+        for (const auto& comp : components_) {
+            all_components.push_back(comp.second);
+        }
+
+        // 向 Agent 注册
+        if (!grpc_manager_->RegisterWithAgent(all_functions, all_objects, all_components, session_id_)) {
+            std::cerr << "❌ 无法向 Agent 注册服务" << std::endl;
+            grpc_manager_->Disconnect();
+            return false;
+        }
+
+        // 更新本地服务器地址
+        local_address_ = grpc_manager_->GetLocalServerAddress();
 
         connected_ = true;
+        std::cout << "✅ 成功连接并注册到 Agent" << std::endl;
+        std::cout << "📍 本地服务地址: " << local_address_ << std::endl;
+        std::cout << "🔑 会话 ID: " << session_id_ << std::endl;
+
         return true;
     }
 
     void Serve() {
         if (!connected_ && !Connect()) {
-            std::cerr << "Failed to connect before serving" << std::endl;
+            std::cerr << "❌ 连接失败，无法启动服务" << std::endl;
             return;
         }
 
         running_ = true;
-        std::cout << "Client serving on: " << local_address_ << std::endl;
-        std::cout << "Press Ctrl+C to stop..." << std::endl;
+        std::cout << "🚀 Croupier 客户端服务启动" << std::endl;
+        std::cout << "📍 本地服务地址: " << local_address_ << std::endl;
+        std::cout << "🎯 已注册函数: " << handlers_.size() << " 个" << std::endl;
+        std::cout << "📦 已注册虚拟对象: " << objects_.size() << " 个" << std::endl;
+        std::cout << "🔧 已注册组件: " << components_.size() << " 个" << std::endl;
+        std::cout << "💡 使用 Stop() 方法停止服务" << std::endl;
+        std::cout << "===============================================" << std::endl;
 
-        // Simulate serving loop
+        // 保持服务运行，等待来自 Agent 的调用
         while (running_) {
+            // 检查连接状态
+            if (!grpc_manager_->IsConnected()) {
+                std::cerr << "⚠️ 与 Agent 的连接已断开" << std::endl;
+                break;
+            }
+
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
+        std::cout << "🛑 服务已停止" << std::endl;
     }
 
     void Stop() {
         running_ = false;
         connected_ = false;
 
+        std::cout << "🛑 正在停止 Croupier 客户端..." << std::endl;
+
+        // 断开 gRPC 连接
+        if (grpc_manager_) {
+            grpc_manager_->Disconnect();
+        }
+
+        // 等待服务器线程结束
         if (server_thread_.joinable()) {
             server_thread_.join();
         }
 
-        std::cout << "Client stopped" << std::endl;
+        std::cout << "✅ 客户端已完全停止" << std::endl;
     }
 
     void Close() {
@@ -374,36 +473,7 @@ public:
     }
 
 private:
-    bool StartLocalServer() {
-        // TODO: Implement actual gRPC server
-        // For now, simulate local server startup
-
-        // Parse listen address
-        std::string host, port_str;
-        auto colon_pos = config_.local_listen.find(':');
-        if (colon_pos != std::string::npos) {
-            host = config_.local_listen.substr(0, colon_pos);
-            port_str = config_.local_listen.substr(colon_pos + 1);
-        } else {
-            host = config_.local_listen;
-            port_str = "0";
-        }
-
-        // Simulate port allocation
-        int port = std::stoi(port_str);
-        if (port == 0) {
-            // Allocate random port
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> dis(20000, 30000);
-            port = dis(gen);
-        }
-
-        local_address_ = host + ":" + std::to_string(port);
-
-        std::cout << "Local server listening on: " << local_address_ << std::endl;
-        return true;
-    }
+    // 这些方法现在由 gRPC 管理器处理
 };
 
 // Invoker Implementation
