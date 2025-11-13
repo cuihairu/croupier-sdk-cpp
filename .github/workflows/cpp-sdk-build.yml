@@ -193,8 +193,8 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '1de2026f28ead93ff1773e6e680387643e914ea1'
-        vcpkgJsonGlob: 'sdks/cpp/vcpkg.json'
+        vcpkgGitCommitId: '2d6a6cf3ac9a7cc93942c3d289a2f9c661a6f4a7'
+        vcpkgJsonGlob: 'vcpkg.json'
 
     # ========== Export GitHub Actions Cache ==========
     - name: Export GitHub Actions cache environment variables
@@ -206,7 +206,6 @@ jobs:
 
     # ========== CMake Configure ==========
     - name: Configure CMake
-      working-directory: sdks/cpp
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
@@ -223,21 +222,18 @@ jobs:
 
     # ========== Build ==========
     - name: Build SDK
-      working-directory: sdks/cpp
       run: |
         cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
     # ========== Run Tests ==========
     - name: Run Tests
       if: matrix.arch == 'x64' && !matrix.cross_compile
-      working-directory: sdks/cpp
       run: |
         cd build
         ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
 
     # ========== Package ==========
     - name: Create Separate Static and Dynamic Packages
-      working-directory: sdks/cpp
       run: |
         # Create install directories for static and dynamic packages
         mkdir -p package-static package-dynamic
@@ -289,7 +285,7 @@ jobs:
       with:
         name: croupier-cpp-sdk-static-${{ matrix.artifact_name }}
         path: |
-          sdks/cpp/croupier-cpp-sdk-static-*-${{ matrix.artifact_name }}.*
+          croupier-cpp-sdk-static-*-${{ matrix.artifact_name }}.*
         retention-days: 30
 
     - name: Upload Dynamic Library Artifacts
@@ -297,7 +293,7 @@ jobs:
       with:
         name: croupier-cpp-sdk-dynamic-${{ matrix.artifact_name }}
         path: |
-          sdks/cpp/croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
+          croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
         retention-days: 30
 
   # ========== Create Release ==========
