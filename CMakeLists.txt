@@ -305,6 +305,7 @@ if(BUILD_TESTS)
         add_executable(croupier-sdk-tests
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
+            tests/test_integration.cpp
         )
 
         target_link_libraries(croupier-sdk-tests

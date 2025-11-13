@@ -3,6 +3,10 @@
 #include <sstream>
 #include <regex>
 #include <fstream>
+#include <shared_mutex>
+
+// 注意：这个实现目前是模拟的，因为还没有 protobuf 生成的代码
+// 在实际项目中，需要先生成 gRPC proto 文件，然后实现真实的服务
 
 namespace croupier {
 namespace sdk {
