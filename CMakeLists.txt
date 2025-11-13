@@ -276,8 +276,15 @@ endif()
 # ========== Example Programs ==========
 if(BUILD_EXAMPLES)
     # Basic example
-    add_executable(croupier-example examples/virtual_object_demo.cpp)
+    add_executable(croupier-example examples/example.cpp)
     target_link_libraries(croupier-example
+        PRIVATE
+            croupier::sdk
+    )
+
+    # Virtual Object Demo
+    add_executable(croupier-virtual-object-demo examples/virtual_object_demo.cpp)
+    target_link_libraries(croupier-virtual-object-demo
         PRIVATE
             croupier::sdk
     )
@@ -290,7 +297,7 @@ if(BUILD_EXAMPLES)
     )
 
     # Set output directory for examples
-    set_target_properties(croupier-example croupier-complete-example PROPERTIES
+    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()
