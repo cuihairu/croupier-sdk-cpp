@@ -193,7 +193,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '2024.07.12'
+        vcpkgGitCommitId: '1de2026f28ead93ff1773e6e680387643e914ea1'
         vcpkgJsonGlob: 'sdks/cpp/vcpkg.json'
 
     # ========== Export GitHub Actions Cache ==========
