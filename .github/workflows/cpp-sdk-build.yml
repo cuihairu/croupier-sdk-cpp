@@ -219,7 +219,7 @@ jobs:
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
       run: |
-        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DENABLE_VCPKG=ON -DENABLE_GRPC=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=OFF -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DENABLE_VCPKG=ON -DENABLE_GRPC=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -235,7 +235,7 @@ jobs:
           -DBUILD_SHARED_LIBS=ON \
           -DBUILD_STATIC_LIBS=ON \
           -DBUILD_EXAMPLES=ON \
-          -DBUILD_TESTS=OFF \
+          -DBUILD_TESTS=ON \
           -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     # ========== Build ==========
