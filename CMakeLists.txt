@@ -360,6 +360,13 @@ if(BUILD_EXAMPLES)
             croupier::sdk
     )
 
+    # Comprehensive Demo - Shows ALL SDK interfaces
+    add_executable(croupier-comprehensive-demo examples/comprehensive_demo.cpp)
+    target_link_libraries(croupier-comprehensive-demo
+        PRIVATE
+            croupier::sdk
+    )
+
     # Example Plugin (shared library)
     add_library(example_plugin SHARED examples/plugins/example_plugin.cpp)
     target_include_directories(example_plugin
@@ -396,7 +403,7 @@ if(BUILD_EXAMPLES)
     )
 
     # Set output directory for examples
-    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example croupier-config-example croupier-plugin-demo PROPERTIES
+    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example croupier-config-example croupier-plugin-demo croupier-comprehensive-demo PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()
