@@ -1,11 +1,15 @@
 #include "croupier/sdk/grpc_service.h"
+
+// Only compile the full gRPC implementation when gRPC is enabled
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+
 #include <iostream>
 #include <sstream>
 #include <regex>
 #include <fstream>
 #include <shared_mutex>
 
-// Note: This implementation is currently a mock because we don't have protobuf generated code yet
+// Note: This implementation requires protobuf generated code
 // In a real project, we need to generate gRPC proto files first, then implement the actual services
 
 namespace croupier {
@@ -104,9 +108,7 @@ ConnectionState GrpcClientManager::GetState() const {
 }
 
 bool GrpcClientManager::RegisterWithAgent(
-    const std::vector<FunctionDescriptor>& functions,
-    const std::vector<VirtualObjectDescriptor>& objects,
-    const std::vector<ComponentDescriptor>& components,
+    const std::vector<LocalFunctionDescriptor>& functions,
     std::string& session_id) {
 
     if (!IsConnected()) {
@@ -118,7 +120,7 @@ bool GrpcClientManager::RegisterWithAgent(
         std::string error_message;
         bool success = agent_stub_->RegisterLocal(
             config_.service_id,
-            "1.0.0", // version
+            config_.service_version,
             local_address_,
             functions,
             session_id,
@@ -129,8 +131,6 @@ bool GrpcClientManager::RegisterWithAgent(
             std::cout << "✅ Successfully registered with Agent, session_id: " << session_id << std::endl;
             std::cout << "📋 Registration info:" << std::endl;
             std::cout << "   - Functions: " << functions.size() << std::endl;
-            std::cout << "   - Virtual objects: " << objects.size() << std::endl;
-            std::cout << "   - Components: " << components.size() << std::endl;
             std::cout << "   - Local address: " << local_address_ << std::endl;
 
             // Start heartbeat
@@ -475,13 +475,13 @@ bool LocalControlServiceStub::RegisterLocal(
     const std::string& service_id,
     const std::string& version,
     const std::string& rpc_addr,
-    const std::vector<FunctionDescriptor>& functions,
+    const std::vector<LocalFunctionDescriptor>& functions,
     std::string& session_id,
     std::string& error_message) {
 
     try {
         // This is a mock implementation, real implementation needs proto files
-        // Now generating a mock session_id
+        // Generate a mock session_id
         session_id = "mock_session_" + service_id + "_" + std::to_string(std::time(nullptr));
 
         std::cout << "📡 Registering service with Agent:" << std::endl;
@@ -489,6 +489,9 @@ bool LocalControlServiceStub::RegisterLocal(
         std::cout << "   Version: " << version << std::endl;
         std::cout << "   RPC Address: " << rpc_addr << std::endl;
         std::cout << "   Functions: " << functions.size() << std::endl;
+        for (const auto& func : functions) {
+            std::cout << "     - " << func.id << " (v" << func.version << ")" << std::endl;
+        }
         std::cout << "   Session ID: " << session_id << std::endl;
 
         // Mock successful registration
@@ -560,3 +563,5 @@ std::unique_ptr<grpc::ClientContext> LocalControlServiceStub::CreateContext() {
 } // namespace grpc_service
 } // namespace sdk
 } // namespace croupier
+
+#endif // CROUPIER_SDK_ENABLE_GRPC

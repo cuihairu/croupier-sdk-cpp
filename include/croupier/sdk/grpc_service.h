@@ -1,18 +1,22 @@
 #pragma once
 
 #include "croupier/sdk/croupier_client.h"
-#include <grpc++/grpc++.h>
 #include <memory>
 #include <atomic>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
+// Only include gRPC headers when gRPC is enabled
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+#include <grpc++/grpc++.h>
+#endif
+
 namespace croupier {
 namespace sdk {
 namespace grpc_service {
 
-// gRPC 连接状态
+// Connection state enum (available regardless of gRPC)
 enum class ConnectionState {
     DISCONNECTED,
     CONNECTING,
@@ -21,13 +25,15 @@ enum class ConnectionState {
     ERROR
 };
 
-// 前向声明
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+
+// Forward declarations for gRPC-enabled build
 class LocalControlServiceStub;
 class LocalFunctionServiceImpl;
 
 /**
- * @brief gRPC 客户端管理器
- * 负责与 Croupier Agent 的 gRPC 通信
+ * @brief gRPC Client Manager
+ * Manages gRPC communication with Croupier Agent
  */
 class GrpcClientManager {
 public:
@@ -40,11 +46,15 @@ public:
     bool IsConnected() const;
     ConnectionState GetState() const;
 
-    // 注册功能
+    // Registration functionality - updated to match proto
     bool RegisterWithAgent(
+        const std::vector<LocalFunctionDescriptor>& functions,
+        std::string& session_id
+    );
+
+    // Send agent registration to server (second layer)
+    bool RegisterAgentWithServer(
         const std::vector<FunctionDescriptor>& functions,
-        const std::vector<VirtualObjectDescriptor>& objects,
-        const std::vector<ComponentDescriptor>& components,
         std::string& session_id
     );
 
@@ -156,12 +166,12 @@ class LocalControlServiceStub {
 public:
     explicit LocalControlServiceStub(std::shared_ptr<grpc::Channel> channel);
 
-    // 注册服务
+    // Register service with agent (LocalControlService)
     bool RegisterLocal(
         const std::string& service_id,
         const std::string& version,
         const std::string& rpc_addr,
-        const std::vector<FunctionDescriptor>& functions,
+        const std::vector<LocalFunctionDescriptor>& functions,
         std::string& session_id,
         std::string& error_message
     );
@@ -199,31 +209,184 @@ private:
 };
 
 /**
- * @brief gRPC 连接选项
+ * @brief gRPC Connection Options
  */
 struct GrpcConnectionOptions {
-    // 连接超时
+    // Connection timeout
     std::chrono::seconds connect_timeout{30};
 
-    // 心跳间隔
+    // Heartbeat interval
     std::chrono::seconds heartbeat_interval{60};
 
-    // 重连间隔
+    // Reconnect interval
     std::chrono::seconds reconnect_interval{5};
 
-    // 最大重连次数
+    // Maximum reconnect attempts
     int max_reconnect_attempts{10};
 
-    // gRPC 选项
+    // gRPC options
     std::map<std::string, std::string> channel_args;
 
-    // TLS 选项
+    // TLS options
     bool use_tls{false};
     std::string cert_file;
     std::string key_file;
     std::string ca_file;
     std::string server_name_override;
 };
+
+#else // !CROUPIER_SDK_ENABLE_GRPC
+
+// Mock implementations when gRPC is disabled
+class GrpcClientManager {
+public:
+    explicit GrpcClientManager(const ClientConfig& config) : config_(config) {}
+    ~GrpcClientManager() = default;
+
+    // Connection management
+    bool Connect() { return false; }
+    void Disconnect() {}
+    bool IsConnected() const { return false; }
+    ConnectionState GetState() const { return ConnectionState::DISCONNECTED; }
+
+    // Registration functionality
+    bool RegisterWithAgent(
+        const std::vector<LocalFunctionDescriptor>& functions,
+        std::string& session_id
+    ) {
+        (void)functions;
+        (void)session_id;
+        return false;
+    }
+
+    // Send agent registration to server (second layer)
+    bool RegisterAgentWithServer(
+        const std::vector<FunctionDescriptor>& functions,
+        std::string& session_id
+    ) {
+        (void)functions;
+        (void)session_id;
+        return false;
+    }
+
+    // Heartbeat management
+    bool SendHeartbeat(const std::string& session_id) {
+        (void)session_id;
+        return false;
+    }
+    void StartHeartbeatLoop(const std::string& session_id) {
+        (void)session_id;
+    }
+    void StopHeartbeatLoop() {}
+
+    // Local server management
+    bool StartLocalServer() { return false; }
+    void StopLocalServer() {}
+    std::string GetLocalServerAddress() const { return ""; }
+
+    // Error handling
+    void SetErrorCallback(std::function<void(const std::string&)> callback) {
+        (void)callback;
+    }
+    void SetReconnectCallback(std::function<void()> callback) {
+        (void)callback;
+    }
+
+private:
+    ClientConfig config_;
+};
+
+class LocalFunctionServiceImpl {
+public:
+    explicit LocalFunctionServiceImpl(
+        const std::map<std::string, FunctionHandler>& handlers
+    ) : handlers_(handlers) {}
+
+    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
+        (void)handlers;
+    }
+    void AddHandler(const std::string& function_id, FunctionHandler handler) {
+        (void)function_id;
+        (void)handler;
+    }
+    void RemoveHandler(const std::string& function_id) {
+        (void)function_id;
+    }
+    size_t GetHandlerCount() const { return 0; }
+
+private:
+    std::map<std::string, FunctionHandler> handlers_;
+};
+
+class LocalControlServiceStub {
+public:
+    explicit LocalControlServiceStub(void* channel) {
+        (void)channel; // void* instead of grpc::Channel
+    }
+
+    bool RegisterLocal(
+        const std::string& service_id,
+        const std::string& version,
+        const std::string& rpc_addr,
+        const std::vector<LocalFunctionDescriptor>& functions,
+        std::string& session_id,
+        std::string& error_message
+    ) {
+        (void)service_id;
+        (void)version;
+        (void)rpc_addr;
+        (void)functions;
+        (void)session_id;
+        (void)error_message;
+        return false;
+    }
+
+    bool Heartbeat(
+        const std::string& service_id,
+        const std::string& session_id,
+        std::string& error_message
+    ) {
+        (void)service_id;
+        (void)session_id;
+        (void)error_message;
+        return false;
+    }
+
+    bool ListLocal(
+        std::vector<FunctionDescriptor>& functions,
+        std::string& error_message
+    ) {
+        (void)functions;
+        (void)error_message;
+        return false;
+    }
+
+    bool UnregisterLocal(
+        const std::string& service_id,
+        const std::string& session_id,
+        std::string& error_message
+    ) {
+        (void)service_id;
+        (void)session_id;
+        (void)error_message;
+        return false;
+    }
+};
+
+struct GrpcConnectionOptions {
+    std::chrono::seconds connect_timeout{30};
+    std::chrono::seconds heartbeat_interval{60};
+    std::chrono::seconds reconnect_interval{5};
+    int max_reconnect_attempts{10};
+    std::map<std::string, std::string> channel_args;
+    bool use_tls{false};
+    std::string cert_file;
+    std::string key_file;
+    std::string ca_file;
+    std::string server_name_override;
+};
+
+#endif // CROUPIER_SDK_ENABLE_GRPC
 
 } // namespace grpc_service
 } // namespace sdk

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(croupier-cpp-sdk
     VERSION 1.0.0
-    DESCRIPTION "Croupier C++ SDK for Virtual Object Registration"
+    DESCRIPTION "Croupier C++ SDK for Game Function Registration"
     LANGUAGES CXX
 )
 
@@ -20,7 +20,22 @@ option(BUILD_STATIC_LIBS "Build static libraries" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(ENABLE_VCPKG "Enable vcpkg package management" ON)
-option(ENABLE_GRPC "Enable gRPC integration" ON)
+option(CROUPIER_CI_BUILD "Enable CI build with proto generation" OFF)
+
+# ========== Proto Generation Module ==========
+include(cmake/ProtoGeneration.cmake)
+
+# Setup build type (CI vs local)
+setup_ci_build()
+
+# Set gRPC enable flag based on CI build result
+if(CROUPIER_SDK_ENABLE_GRPC)
+    message(STATUS "Building with real gRPC implementation")
+    set(ENABLE_GRPC ON)
+else()
+    message(STATUS "Building with mock gRPC implementation")
+    set(ENABLE_GRPC OFF)
+endif()
 
 # ========== vcpkg Integration ==========
 if(ENABLE_VCPKG)
@@ -169,6 +184,7 @@ set(SDK_SOURCES
     src/utils/json_utils.cpp
     src/utils/file_utils.cpp
     src/config/client_config_loader.cpp
+    src/plugin/dynamic_loader.cpp
 )
 
 set(SDK_HEADERS
@@ -178,6 +194,7 @@ set(SDK_HEADERS
     include/croupier/sdk/utils/json_utils.h
     include/croupier/sdk/utils/file_utils.h
     include/croupier/sdk/config/client_config_loader.h
+    include/croupier/sdk/plugin/dynamic_loader.h
 )
 
 # Add generated proto files if gRPC is enabled AND proto files exist
@@ -336,8 +353,50 @@ if(BUILD_EXAMPLES)
             croupier::sdk
     )
 
+    # Plugin System Demo
+    add_executable(croupier-plugin-demo examples/plugin_demo.cpp)
+    target_link_libraries(croupier-plugin-demo
+        PRIVATE
+            croupier::sdk
+    )
+
+    # Example Plugin (shared library)
+    add_library(example_plugin SHARED examples/plugins/example_plugin.cpp)
+    target_include_directories(example_plugin
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+
+    # Platform-specific settings for plugin
+    if(WIN32)
+        # Windows DLL export settings
+        target_compile_definitions(example_plugin PRIVATE BUILDING_PLUGIN_DLL)
+        set_target_properties(example_plugin PROPERTIES
+            PREFIX ""
+            SUFFIX ".dll"
+        )
+    elseif(APPLE)
+        # macOS dylib settings
+        set_target_properties(example_plugin PROPERTIES
+            PREFIX "lib"
+            SUFFIX ".dylib"
+        )
+    else()
+        # Linux shared library settings
+        set_target_properties(example_plugin PROPERTIES
+            PREFIX "lib"
+            SUFFIX ".so"
+        )
+    endif()
+
+    # Set output directory for plugins
+    set_target_properties(example_plugin PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugins
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugins
+    )
+
     # Set output directory for examples
-    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example croupier-config-example PROPERTIES
+    set_target_properties(croupier-example croupier-virtual-object-demo croupier-complete-example croupier-config-example croupier-plugin-demo PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()

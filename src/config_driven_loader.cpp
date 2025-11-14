@@ -98,10 +98,10 @@ ComponentDescriptor ConfigDrivenLoader::LoadComponentFromJson(const std::string&
     try {
 #ifdef CROUPIER_SDK_ENABLE_JSON
         json config = json::parse(json_content);
-        return ParseJsonToComponent(config);
+        return ParseJsonToComponent(config.dump());
 #else
         json config = JsonParser::parse(json_content);
-        return ParseJsonToComponent(config);
+        return ParseJsonToComponent(config.ToString());
 #endif
     } catch (const std::exception& e) {
         throw std::runtime_error("JSON 解析失败: " + std::string(e.what()));
@@ -118,10 +118,18 @@ bool ConfigDrivenLoader::LoadAndRegisterComponent(CroupierClient& client, const 
         // 2. 解析函数处理器
         auto handlers = ResolveHandlers(component);
 
-        // 3. 更新组件的处理器映射
-        component.function_handlers = handlers;
+        // 3. Register handlers with client directly since ComponentDescriptor doesn't store handlers
+        for (const auto& [function_id, handler] : handlers) {
+            FunctionDescriptor func_desc;
+            func_desc.id = function_id;
+            func_desc.version = component.version;
 
-        // 4. 注册到客户端
+            if (!client.RegisterFunction(func_desc, handler)) {
+                std::cout << "❌ Failed to register function: " << function_id << std::endl;
+            }
+        }
+
+        // 4. Register component with client
         bool success = client.RegisterComponent(component);
 
         if (success) {
@@ -272,7 +280,7 @@ std::string ConfigDrivenLoader::LoadFileContent(const std::string& file_path) {
     return buffer.str();
 }
 
-ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const json& config) {
+ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponentFromJson(const json& config) {
     ComponentDescriptor component;
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
@@ -371,12 +379,12 @@ VirtualObjectDescriptor ConfigDrivenLoader::ParseJsonToVirtualObject(const json&
 std::map<std::string, FunctionHandler> ConfigDrivenLoader::ResolveHandlers(const ComponentDescriptor& comp) {
     std::map<std::string, FunctionHandler> handlers;
 
-    std::cout << "🔄 解析组件处理器: " << comp.id << std::endl;
+    std::cout << "🔄 Resolving component handlers: " << comp.id << std::endl;
 
-    // 遍历虚拟对象的操作，查找对应的处理器
-    for (const auto& [obj_key, obj] : comp.virtual_objects) {
-        for (const auto& [op_name, function_id] : obj.operations) {
-            std::cout << "  🔍 查找处理器: " << function_id << " (用于 " << obj_key << "." << op_name << ")" << std::endl;
+    // Traverse virtual object operations to find corresponding handlers
+    for (const auto& entity : comp.entities) {
+        for (const auto& [op_name, function_id] : entity.operations) {
+            std::cout << "  🔍 Finding handler: " << function_id << " (for " << entity.id << "." << op_name << ")" << std::endl;
 
             auto handler = GetHandler(function_id);
             if (handler) {
@@ -394,7 +402,9 @@ std::map<std::string, FunctionHandler> ConfigDrivenLoader::ResolveHandlers(const
 }
 
 FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& function_id, const std::map<std::string, std::string>& config) {
-    // 检查配置中是否有处理器定义
+    (void)function_id; // Suppress unused parameter warning - function_id not used in basic implementation
+
+    // Check if handler is defined in configuration
     auto type_it = config.find("type");
     if (type_it == config.end()) {
         return nullptr;
@@ -431,10 +441,12 @@ FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& f
 
 FunctionHandler ConfigDrivenLoader::CreateDefaultHandler(const std::string& function_id) {
     return [function_id](const std::string& context, const std::string& payload) -> std::string {
+        (void)payload; // Suppress unused parameter warning
+
         return "{"
                "\"function_id\": \"" + function_id + "\","
                "\"status\": \"not_implemented\","
-               "\"message\": \"此函数尚未实现具体的处理逻辑\","
+               "\"message\": \"This function has no specific implementation logic yet\","
                "\"context\": \"" + context + "\","
                "\"timestamp\": \"" + std::to_string(std::time(nullptr)) + "\""
                "}";
@@ -500,6 +512,8 @@ FunctionHandler BasicHandlerFactory::CreateEchoHandler(const std::map<std::strin
 
 FunctionHandler BasicHandlerFactory::CreateErrorHandler(const std::string& error_message) {
     return [error_message](const std::string& context, const std::string& payload) -> std::string {
+        (void)payload; // Suppress unused parameter warning - error handler doesn't use payload
+
         return "{"
                "\"type\": \"error\","
                "\"error_message\": \"" + error_message + "\","
@@ -511,7 +525,9 @@ FunctionHandler BasicHandlerFactory::CreateErrorHandler(const std::string& error
 
 FunctionHandler BasicHandlerFactory::CreateProxyHandler(const std::string& target_url, const std::map<std::string, std::string>& config) {
     return [target_url, config](const std::string& context, const std::string& payload) -> std::string {
-        // 实际实现中，这里会发起 HTTP 请求到目标 URL
+        (void)payload; // Suppress unused parameter warning - proxy handler placeholder doesn't use payload
+
+        // In a real implementation, this would make HTTP requests to the target URL
         return "{"
                "\"type\": \"proxy\","
                "\"target_url\": \"" + target_url + "\","

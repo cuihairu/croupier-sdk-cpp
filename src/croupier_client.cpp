@@ -28,6 +28,8 @@ namespace utils {
     }
 
     bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema) {
+        (void)schema; // Suppress unused parameter warning - schema validation not implemented yet
+
         // Simple validation - check if JSON is properly formatted
         // This is a placeholder implementation; a real implementation would use a JSON schema library
         if (json.empty()) return true;
@@ -137,16 +139,16 @@ public:
         // 初始化 gRPC 管理器
         grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
 
-        // 设置错误回调
-        grpc_manager_->SetErrorCallback([this](const std::string& error) {
-            std::cerr << "🚨 gRPC 错误: " << error << std::endl;
-            // 可以在这里实现错误处理逻辑
+        // Set error callback
+        grpc_manager_->SetErrorCallback([](const std::string& error) {
+            std::cerr << "🚨 gRPC Error: " << error << std::endl;
+            // Error handling logic can be implemented here
         });
 
-        // 设置重连回调
+        // Set reconnect callback
         grpc_manager_->SetReconnectCallback([this]() {
-            std::cout << "🔄 gRPC 重连成功，重新注册函数..." << std::endl;
-            // 重新注册所有函数
+            std::cout << "🔄 gRPC Reconnected, re-registering functions..." << std::endl;
+            // Re-register all functions
             RegisterAllFunctions();
         });
     }
@@ -335,37 +337,28 @@ public:
         return true;
     }
 
-    // 重新注册所有函数到 gRPC 管理器
+    // Re-register all functions to gRPC manager
     void RegisterAllFunctions() {
         if (!grpc_manager_->IsConnected()) {
             return;
         }
 
-        // 收集所有函数描述符
-        std::vector<FunctionDescriptor> all_functions;
+        // Convert FunctionDescriptor to LocalFunctionDescriptor (for local registration)
+        std::vector<LocalFunctionDescriptor> local_functions;
         for (const auto& desc : descriptors_) {
-            all_functions.push_back(desc.second);
+            LocalFunctionDescriptor local_func;
+            local_func.id = desc.second.id;
+            local_func.version = desc.second.version;
+            local_functions.push_back(local_func);
         }
 
-        // 收集所有虚拟对象
-        std::vector<VirtualObjectDescriptor> all_objects;
-        for (const auto& obj : objects_) {
-            all_objects.push_back(obj.second);
-        }
-
-        // 收集所有组件
-        std::vector<ComponentDescriptor> all_components;
-        for (const auto& comp : components_) {
-            all_components.push_back(comp.second);
-        }
-
-        // 向 Agent 注册
+        // Register with Agent (first layer: SDK -> Agent)
         std::string new_session_id;
-        if (grpc_manager_->RegisterWithAgent(all_functions, all_objects, all_components, new_session_id)) {
+        if (grpc_manager_->RegisterWithAgent(local_functions, new_session_id)) {
             session_id_ = new_session_id;
-            std::cout << "✅ 重新注册成功，session_id: " << session_id_ << std::endl;
+            std::cout << "✅ Re-registration successful, session_id: " << session_id_ << std::endl;
         } else {
-            std::cerr << "❌ 重新注册失败" << std::endl;
+            std::cerr << "❌ Re-registration failed" << std::endl;
         }
     }
 
@@ -380,25 +373,18 @@ public:
             return false;
         }
 
-        // 收集所有已注册的函数、对象和组件
-        std::vector<FunctionDescriptor> all_functions;
+        // Convert FunctionDescriptor to LocalFunctionDescriptor for agent registration
+        std::vector<LocalFunctionDescriptor> local_functions;
         for (const auto& desc : descriptors_) {
-            all_functions.push_back(desc.second);
+            LocalFunctionDescriptor local_func;
+            local_func.id = desc.second.id;
+            local_func.version = desc.second.version;
+            local_functions.push_back(local_func);
         }
 
-        std::vector<VirtualObjectDescriptor> all_objects;
-        for (const auto& obj : objects_) {
-            all_objects.push_back(obj.second);
-        }
-
-        std::vector<ComponentDescriptor> all_components;
-        for (const auto& comp : components_) {
-            all_components.push_back(comp.second);
-        }
-
-        // 向 Agent 注册
-        if (!grpc_manager_->RegisterWithAgent(all_functions, all_objects, all_components, session_id_)) {
-            std::cerr << "❌ 无法向 Agent 注册服务" << std::endl;
+        // Register with Agent (first layer: SDK -> Agent)
+        if (!grpc_manager_->RegisterWithAgent(local_functions, session_id_)) {
+            std::cerr << "❌ Failed to register service with Agent" << std::endl;
             grpc_manager_->Disconnect();
             return false;
         }
@@ -500,6 +486,8 @@ public:
 
     std::string Invoke(const std::string& function_id, const std::string& payload,
                       const InvokeOptions& options) {
+        (void)options; // Suppress unused parameter warning - options not implemented yet
+
         if (!connected_ && !Connect()) {
             throw std::runtime_error("Not connected to server");
         }
@@ -526,6 +514,9 @@ public:
 
     std::string StartJob(const std::string& function_id, const std::string& payload,
                         const InvokeOptions& options) {
+        (void)payload; // Suppress unused parameter warning - async jobs not implemented yet
+        (void)options; // Suppress unused parameter warning - options not implemented yet
+
         if (!connected_ && !Connect()) {
             throw std::runtime_error("Not connected to server");
         }
@@ -864,6 +855,8 @@ std::string GenerateComponentTemplate(const std::string& component_id) {
 
 // Parse object descriptor from JSON string
 VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
+    (void)json; // Suppress unused parameter warning - JSON parsing not implemented yet
+
     // TODO: Implement proper JSON parsing
     // For now, return a placeholder
     VirtualObjectDescriptor desc;
@@ -875,6 +868,8 @@ VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
 
 // Parse component descriptor from JSON string
 ComponentDescriptor ParseComponentDescriptor(const std::string& json) {
+    (void)json; // Suppress unused parameter warning - JSON parsing not implemented yet
+
     // TODO: Implement proper JSON parsing
     // For now, return a placeholder
     ComponentDescriptor comp;

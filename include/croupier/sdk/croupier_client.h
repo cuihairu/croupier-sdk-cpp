@@ -17,11 +17,15 @@ class CroupierInvoker;
 // Function handler type
 using FunctionHandler = std::function<std::string(const std::string& context, const std::string& payload)>;
 
-// Function descriptor with schema support
+// Function descriptor matching proto definition (control.proto)
 struct FunctionDescriptor {
-    std::string id;
-    std::string version;
-    std::map<std::string, std::string> schema; // JSON schema as key-value pairs for simplicity
+    std::string id;        // function id, e.g. "player.ban"
+    std::string version;   // semver, e.g. "1.2.0"
+    std::string category;  // grouping category
+    std::string risk;      // "low"|"medium"|"high"
+    std::string entity;    // entity type, e.g. "item", "player"
+    std::string operation; // operation type, e.g. "create", "read", "update", "delete"
+    bool enabled = true;   // whether this function is currently enabled
 };
 
 // Relationship definition for virtual objects
@@ -54,6 +58,12 @@ struct ComponentDescriptor {
     std::map<std::string, std::string> config;      // Component configuration
 };
 
+// Local function descriptor matching agent/local/v1/local.proto
+struct LocalFunctionDescriptor {
+    std::string id;      // function id
+    std::string version; // function version
+};
+
 // Client configuration
 struct ClientConfig {
     std::string agent_addr = "127.0.0.1:19090";
@@ -61,9 +71,12 @@ struct ClientConfig {
     std::string service_id = "cpp-service";
     std::string service_version = "1.0.0";
 
+    // ========== Agent Registration ==========
+    std::string agent_id;              // Agent unique identifier (auto-generated if empty)
+
     // ========== Game Environment Configuration ==========
-    std::string game_id;           // Required: Game identifier for backend separation
-    std::string env = "development"; // Environment: "development", "staging", "production"
+    std::string game_id;               // Required: Game identifier for backend separation
+    std::string env = "development";   // Environment: "development", "staging", "production"
 
     bool insecure = true; // For development; set false for production with TLS
 

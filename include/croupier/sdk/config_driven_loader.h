@@ -140,12 +140,14 @@ private:
     // 动态库加载器
     DynamicLibLoader dynamic_lib_loader_;
 
-    // 内部辅助方法
+    // Internal helper methods
     std::string LoadFileContent(const std::string& file_path);
     ComponentDescriptor ParseJsonToComponent(const std::string& json_content);
     VirtualObjectDescriptor ParseJsonToVirtualObject(const std::string& json_content);
     std::map<std::string, FunctionHandler> ResolveHandlers(const ComponentDescriptor& comp);
     FunctionHandler CreateHandlerFromConfig(const std::string& function_id, const std::map<std::string, std::string>& config);
+    FunctionHandler CreateDefaultHandler(const std::string& function_id);
+    FunctionHandler LoadFromDynamicLib(const std::string& lib_path, const std::string& function_name);
 };
 
 // ========== 预定义的处理器工厂 ==========
