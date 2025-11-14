@@ -133,8 +133,8 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
             do {
                 if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
                     std::string filename = findFileData.cFileName;
-                    if (extension.empty() || filename.length() >= extension.length() &&
-                        filename.substr(filename.length() - extension.length()) == extension) {
+                    if (extension.empty() || (filename.length() >= extension.length() &&
+                        filename.substr(filename.length() - extension.length()) == extension)) {
                         result.push_back(JoinPath(directory, filename));
                     }
                 }
@@ -148,8 +148,8 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
             while ((entry = readdir(dir)) != nullptr) {
                 if (entry->d_type == DT_REG) {  // Regular file
                     std::string filename = entry->d_name;
-                    if (extension.empty() || filename.length() >= extension.length() &&
-                        filename.substr(filename.length() - extension.length()) == extension) {
+                    if (extension.empty() || (filename.length() >= extension.length() &&
+                        filename.substr(filename.length() - extension.length()) == extension)) {
                         result.push_back(JoinPath(directory, filename));
                     }
                 }

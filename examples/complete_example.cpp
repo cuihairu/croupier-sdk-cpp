@@ -10,7 +10,7 @@ using namespace croupier::sdk;
 std::unique_ptr<CroupierClient> g_client;
 
 // 信号处理函数
-void signalHandler(int signal) {
+void signalHandler(int /* signal */) {
     std::cout << "\n🛑 接收到停止信号，正在优雅关闭..." << std::endl;
     if (g_client) {
         g_client->Stop();
@@ -19,7 +19,7 @@ void signalHandler(int signal) {
 }
 
 // 钱包相关的处理器
-std::string WalletGetHandler(const std::string& context, const std::string& payload) {
+std::string WalletGetHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "💰 执行钱包查询: " << payload << std::endl;
 
     // 模拟业务逻辑
@@ -35,7 +35,7 @@ std::string WalletGetHandler(const std::string& context, const std::string& payl
     })";
 }
 
-std::string WalletTransferHandler(const std::string& context, const std::string& payload) {
+std::string WalletTransferHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "💸 执行钱包转账: " << payload << std::endl;
 
     // 模拟转账处理
@@ -54,7 +54,7 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
 }
 
 // 玩家管理处理器
-std::string PlayerCreateHandler(const std::string& context, const std::string& payload) {
+std::string PlayerCreateHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "👤 创建新玩家: " << payload << std::endl;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
@@ -69,7 +69,7 @@ std::string PlayerCreateHandler(const std::string& context, const std::string& p
     })";
 }
 
-std::string PlayerGetHandler(const std::string& context, const std::string& payload) {
+std::string PlayerGetHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "👤 查询玩家信息: " << payload << std::endl;
 
     return R"({
@@ -85,7 +85,7 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
 }
 
 // 商店系统处理器
-std::string ShopListItemsHandler(const std::string& context, const std::string& payload) {
+std::string ShopListItemsHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "🛒 查询商店物品: " << payload << std::endl;
 
     return R"({
@@ -120,7 +120,7 @@ std::string ShopListItemsHandler(const std::string& context, const std::string& 
     })";
 }
 
-int main(int argc, char* argv[]) {
+int main(int /* argc */, char* /* argv */[]) {
     std::cout << "🎮 Croupier C++ SDK 完整示例" << std::endl;
     std::cout << "===============================================" << std::endl;
 

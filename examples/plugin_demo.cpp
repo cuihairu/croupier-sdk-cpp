@@ -45,7 +45,7 @@ void TestPluginFunction(PluginManager& plugin_manager, const std::string& functi
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int /* argc */, char* /* argv */[]) {
     std::cout << "🚀 Croupier C++ SDK - Dynamic Plugin System Demo" << std::endl;
     std::cout << "================================================" << std::endl;
 
@@ -158,11 +158,11 @@ int main(int argc, char* argv[]) {
             if (registered) {
                 std::cout << "✅ All plugin functions registered successfully!" << std::endl;
 
-                // Get list of registered functions from client
-                auto client_functions = client.GetRegisteredFunctions();
-                std::cout << "📋 Client now has " << client_functions.size() << " registered functions:" << std::endl;
-                for (const auto& func : client_functions) {
-                    std::cout << "  - " << func.id << " (v" << func.version << ")" << std::endl;
+                // Get list of registered objects from client
+                auto client_objects = client.GetRegisteredObjects();
+                std::cout << "📋 Client now has " << client_objects.size() << " registered objects:" << std::endl;
+                for (const auto& obj : client_objects) {
+                    std::cout << "  - " << obj.id << " (v" << obj.version << ")" << std::endl;
                 }
 
                 // Try to connect to agent (this will fail if no agent is running, which is normal)

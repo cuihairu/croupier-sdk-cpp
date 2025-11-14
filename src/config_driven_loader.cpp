@@ -1,4 +1,5 @@
 #include "croupier/sdk/config_driven_loader.h"
+#include "croupier/sdk/utils/json_utils.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -100,8 +101,8 @@ ComponentDescriptor ConfigDrivenLoader::LoadComponentFromJson(const std::string&
         json config = json::parse(json_content);
         return ParseJsonToComponent(config.dump());
 #else
-        json config = JsonParser::parse(json_content);
-        return ParseJsonToComponent(config.ToString());
+        auto config = utils::JsonUtils::ParseJson(json_content);
+        return ParseJsonToComponent(json_content);
 #endif
     } catch (const std::exception& e) {
         throw std::runtime_error("JSON 解析失败: " + std::string(e.what()));
@@ -280,10 +281,13 @@ std::string ConfigDrivenLoader::LoadFileContent(const std::string& file_path) {
     return buffer.str();
 }
 
-ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponentFromJson(const json& config) {
+ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const std::string& json_content) {
     ComponentDescriptor component;
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
+    // 解析JSON字符串
+    auto config = nlohmann::json::parse(json_content);
+
     // 使用 nlohmann::json 的完整解析
     if (config.contains("component")) {
         auto comp = config["component"];
@@ -324,7 +328,9 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponentFromJson(const json&
     }
 #else
     // 简化解析实现
-    if (config.type == json::OBJECT && config.object_value.find("component") != config.object_value.end()) {
+    auto config = utils::JsonUtils::ParseJson(json_content);
+    if (config.type == utils::JsonUtils::SimpleJson::OBJECT &&
+        config.object_value.find("component") != config.object_value.end()) {
         auto comp = config.object_value.at("component");
         if (comp.object_value.find("id") != comp.object_value.end()) {
             component.id = comp.object_value.at("id").str_value;
@@ -341,10 +347,13 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponentFromJson(const json&
     return component;
 }
 
-VirtualObjectDescriptor ConfigDrivenLoader::ParseJsonToVirtualObject(const json& obj_config) {
+VirtualObjectDescriptor ConfigDrivenLoader::ParseJsonToVirtualObject(const std::string& json_content) {
     VirtualObjectDescriptor obj;
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
+    // 解析JSON字符串
+    auto obj_config = nlohmann::json::parse(json_content);
+
     obj.id = obj_config.value("id", "");
     obj.version = obj_config.value("version", "1.0.0");
     obj.name = obj_config.value("name", "");
@@ -368,6 +377,7 @@ VirtualObjectDescriptor ConfigDrivenLoader::ParseJsonToVirtualObject(const json&
     }
 #else
     // 简化实现
+    (void)json_content;  // Suppress unused parameter warning
     obj.id = "simple.object";
     obj.version = "1.0.0";
     obj.name = "Simple Object";

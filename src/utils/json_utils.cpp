@@ -220,6 +220,7 @@ void JsonUtils::PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstre
             ss << "\"" << json_obj.str_value << "\"";
             break;
         case SimpleJson::OBJECT:
+        {
             ss << "{\n";
             bool first = true;
             for (const auto& [key, value] : json_obj.object_value) {
@@ -230,9 +231,11 @@ void JsonUtils::PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstre
             }
             ss << "\n" << indent_str << "}";
             break;
+        }
         case SimpleJson::ARRAY:
+        {
             ss << "[\n";
-            first = true;
+            bool first = true;
             for (const auto& value : json_obj.array_value) {
                 if (!first) ss << ",\n";
                 ss << std::string(current_indent + indent_size, ' ');
@@ -241,6 +244,7 @@ void JsonUtils::PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstre
             }
             ss << "\n" << indent_str << "]";
             break;
+        }
     }
 }
 #endif

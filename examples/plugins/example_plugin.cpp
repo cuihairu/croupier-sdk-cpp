@@ -14,7 +14,7 @@ static PluginInfo plugin_info = {
     "1.0.0",                            // version
     "Croupier Team",                    // author
     "Example plugin demonstrating dynamic loading capabilities",  // description
-    {"hello", "calculate", "time", "echo"},  // provided_functions
+    {"hello", "calculate", "current_time", "echo"},  // provided_functions
     {
         {"language", "C++"},
         {"build_date", __DATE__},
@@ -101,7 +101,7 @@ const char* hello(const char* context, const char* payload) {
  * @brief Mathematical calculation function
  * Performs basic arithmetic operations
  */
-const char* calculate(const char* context, const char* payload) {
+const char* calculate(const char* /* context */, const char* payload) {
     static std::string result;
 
     try {
@@ -194,7 +194,7 @@ const char* calculate(const char* context, const char* payload) {
  * @brief Current time function
  * Returns current timestamp and formatted time
  */
-const char* time(const char* context, const char* payload) {
+const char* current_time(const char* /* context */, const char* /* payload */) {
     static std::string result;
 
     try {

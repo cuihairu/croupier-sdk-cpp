@@ -6,16 +6,9 @@
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
+#else
+#include "croupier/sdk/utils/json_utils.h"
 #endif
-
-// Forward declarations
-namespace croupier {
-namespace sdk {
-namespace utils {
-    class JsonUtils;
-}
-}
-}
 
 namespace croupier {
 namespace sdk {

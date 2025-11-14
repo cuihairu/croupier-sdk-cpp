@@ -7,7 +7,7 @@ using namespace croupier::sdk;
 
 // ========== Wallet Entity Handlers ==========
 
-std::string WalletGetHandler(const std::string& context, const std::string& payload) {
+std::string WalletGetHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "WalletGet called with payload: " << payload << std::endl;
 
     auto data = utils::ParseJSON(payload);
@@ -23,7 +23,7 @@ std::string WalletGetHandler(const std::string& context, const std::string& payl
     return utils::ToJSON(response);
 }
 
-std::string WalletTransferHandler(const std::string& context, const std::string& payload) {
+std::string WalletTransferHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "WalletTransfer called with payload: " << payload << std::endl;
 
     auto data = utils::ParseJSON(payload);
@@ -44,7 +44,7 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
     return utils::ToJSON(response);
 }
 
-std::string WalletDepositHandler(const std::string& context, const std::string& payload) {
+std::string WalletDepositHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "WalletDeposit called with payload: " << payload << std::endl;
 
     auto data = utils::ParseJSON(payload);
@@ -61,7 +61,7 @@ std::string WalletDepositHandler(const std::string& context, const std::string& 
 
 // ========== Currency Entity Handlers ==========
 
-std::string CurrencyGetHandler(const std::string& context, const std::string& payload) {
+std::string CurrencyGetHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "CurrencyGet called with payload: " << payload << std::endl;
 
     auto data = utils::ParseJSON(payload);
@@ -77,7 +77,7 @@ std::string CurrencyGetHandler(const std::string& context, const std::string& pa
     return utils::ToJSON(response);
 }
 
-std::string CurrencyCreateHandler(const std::string& context, const std::string& payload) {
+std::string CurrencyCreateHandler(const std::string& /* context */, const std::string& payload) {
     std::cout << "CurrencyCreate called with payload: " << payload << std::endl;
 
     auto data = utils::ParseJSON(payload);
