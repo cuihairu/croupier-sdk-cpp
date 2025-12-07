@@ -9,6 +9,7 @@
 /target/
 /CMakeFiles/
 **/CMakeFiles/
+/downloaded_proto/
 
 # CMake generated files
 CMakeCache.txt
@@ -59,4 +60,3 @@ Testing/
 
 # Package managers
 vcpkg_installed/
-
