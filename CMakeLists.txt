@@ -239,12 +239,14 @@ set(SDK_HEADERS
 )
 
 # Add generated proto files if gRPC is enabled AND proto files exist
-if(ENABLE_GRPC AND GENERATED_PROTO_SOURCES)
-    list(APPEND SDK_SOURCES ${GENERATED_PROTO_SOURCES})
-    list(APPEND SDK_HEADERS ${GENERATED_PROTO_HEADERS})
-    message(STATUS "Added generated proto files to build")
-else()
-    message(STATUS "Building without generated proto files (using mock implementation)")
+if(ENABLE_GRPC)
+    if(GENERATED_PROTO_SOURCES)
+        list(APPEND SDK_SOURCES ${GENERATED_PROTO_SOURCES})
+        list(APPEND SDK_HEADERS ${GENERATED_PROTO_HEADERS})
+        message(STATUS "Added generated proto files to build")
+    else()
+        message(STATUS "Building without generated proto files (using mock implementation)")
+    endif()
 endif()
 
 # ========== Library Targets ==========
