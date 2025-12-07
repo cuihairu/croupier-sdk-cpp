@@ -17,7 +17,7 @@ function(download_proto_files PROTO_SOURCE_DIR PROTO_DEST_DIR)
     endif()
 
     # Download proto files from main repository
-    set(PROTO_BASE_URL "https://raw.githubusercontent.com/cuihairu/croupier/${CROUPIER_PROTO_BRANCH}/proto")
+    set(PROTO_BASE_URL "https://raw.githubusercontent.com/cuihairu/croupier-proto/${CROUPIER_PROTO_BRANCH}")
 
     # List of proto files to download
     set(PROTO_FILES
@@ -206,15 +206,21 @@ function(setup_ci_build)
                 message(STATUS "⚠️ Prebuilt proto directory exists but no generated files found, regenerating...")
             endif()
         else()
-            # Fallback: download from main project
-            message(STATUS "⬇️  Proto files not pre-copied, downloading from main project...")
-            set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
-
-            # Download proto files
-            download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
-
-            # Generate gRPC code
-            generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
+            # Prefer local proto submodule
+            set(SDK_PROTO_DIR "${CPP_SDK_DIR}/proto")
+            if(EXISTS "${SDK_PROTO_DIR}/croupier")
+                message(STATUS "📦 Using proto submodule at ${SDK_PROTO_DIR}")
+                generate_grpc_code(${SDK_PROTO_DIR} ${PROTO_GENERATED_DIR})
+            elseif(EXISTS "${PROJECT_ROOT_DIR}/proto/croupier")
+                message(STATUS "🏠 Using main repo proto directory at ${PROJECT_ROOT_DIR}/proto")
+                generate_grpc_code("${PROJECT_ROOT_DIR}/proto" ${PROTO_GENERATED_DIR})
+            else()
+                # Fallback: download from proto repository
+                message(STATUS "⬇️  Proto files not found locally, downloading from croupier-proto...")
+                set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
+                download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
+                generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
+            endif()
         endif()
 
         # Enable gRPC and set paths
