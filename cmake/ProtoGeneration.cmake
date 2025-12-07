@@ -65,7 +65,7 @@ function(generate_grpc_code PROTO_SOURCE_DIR GENERATED_DIR)
     message(STATUS "Generating gRPC code from proto files...")
 
     # Find protobuf and gRPC
-    find_package(Protobuf CONFIG)
+    find_package(Protobuf CONFIG QUIET)
     if(NOT Protobuf_FOUND)
         find_package(Protobuf MODULE REQUIRED)
     endif()

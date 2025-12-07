@@ -103,7 +103,7 @@ find_package(Threads REQUIRED)
 # gRPC and Protobuf for real implementation
 if(ENABLE_GRPC)
     find_package(gRPC CONFIG REQUIRED)
-    find_package(Protobuf CONFIG)
+    find_package(Protobuf CONFIG QUIET)
     if(NOT Protobuf_FOUND)
         find_package(Protobuf MODULE REQUIRED)
     endif()
