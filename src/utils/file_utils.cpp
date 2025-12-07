@@ -8,11 +8,14 @@
 #include <direct.h>
 #include <windows.h>
 #include <io.h>
-#include <shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
 #define ACCESS _access
 #define GETCWD _getcwd
 #define MKDIR(path) _mkdir(path)
+// Avoid collisions with WinAPI macros (CreateDirectory, GetCurrentDirectory, etc.)
+#undef CreateDirectory
+#undef GetCurrentDirectory
+#undef RemoveDirectory
+#undef CopyFile
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -20,6 +23,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#include <cstring>
 #define ACCESS access
 #define GETCWD getcwd
 #define MKDIR(path) mkdir(path, 0755)
@@ -344,7 +348,7 @@ std::string FileSystemUtils::ToAbsolutePath(const std::string& relative_path,
         return NormalizePath(relative_path);
     }
 
-    std::string base = base_path.empty() ? GetCurrentDirectory() : base_path;
+    std::string base = base_path.empty() ? FileSystemUtils::GetCurrentDirectory() : base_path;
     return NormalizePath(JoinPath(base, relative_path));
 }
 

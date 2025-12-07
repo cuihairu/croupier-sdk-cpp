@@ -6,10 +6,25 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <shared_mutex>
+#include <unordered_map>
+#include <deque>
+
+// Windows macro conflict resolution: ERROR is defined in Windows SDK headers
+// We need to undefine it before our enum definition and restore it after
+#ifdef _WIN32
+#ifdef ERROR
+#define CROUPIER_SAVED_ERROR_MACRO ERROR
+#undef ERROR
+#endif
+#endif
 
 // Only include gRPC headers when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
+#include "croupier/agent/local/v1/local.grpc.pb.h"
+#include "croupier/function/v1/function.grpc.pb.h"
+#include <google/protobuf/map.h>
 #endif
 
 namespace croupier {
@@ -17,12 +32,13 @@ namespace sdk {
 namespace grpc_service {
 
 // Connection state enum (available regardless of gRPC)
+// Note: Using FAILED instead of ERROR to avoid Windows macro conflicts
 enum class ConnectionState {
     DISCONNECTED,
     CONNECTING,
     CONNECTED,
     RECONNECTING,
-    ERROR
+    FAILED  // Renamed from ERROR to avoid Windows macro conflict
 };
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
@@ -67,10 +83,13 @@ public:
     bool StartLocalServer();
     void StopLocalServer();
     std::string GetLocalServerAddress() const;
+    grpc::ChannelArguments BuildClientChannelArguments() const;
+    std::shared_ptr<grpc::ChannelCredentials> BuildClientCredentials() const;
 
     // 错误处理
     void SetErrorCallback(std::function<void(const std::string&)> callback);
     void SetReconnectCallback(std::function<void()> callback);
+    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers);
 
 private:
     // 配置
@@ -100,6 +119,8 @@ private:
     // 本地服务器信息
     std::string local_address_;
     int local_port_;
+    std::mutex handler_mutex_;
+    std::map<std::string, FunctionHandler> handler_snapshot_;
 
     // 内部方法
     void DoConnect();
@@ -111,15 +132,16 @@ private:
     void NotifyReconnect();
 
     // gRPC 配置
-    grpc::ChannelArguments CreateChannelArguments();
-    std::shared_ptr<grpc::ChannelCredentials> CreateCredentials();
+    grpc::ChannelArguments CreateChannelArguments() const;
+    std::shared_ptr<grpc::ChannelCredentials> CreateCredentials() const;
+    std::shared_ptr<grpc::ServerCredentials> CreateServerCredentials() const;
 };
 
 /**
  * @brief 本地函数服务实现
  * 接收来自 Agent 的函数调用请求
  */
-class LocalFunctionServiceImpl {
+class LocalFunctionServiceImpl : public croupier::function::v1::FunctionService::Service {
 public:
     explicit LocalFunctionServiceImpl(
         const std::map<std::string, FunctionHandler>& handlers
@@ -137,19 +159,34 @@ public:
     // 获取处理器数量
     size_t GetHandlerCount() const;
 
-    // gRPC 服务方法 - 这些将在实际的 proto 生成代码中实现
-    // grpc::Status InvokeFunction(...)
-    // grpc::Status StreamFunction(...)
-    // grpc::Status CancelJob(...)
+    // gRPC 服务方法
+    ::grpc::Status Invoke(::grpc::ServerContext* context,
+                          const croupier::function::v1::InvokeRequest* request,
+                          croupier::function::v1::InvokeResponse* response) override;
+    ::grpc::Status StartJob(::grpc::ServerContext* context,
+                            const croupier::function::v1::InvokeRequest* request,
+                            croupier::function::v1::StartJobResponse* response) override;
+    ::grpc::Status StreamJob(::grpc::ServerContext* context,
+                             const croupier::function::v1::JobStreamRequest* request,
+                             ::grpc::ServerWriter<croupier::function::v1::JobEvent>* writer) override;
+    ::grpc::Status CancelJob(::grpc::ServerContext* context,
+                             const croupier::function::v1::CancelJobRequest* request,
+                             croupier::function::v1::StartJobResponse* response) override;
 
 private:
+    struct JobState;
+
     std::map<std::string, FunctionHandler> handlers_;
-    std::shared_mutex handlers_mutex_;
+    mutable std::shared_mutex handlers_mutex_;
 
     // 统计信息
     std::atomic<uint64_t> total_calls_;
     std::atomic<uint64_t> successful_calls_;
     std::atomic<uint64_t> failed_calls_;
+    std::atomic<uint64_t> job_counter_{0};
+
+    mutable std::mutex jobs_mutex_;
+    std::unordered_map<std::string, std::shared_ptr<JobState>> jobs_;
 
     // 执行函数调用
     std::string ExecuteHandler(
@@ -157,6 +194,18 @@ private:
         const std::string& context,
         const std::string& payload
     );
+
+    std::string SerializeMetadata(
+        const google::protobuf::Map<std::string, std::string>& metadata) const;
+    std::string NextJobId(const std::string& function_id);
+    std::shared_ptr<JobState> CreateJob(const std::string& job_id);
+    std::shared_ptr<JobState> FindJob(const std::string& job_id) const;
+    void FinishJob(const std::string& job_id);
+    void EnqueueEvent(const std::shared_ptr<JobState>& state,
+                      croupier::function::v1::JobEvent&& event,
+                      bool mark_finished);
+    bool DequeueEvent(const std::shared_ptr<JobState>& state,
+                      croupier::function::v1::JobEvent* event);
 };
 
 /**
@@ -198,8 +247,7 @@ public:
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
-    // 实际的 stub 将在 proto 生成后创建
-    // std::unique_ptr<LocalControlService::Stub> stub_;
+    std::unique_ptr<croupier::agent::local::v1::LocalControlService::Stub> stub_;
 
     // 超时配置
     std::chrono::milliseconds default_timeout_;
@@ -290,6 +338,9 @@ public:
     }
     void SetReconnectCallback(std::function<void()> callback) {
         (void)callback;
+    }
+    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
+        (void)handlers;
     }
 
 private:
@@ -391,3 +442,11 @@ struct GrpcConnectionOptions {
 } // namespace grpc_service
 } // namespace sdk
 } // namespace croupier
+
+// Restore Windows ERROR macro if it was saved
+#ifdef _WIN32
+#ifdef CROUPIER_SAVED_ERROR_MACRO
+#define ERROR CROUPIER_SAVED_ERROR_MACRO
+#undef CROUPIER_SAVED_ERROR_MACRO
+#endif
+#endif

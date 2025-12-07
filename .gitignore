@@ -1,0 +1,62 @@
+# macOS artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Build directories
+/build/
+/bin/
+/target/
+/CMakeFiles/
+**/CMakeFiles/
+
+# CMake generated files
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+install_manifest.txt
+Testing/
+
+# Object files
+*.o
+*.obj
+*.lo
+*.la
+*.slo
+
+# Static and dynamic libraries
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# Executables and debugging
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.dSYM/
+*.pdb
+*.ilk
+
+# Compiler caches and logs
+*.cache
+*.log
+*.d
+
+# Generated headers/sources
+*.gch
+*.pch
+
+# IDE metadata
+.vscode/
+.idea/
+*.code-workspace
+
+# Package managers
+vcpkg_installed/
+

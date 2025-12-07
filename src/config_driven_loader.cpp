@@ -3,8 +3,14 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <dlfcn.h>  // Unix动态库加载
 #include <iostream>
+
+// Platform-specific dynamic library headers
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>  // Unix 动态库加载
+#endif
 
 // 简单的 JSON 解析器 (生产环境建议使用 nlohmann/json)
 #ifdef CROUPIER_SDK_ENABLE_JSON
@@ -297,9 +303,9 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const std::string& 
         component.description = comp.value("description", "");
     }
 
-    // 解析虚拟对象
-    if (config.contains("virtual_objects")) {
-        for (const auto& obj_config : config["virtual_objects"]) {
+    // 解析实体（虚拟对象），兼容键名 "entities" 和老的 "virtual_objects"
+    auto parse_entities_array = [&](const nlohmann::json& arr) {
+        for (const auto& obj_config : arr) {
             VirtualObjectDescriptor obj;
             obj.id = obj_config.value("id", "");
             obj.version = obj_config.value("version", "1.0.0");
@@ -323,8 +329,15 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const std::string& 
                 }
             }
 
-            component.virtual_objects[obj.id] = obj;
+            // 新版 ComponentDescriptor 使用 vector<VirtualObjectDescriptor> entities;
+            component.entities.push_back(std::move(obj));
         }
+    };
+    if (config.contains("entities") && config["entities"].is_array()) {
+        parse_entities_array(config["entities"]);
+    } else if (config.contains("virtual_objects") && config["virtual_objects"].is_array()) {
+        // 兼容旧字段
+        parse_entities_array(config["virtual_objects"]);
     }
 #else
     // 简化解析实现
@@ -475,7 +488,15 @@ FunctionHandler ConfigDrivenLoader::LoadFromDynamicLib(const std::string& lib_pa
     }
 
     typedef const char* (*HandlerFunc)(const char* context, const char* payload);
-    HandlerFunc func = (HandlerFunc)GetProcAddress(handle, function_name.c_str());
+    HandlerFunc func = nullptr;
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+    func = reinterpret_cast<HandlerFunc>(GetProcAddress(handle, function_name.c_str()));
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
     if (!func) {
         std::cerr << "❌ 无法找到函数: " << function_name << std::endl;
         FreeLibrary(handle);

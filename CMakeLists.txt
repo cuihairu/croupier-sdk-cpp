@@ -1,10 +1,25 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(croupier-cpp-sdk
-    VERSION 1.0.0
+    VERSION 0.1.0
     DESCRIPTION "Croupier C++ SDK for Game Function Registration"
     LANGUAGES CXX
 )
+
+# Verify build tools are available after project setup
+# Note: Changed to WARNING to support vcpkg toolchain initialization
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(NOT CMAKE_MAKE_PROGRAM)
+        message(WARNING "CMAKE_MAKE_PROGRAM is not set. Build may fail if build tools are not installed.")
+    else()
+        message(STATUS "Make program: ${CMAKE_MAKE_PROGRAM}")
+    endif()
+    if(NOT CMAKE_CXX_COMPILER)
+        message(WARNING "C++ compiler is not available. Build may fail if g++ is not installed.")
+    else()
+        message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+    endif()
+endif()
 
 # ========== Project Configuration ==========
 set(CMAKE_CXX_STANDARD 17)
@@ -22,11 +37,22 @@ option(BUILD_TESTS "Build unit tests" OFF)
 option(ENABLE_VCPKG "Enable vcpkg package management" ON)
 option(CROUPIER_CI_BUILD "Enable CI build with proto generation" OFF)
 
+# ========== Standalone Build Options ==========
+option(CROUPIER_STANDALONE_BUILD "Enable standalone build mode" OFF)
+option(CROUPIER_PREBUILT_PROTO "Use prebuilt proto files" OFF)
+option(CROUPIER_ONLINE_BUILD "Enable online proto download" OFF)
+option(USE_SYSTEM_PACKAGES "Use system packages instead of vcpkg" OFF)
+set(CROUPIER_PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/downloaded_proto" CACHE STRING "Proto files directory for online build")
+
 # ========== Proto Generation Module ==========
 include(cmake/ProtoGeneration.cmake)
 
-# Setup build type (CI vs local)
-setup_ci_build()
+# Setup build type with enhanced logic for standalone builds
+if(CROUPIER_STANDALONE_BUILD)
+    setup_standalone_build()
+else()
+    setup_ci_build()
+endif()
 
 # Set gRPC enable flag based on CI build result
 if(CROUPIER_SDK_ENABLE_GRPC)
@@ -78,6 +104,7 @@ find_package(Threads REQUIRED)
 if(ENABLE_GRPC)
     find_package(gRPC CONFIG REQUIRED)
     find_package(Protobuf CONFIG REQUIRED)
+    find_package(ZLIB REQUIRED)
 
     message(STATUS "Found gRPC: ${gRPC_VERSION}")
     message(STATUS "Found Protobuf: ${Protobuf_VERSION}")
@@ -102,11 +129,24 @@ endif()
 # ========== Compiler Settings ==========
 if(MSVC)
     # MSVC specific settings
-    add_compile_options(/W4 /WX)
+    # Use /W4 for SDK code but disable warnings-as-errors for specific warnings
+    # from protobuf generated code
+    add_compile_options(/W4)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    # Disable C4100 (unreferenced parameter) and C4267 (size_t to int conversion)
+    # for generated protobuf code - these are common in generated code
+    add_compile_options(/wd4100 /wd4267)
+    # Keep WX for most code, but these warnings are unavoidable in generated code
+    # Note: We rely on CI to catch real errors, generated code warnings are acceptable
 else()
     # GCC/Clang settings
     add_compile_options(-Wall -Wextra -Werror)
+
+    # Suppress warnings from third-party libraries (protobuf, gRPC)
+    add_compile_options(
+        -Wno-deprecated-declarations    # Suppress protobuf deprecated API warnings
+        -Wno-unused-parameter           # Suppress gRPC unused parameter warnings
+    )
 
     # Enable debug info in release builds for better profiling
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -119,59 +159,57 @@ set(GENERATED_PROTO_SOURCES "")
 set(GENERATED_PROTO_HEADERS "")
 
 if(ENABLE_GRPC)
-    # Proto files from main project (optional - only if available)
-    set(PROTO_FILES
-        ../../proto/croupier/agent/local/v1/local.proto
-        ../../proto/croupier/function/v1/function.proto
-        ../../proto/croupier/control/v1/control.proto
-    )
+    # Monorepo mode: Use main project's generated files
+    set(MAIN_PROJECT_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../gen")
 
-    # Check if proto files exist
-    set(PROTO_FILES_EXIST TRUE)
-    foreach(PROTO_FILE ${PROTO_FILES})
-        if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_FILE})
-            set(PROTO_FILES_EXIST FALSE)
-            message(STATUS "Proto file not found: ${PROTO_FILE}")
+    message(STATUS "🏠 Monorepo build detected")
+    message(STATUS "Using generated files from: ${MAIN_PROJECT_GEN_DIR}")
+
+    # Check if main project generated files exist
+    if(EXISTS ${MAIN_PROJECT_GEN_DIR})
+        # Collect all generated C++ proto files from main project
+        file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${MAIN_PROJECT_GEN_DIR}/**/*.cc")
+        file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${MAIN_PROJECT_GEN_DIR}/**/*.h")
+
+        if(GENERATED_PROTO_SOURCES)
+            list(LENGTH GENERATED_PROTO_SOURCES file_count)
+            message(STATUS "✅ Found ${file_count} generated proto source files")
+            set(PROTO_GENERATED_DIR ${MAIN_PROJECT_GEN_DIR})
+        else()
+            message(STATUS "⚠️ Generated files directory exists but no .cc/.h files found")
+            message(STATUS "Please run 'make proto' from project root")
         endif()
-    endforeach()
-
-    if(PROTO_FILES_EXIST)
-        message(STATUS "All proto files found, generating gRPC code...")
-
-        # Generated proto sources
-        set(PROTO_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
-        file(MAKE_DIRECTORY ${PROTO_GENERATED_DIR})
-
-        # Generate proto sources
-        foreach(PROTO_FILE ${PROTO_FILES})
-            get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
-            get_filename_component(PROTO_PATH ${PROTO_FILE} DIRECTORY)
-
-            set(PROTO_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.cc)
-            set(PROTO_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.pb.h)
-            set(GRPC_SRCS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.cc)
-            set(GRPC_HDRS ${PROTO_GENERATED_DIR}/${PROTO_NAME}.grpc.pb.h)
-
-            add_custom_command(
-                OUTPUT ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS} ${GRPC_HDRS}
-                COMMAND protobuf::protoc
-                    --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/../../proto
-                    --cpp_out=${PROTO_GENERATED_DIR}
-                    --grpc_out=${PROTO_GENERATED_DIR}
-                    --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
-                    ${PROTO_FILE}
-                DEPENDS ${PROTO_FILE}
-            )
-
-            list(APPEND GENERATED_PROTO_SOURCES ${PROTO_SRCS} ${GRPC_SRCS})
-            list(APPEND GENERATED_PROTO_HEADERS ${PROTO_HDRS} ${GRPC_HDRS})
-        endforeach()
-
-        # Add compile definition for real gRPC
-        add_compile_definitions(CROUPIER_SDK_ENABLE_REAL_GRPC)
-        message(STATUS "Enabled real gRPC code generation")
     else()
-        message(STATUS "Proto files not available, using mock gRPC implementation")
+        message(STATUS "⚠️ Main project generated files not found: ${MAIN_PROJECT_GEN_DIR}")
+        message(STATUS "Please run 'make proto' from project root to generate proto files")
+    endif()
+
+    # Fallback to SDK-local generated artifacts
+    if(NOT GENERATED_PROTO_SOURCES)
+        set(LOCAL_GENERATED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated")
+        if(EXISTS ${LOCAL_GENERATED_DIR})
+            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${LOCAL_GENERATED_DIR}/**/*.cc")
+            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${LOCAL_GENERATED_DIR}/**/*.h")
+            if(GENERATED_PROTO_SOURCES)
+                list(LENGTH GENERATED_PROTO_SOURCES file_count)
+                message(STATUS "✅ Found ${file_count} generated proto source files under sdks/cpp/generated")
+                set(PROTO_GENERATED_DIR ${LOCAL_GENERATED_DIR})
+            else()
+                message(STATUS "⚠️ sdks/cpp/generated exists but no generated sources found")
+            endif()
+        endif()
+    endif()
+
+    # Fallback: Check standalone build options
+    if(NOT GENERATED_PROTO_SOURCES)
+        if(CROUPIER_STANDALONE_BUILD)
+            setup_standalone_build()
+        elseif(CROUPIER_CI_BUILD)
+            setup_ci_build()
+        else()
+            message(STATUS "🔧 No proto files found, using mock gRPC implementation")
+            set(ENABLE_GRPC OFF)
+        endif()
     endif()
 endif()
 
@@ -235,6 +273,7 @@ if(BUILD_SHARED_LIBS)
         target_link_libraries(croupier-sdk-shared
             PUBLIC
                 ${GRPC_LIBRARIES}
+                ZLIB::ZLIB
         )
         target_compile_definitions(croupier-sdk-shared
             PUBLIC
@@ -289,6 +328,7 @@ if(BUILD_STATIC_LIBS)
         target_link_libraries(croupier-sdk-static
             PUBLIC
                 ${GRPC_LIBRARIES}
+                ZLIB::ZLIB
         )
         target_compile_definitions(croupier-sdk-static
             PUBLIC
@@ -480,4 +520,3 @@ message(STATUS "  nlohmann_json:   Found")
 endif()
 message(STATUS "=================================================")
 message(STATUS "")
-

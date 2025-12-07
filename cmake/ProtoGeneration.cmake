@@ -2,6 +2,9 @@
 #
 # This module handles proto file downloading and code generation for CI builds
 
+get_filename_component(CPP_SDK_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+get_filename_component(PROJECT_ROOT_DIR "${CPP_SDK_DIR}/.." ABSOLUTE)
+
 # Function to download proto files from main repository
 function(download_proto_files PROTO_SOURCE_DIR PROTO_DEST_DIR)
     message(STATUS "Downloading proto files for CI build...")
@@ -115,20 +118,104 @@ function(generate_grpc_code PROTO_SOURCE_DIR GENERATED_DIR)
     message(STATUS "gRPC code generation configured for ${GENERATED_DIR}")
 endfunction()
 
+# Function to setup standalone build
+function(setup_standalone_build)
+    message(STATUS "Standalone build mode detected")
+
+    if(CROUPIER_PREBUILT_PROTO)
+        # Mode 1: Use prebuilt proto files
+        message(STATUS "🎯 Using prebuilt proto files")
+
+        set(PROTO_GENERATED_DIR "${CPP_SDK_DIR}/generated")
+
+        if(EXISTS ${PROTO_GENERATED_DIR})
+            # Collect existing generated files
+            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${PROTO_GENERATED_DIR}/**/*.cc")
+            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${PROTO_GENERATED_DIR}/**/*.h")
+
+            if(GENERATED_PROTO_SOURCES)
+                set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
+                set(PROTO_GENERATED_DIR ${PROTO_GENERATED_DIR} PARENT_SCOPE)
+                set(GENERATED_PROTO_SOURCES ${GENERATED_PROTO_SOURCES} PARENT_SCOPE)
+                set(GENERATED_PROTO_HEADERS ${GENERATED_PROTO_HEADERS} PARENT_SCOPE)
+
+                list(LENGTH GENERATED_PROTO_SOURCES file_count)
+                message(STATUS "✅ Found ${file_count} generated proto source files")
+                return()
+            else()
+                message(STATUS "⚠️ Prebuilt directory exists but no .cc files found")
+            endif()
+        else()
+            message(STATUS "⚠️ Prebuilt proto directory not found")
+        endif()
+
+    elseif(CROUPIER_ONLINE_BUILD)
+        # Mode 2: Online download and generation
+        message(STATUS "🌐 Online build mode - downloading proto files")
+
+        if(EXISTS ${CROUPIER_PROTO_DIR})
+            set(PROTO_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+            # Generate gRPC code from downloaded files
+            generate_grpc_code(${CROUPIER_PROTO_DIR} ${PROTO_GENERATED_DIR})
+
+            # Enable gRPC and set paths
+            set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
+            set(PROTO_GENERATED_DIR ${PROTO_GENERATED_DIR} PARENT_SCOPE)
+            set(GENERATED_PROTO_SOURCES ${GENERATED_PROTO_SOURCES} PARENT_SCOPE)
+            set(GENERATED_PROTO_HEADERS ${GENERATED_PROTO_HEADERS} PARENT_SCOPE)
+
+            message(STATUS "✅ Online proto generation configured")
+            return()
+        else()
+            message(STATUS "⚠️ Proto directory not found: ${CROUPIER_PROTO_DIR}")
+        endif()
+    endif()
+
+    # Mode 3: Fallback to mock implementation
+    message(STATUS "🔧 Using mock gRPC implementation for standalone build")
+    set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+endfunction()
+
 # Function to setup CI build with proto generation
 function(setup_ci_build)
-    # Check if we're in CI environment
+    # Check if we're in CI environment or CI build is explicitly enabled
     if(DEFINED ENV{CI} OR CROUPIER_CI_BUILD)
-        message(STATUS "CI build detected, enabling proto generation...")
+        message(STATUS "CI build detected, setting up proto generation...")
 
-        set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
+        # First check if we have pre-copied proto files (from CI)
+        set(PROTO_SOURCE_DIR "${CPP_SDK_DIR}/generated/croupier")
         set(PROTO_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-        # Download proto files
-        download_proto_files("${CMAKE_CURRENT_SOURCE_DIR}/../../proto" ${PROTO_DOWNLOAD_DIR})
+        if(EXISTS ${PROTO_SOURCE_DIR})
+            message(STATUS "✅ Using pre-copied proto files from CI")
 
-        # Generate gRPC code
-        generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
+            set(PREBUILT_PROTO_DIR "${CPP_SDK_DIR}/generated")
+            file(GLOB_RECURSE PREBUILT_PROTO_SRCS "${PREBUILT_PROTO_DIR}/*.cc")
+            file(GLOB_RECURSE PREBUILT_PROTO_HDRS "${PREBUILT_PROTO_DIR}/*.h")
+
+            if(PREBUILT_PROTO_SRCS)
+                list(LENGTH PREBUILT_PROTO_SRCS file_count)
+                message(STATUS "✅ Reusing ${file_count} generated proto source files")
+                set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
+                set(PROTO_GENERATED_DIR ${PREBUILT_PROTO_DIR} PARENT_SCOPE)
+                set(GENERATED_PROTO_SOURCES ${PREBUILT_PROTO_SRCS} PARENT_SCOPE)
+                set(GENERATED_PROTO_HEADERS ${PREBUILT_PROTO_HDRS} PARENT_SCOPE)
+                return()
+            else()
+                message(STATUS "⚠️ Prebuilt proto directory exists but no generated files found, regenerating...")
+            endif()
+        else()
+            # Fallback: download from main project
+            message(STATUS "⬇️  Proto files not pre-copied, downloading from main project...")
+            set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
+
+            # Download proto files
+            download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
+
+            # Generate gRPC code
+            generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
+        endif()
 
         # Enable gRPC and set paths
         set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
@@ -136,9 +223,48 @@ function(setup_ci_build)
         set(GENERATED_PROTO_SOURCES ${GENERATED_PROTO_SOURCES} PARENT_SCOPE)
         set(GENERATED_PROTO_HEADERS ${GENERATED_PROTO_HEADERS} PARENT_SCOPE)
 
-        message(STATUS "CI build setup completed with proto generation")
+        message(STATUS "✅ CI build setup completed with proto generation")
     else()
-        message(STATUS "Local build detected, using mock gRPC implementation")
-        set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+        # Check if we have local generated files (monorepo) or SDK-local generated artifacts
+        set(MONOREPO_GENERATED_DIR "${PROJECT_ROOT_DIR}/gen")
+        set(MONOREPO_GENERATED_DIR_WITH_PACKAGE "${MONOREPO_GENERATED_DIR}/croupier")
+        set(SDK_GENERATED_DIR "${CPP_SDK_DIR}/generated")
+        set(SDK_GENERATED_DIR_WITH_PACKAGE "${SDK_GENERATED_DIR}/croupier")
+
+        if(EXISTS ${MONOREPO_GENERATED_DIR_WITH_PACKAGE})
+            message(STATUS "🏠 Local build detected, using existing generated files from main project")
+            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${MONOREPO_GENERATED_DIR}/**/*.cc")
+            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${MONOREPO_GENERATED_DIR}/**/*.h")
+
+            if(GENERATED_PROTO_SOURCES)
+                list(LENGTH GENERATED_PROTO_SOURCES file_count)
+                message(STATUS "✅ Found ${file_count} generated files from main project")
+                set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
+                set(PROTO_GENERATED_DIR ${MONOREPO_GENERATED_DIR} PARENT_SCOPE)
+                set(GENERATED_PROTO_SOURCES ${GENERATED_PROTO_SOURCES} PARENT_SCOPE)
+                set(GENERATED_PROTO_HEADERS ${GENERATED_PROTO_HEADERS} PARENT_SCOPE)
+            else()
+                message(STATUS "⚠️  Generated files directory exists but no .cc/.h files found")
+                set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+            endif()
+        elseif(EXISTS ${SDK_GENERATED_DIR_WITH_PACKAGE})
+            message(STATUS "📦 Using SDK-local generated protobuf files")
+            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${SDK_GENERATED_DIR}/**/*.cc")
+            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${SDK_GENERATED_DIR}/**/*.h")
+            if(GENERATED_PROTO_SOURCES)
+                list(LENGTH GENERATED_PROTO_SOURCES file_count)
+                message(STATUS "✅ Found ${file_count} generated proto source files under sdks/cpp/generated")
+                set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
+                set(PROTO_GENERATED_DIR ${SDK_GENERATED_DIR} PARENT_SCOPE)
+                set(GENERATED_PROTO_SOURCES ${GENERATED_PROTO_SOURCES} PARENT_SCOPE)
+                set(GENERATED_PROTO_HEADERS ${GENERATED_PROTO_HEADERS} PARENT_SCOPE)
+            else()
+                message(STATUS "⚠️ sdks/cpp/generated exists but no generated files found")
+                set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+            endif()
+        else()
+            message(STATUS "🔧 Local build detected, using mock gRPC implementation (no generated files)")
+            set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+        endif()
     endif()
 endfunction()
