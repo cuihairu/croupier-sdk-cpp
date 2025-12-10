@@ -30,13 +30,17 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake ninja-build pkg-config
-        # Verify ninja installation
-        echo "=== All ninja installations ==="
-        ls -la /usr/bin/ninja* /usr/local/bin/ninja* 2>/dev/null || true
+        # Verify installations
+        echo "=== CMake installations ==="
+        which -a cmake
+        echo "=== Using system CMake ==="
+        /usr/bin/cmake --version
+        echo "=== Ninja installations ==="
         which -a ninja
         echo "=== Using ninja ==="
         ninja --version
-        file $(which ninja)
+        # Force use system cmake by setting PATH
+        echo "export PATH=\"/usr/bin:\$PATH\"" >> $GITHUB_ENV
 
     - name: Setup vcpkg
       run: |
