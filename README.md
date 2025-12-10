@@ -6,11 +6,14 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/ci.yml">
+    <img src="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
   <a href="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/nightly.yml">
     <img src="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/nightly.yml/badge.svg" alt="Nightly Build">
   </a>
-  <a href="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/cpp-sdk-build.yml">
-    <img src="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/cpp-sdk-build.yml/badge.svg" alt="Build Status">
+  <a href="https://github.com/cuihairu/croupier-sdk-cpp/releases">
+    <img src="https://img.shields.io/github/v/release/cuihairu/croupier-sdk-cpp?include_prereleases" alt="Release">
   </a>
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
@@ -257,9 +260,17 @@ struct ClientConfig {
 
 访问 [Releases 页面](https://github.com/cuihairu/croupier-sdk-cpp/releases) 下载：
 
-- `croupier-cpp-sdk-{version}-windows-x64.zip`
-- `croupier-cpp-sdk-{version}-linux-x64.tar.gz`
-- `croupier-cpp-sdk-{version}-macos-arm64.tar.gz`
+**静态库包：**
+- `croupier-cpp-sdk-static-{version}-windows-x64.zip`
+- `croupier-cpp-sdk-static-{version}-linux-x64.tar.gz`
+- `croupier-cpp-sdk-static-{version}-macos-arm64.tar.gz`
+
+**动态库包：**
+- `croupier-cpp-sdk-dynamic-{version}-windows-x64.zip`
+- `croupier-cpp-sdk-dynamic-{version}-linux-x64.tar.gz`
+- `croupier-cpp-sdk-dynamic-{version}-macos-arm64.tar.gz`
+
+> 💡 **提示**：推送 `v*` 格式的 tag（如 `v1.0.0`）会自动触发正式 Release 构建
 
 ## 开发指南
 
