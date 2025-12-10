@@ -49,12 +49,12 @@ jobs:
     - name: Install vcpkg dependencies
       run: |
         cd vcpkg
-        # Use GitHub Actions binary cache for vcpkg
-        export VCPKG_BINARY_SOURCES="clear;x-gha,readwrite"
-        # Limit parallelism to reduce memory usage
-        export VCPKG_MAX_CONCURRENCY=1
-        # Install dependencies
-        ./vcpkg install --triplet=x64-linux --accept-license --debug --display-status
+        # Keep build logs for debugging
+        export VCPKG_KEEP_BUILD_TREES=1
+        # Install with full output to see the actual ninja error
+        set -e
+        trap 'echo "=== BUILD LOGS ==="; find buildtrees -name "*.log" -exec echo "=== {} ===" \; -exec cat {} \;' ERR
+        ./vcpkg install --triplet=x64-linux --accept-license
 
     - name: Setup proto files
       run: |
