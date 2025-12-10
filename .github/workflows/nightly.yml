@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '0 2 * * *'
 
+  # Tag push triggers official release
+  push:
+    tags:
+      - 'v*'
+
   # Manual trigger
   workflow_dispatch:
     inputs:
