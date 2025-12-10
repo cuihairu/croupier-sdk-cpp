@@ -180,7 +180,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '2d6a6cf3ac9a7cc93942c3d289a2f9c661a6f4a7'
+        vcpkgGitCommitId: 'f5cbc726b123896eef77f5acc1b9047a28a0731e'
         vcpkgJsonGlob: 'vcpkg.json'
 
     - name: Export GitHub Actions cache environment variables
