@@ -65,23 +65,34 @@ jobs:
         cd vcpkg
         # Set environment variables
         export VCPKG_ROOT=$(pwd)
-        export VCPKG_FORCE_SYSTEM_BINARIES=1
         export VCPKG_KEEP_BUILD_TREES=1
-        # Force use Make instead of Ninja to avoid compatibility issues
-        export VCPKG_FORCE_SYSTEM_BINARIES=ON
+
+        # Force use Make instead of Ninja
+        export ACMAKE_PATH="/usr/bin:/usr/local/bin"
+        export CMAKE_GENERATOR="Unix Makefiles"
+        export VCPKG_FORCE_SYSTEM_BINARIES=1
+
         echo "=== TOOL LOCATIONS ==="
+        echo "PATH: $PATH"
+        which cmake
         which ninja
         which make
         echo "=== VCPKG VERSION ==="
         ./vcpkg version
-        # Install dependencies from manifest using Make
+
+        # Create a vcpkg triplets override file
+        mkdir -p triplets
+        cat > triplets/x64-linux.cmake << 'EOF'
+        set(CMAKE_GENERATOR "Unix Makefiles" CACHE STRING "Force use Make")
+        set(CMAKE_MAKE_PROGRAM "/usr/bin/make" CACHE FILEPATH "Force use system make")
+        EOF
+
+        # Install dependencies from manifest
         # Run from sdk directory so vcpkg can find the manifest
         cd ../sdk
         set -e
         echo "=== Installing dependencies with Make ==="
-        # Set VCPKG_CMAKE_CONFIGURE_OPTIONS for all subsequent vcpkg commands
-        export VCPKG_CMAKE_CONFIGURE_OPTIONS="-G \"Unix Makefiles\""
-        ../vcpkg/vcpkg install --triplet=x64-linux
+        ../vcpkg/vcpkg install --triplet=../vcpkg/triplets/x64-linux.cmake --triplet x64-linux
         echo "=== Build completed successfully ==="
 
     - name: Setup proto files
