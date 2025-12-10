@@ -36,6 +36,21 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git
         ./vcpkg/bootstrap-vcpkg.sh
 
+    - name: Cache vcpkg dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          vcpkg_installed
+          ~/.cache/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Install vcpkg dependencies
+      run: |
+        cd vcpkg
+        ./vcpkg install --triplet=x64-linux --accept-license
+
     - name: Setup proto files
       run: |
         cd sdk
