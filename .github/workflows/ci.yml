@@ -36,12 +36,21 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git
         ./vcpkg/bootstrap-vcpkg.sh
 
+    - name: Setup proto files
+      run: |
+        cd sdk
+        # Create gen directory structure
+        mkdir -p ../../gen
+        # Copy generated proto files to expected location
+        cp -r generated ../../gen/sdks/cpp/
+
     - name: Configure CMake (CI Build)
       run: |
         cd sdk
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
           -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=x64-linux \
           -DCROUPIER_CI_BUILD=ON \
           -DBUILD_EXAMPLES=ON \
           -DBUILD_TESTS=ON \
