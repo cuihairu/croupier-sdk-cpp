@@ -1,4 +1,4 @@
-name: "Build Croupier C++ SDK"
+name: CI
 
 on:
   push:
@@ -14,121 +14,43 @@ jobs:
         build-type: [Release, Debug]
 
     steps:
-    - name: Checkout SDK repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
       with:
-        path: sdk
-
-    - name: Checkout main Croupier repository for proto files
-      uses: actions/checkout@v4
-      with:
-        repository: cuihairu/croupier
-        path: croupier
-        token: ${{ secrets.GITHUB_TOKEN }}
+        submodules: 'recursive'
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build pkg-config
-        # Verify installations
-        echo "=== CMake installations ==="
-        which -a cmake
-        echo "=== Using system CMake ==="
-        /usr/bin/cmake --version
-        echo "=== Ninja installations ==="
-        which -a ninja
-        echo "=== Using ninja ==="
-        ninja --version
-        # Force use system cmake by setting PATH
-        echo "export PATH=\"/usr/bin:\$PATH\"" >> $GITHUB_ENV
+        sudo apt-get install -y build-essential ninja-build
 
     - name: Setup vcpkg
-      run: |
-        git clone https://github.com/Microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
-        # Force vcpkg to use system ninja
-        export VCPKG_FORCE_SYSTEM_BINARIES=1
-        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> $GITHUB_ENV
-
-    - name: Cache vcpkg dependencies
-      uses: actions/cache@v3
+      uses: lukka/run-vcpkg@v11
       with:
-        path: |
-          vcpkg_installed
-          ~/.cache/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
-        restore-keys: |
-          ${{ runner.os }}-vcpkg-
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '2d6a6cf3ac9a7cc93942c3d289a2f9c661a6f4a7'
+        vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Install vcpkg dependencies
+    - name: Configure CMake
       run: |
-        cd vcpkg
-        # Set environment variables
-        export VCPKG_ROOT=$(pwd)
-        export VCPKG_KEEP_BUILD_TREES=1
-
-        # Force use Make instead of Ninja
-        export ACMAKE_PATH="/usr/bin:/usr/local/bin"
-        export CMAKE_GENERATOR="Unix Makefiles"
-        export VCPKG_FORCE_SYSTEM_BINARIES=1
-
-        echo "=== TOOL LOCATIONS ==="
-        echo "PATH: $PATH"
-        which cmake
-        which ninja
-        which make
-        echo "=== VCPKG VERSION ==="
-        ./vcpkg version
-
-        # Create a vcpkg triplets override file
-        mkdir -p triplets
-        cat > triplets/x64-linux.cmake << 'EOF'
-        set(CMAKE_GENERATOR "Unix Makefiles" CACHE STRING "Force use Make")
-        set(CMAKE_MAKE_PROGRAM "/usr/bin/make" CACHE FILEPATH "Force use system make")
-        EOF
-
-        # Install dependencies from manifest
-        # Run from sdk directory so vcpkg can find the manifest
-        cd ../sdk
-        set -e
-        echo "=== Installing dependencies with Make ==="
-        ../vcpkg/vcpkg install --triplet=../vcpkg/triplets/x64-linux.cmake --triplet x64-linux
-        echo "=== Build completed successfully ==="
-
-    - name: Setup proto files
-      run: |
-        cd sdk
-        # Create gen directory structure
-        mkdir -p ../../gen
-        # Copy generated proto files to expected location
-        cp -r generated ../../gen/sdks/cpp/
-
-    - name: Configure CMake (CI Build)
-      run: |
-        cd sdk
         cmake -B build \
+          -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
           -DVCPKG_TARGET_TRIPLET=x64-linux \
-          -DCROUPIER_CI_BUILD=ON \
           -DBUILD_EXAMPLES=ON \
-          -DBUILD_TESTS=ON \
-          -G Ninja
+          -DBUILD_TESTS=ON
 
     - name: Build
-      run: |
-        cd sdk
-        cmake --build build --config ${{ matrix.build-type }}
+      run: cmake --build build --config ${{ matrix.build-type }} --parallel
 
     - name: Test
-      run: |
-        cd sdk
-        ctest --build-config ${{ matrix.build-type }} --output-on-failure
+      run: cd build && ctest --build-config ${{ matrix.build-type }} --output-on-failure
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: croupier-cpp-sdk-${{ matrix.build-type }}
         path: |
-          sdk/build/bin/
-          sdk/build/lib/
+          build/bin/
+          build/lib/

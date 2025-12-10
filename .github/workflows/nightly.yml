@@ -1,36 +1,382 @@
-name: Nightly Build
+name: Nightly Build & Release
 
 on:
+  # Daily build at 02:00 UTC
   schedule:
     - cron: '0 2 * * *'
+
+  # Manual trigger
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'nightly'
+        type: choice
+        options:
+          - nightly
+          - release
+          - patch
+
+permissions:
+  contents: write
+
+env:
+  BUILD_TYPE: Release
+  VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+  SDK_VERSION_BASE: "1.0"
 
 jobs:
-  linux:
+  # ========== Version Management ==========
+  version:
     runs-on: ubuntu-latest
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/.vcpkg
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_tag: ${{ steps.version.outputs.version_tag }}
+      is_release: ${{ steps.version.outputs.is_release }}
+      is_tagged_release: ${{ steps.version.outputs.is_tagged_release }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Install build tooling
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential ninja-build cmake git pkg-config
-      - name: Bootstrap vcpkg
-        run: |
-          if [ ! -d "$VCPKG_ROOT" ]; then
-            git clone https://github.com/microsoft/vcpkg "$VCPKG_ROOT"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate Version
+      id: version
+      run: |
+        DATE=$(date +%Y%m%d)
+        TIME=$(date +%H%M)
+
+        CURRENT_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+        IS_TAGGED_RELEASE="false"
+
+        if [[ -n "$CURRENT_TAG" ]]; then
+          VERSION="${CURRENT_TAG#v}"
+          VERSION_TAG="$CURRENT_TAG"
+          IS_RELEASE="true"
+          IS_TAGGED_RELEASE="true"
+          echo "🎯 Tagged release detected: $CURRENT_TAG"
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event.inputs.release_type }}" == "release" ]]; then
+            VERSION="${SDK_VERSION_BASE}.0"
+            VERSION_TAG="v${VERSION}"
+            IS_RELEASE="true"
+          elif [[ "${{ github.event.inputs.release_type }}" == "patch" ]]; then
+            LATEST_TAG=$(git tag -l "v${SDK_VERSION_BASE}.*" --sort=-version:refname | head -n1)
+            if [[ -z "$LATEST_TAG" ]]; then
+              VERSION="${SDK_VERSION_BASE}.1"
+            else
+              PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+              VERSION="${SDK_VERSION_BASE}.$((PATCH + 1))"
+            fi
+            VERSION_TAG="v${VERSION}"
+            IS_RELEASE="true"
+          else
+            VERSION="${SDK_VERSION_BASE}.0-nightly.${DATE}.${TIME}"
+            VERSION_TAG="nightly-${DATE}-${TIME}"
+            IS_RELEASE="false"
           fi
-          "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
-      - name: Configure
-        run: |
-          cmake -S . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DVCPKG_TARGET_TRIPLET=x64-linux \
-            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_FEATURE_FLAGS=manifests,binarycaching
-      - name: Build
-        run: cmake --build build --parallel
+        elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+          VERSION="${SDK_VERSION_BASE}.0-nightly.${DATE}.${TIME}"
+          VERSION_TAG="nightly-${DATE}-${TIME}"
+          IS_RELEASE="false"
+        else
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          VERSION="${SDK_VERSION_BASE}.0-dev.${DATE}.${COMMIT_SHORT}"
+          VERSION_TAG="dev-${DATE}-${COMMIT_SHORT}"
+          IS_RELEASE="false"
+        fi
+
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+        echo "is_release=${IS_RELEASE}" >> $GITHUB_OUTPUT
+        echo "is_tagged_release=${IS_TAGGED_RELEASE}" >> $GITHUB_OUTPUT
+
+        echo "Generated version: ${VERSION}"
+        echo "Generated tag: ${VERSION_TAG}"
+        echo "Is release: ${IS_RELEASE}"
+        echo "Is tagged release: ${IS_TAGGED_RELEASE}"
+
+  # ========== Multi-Platform Build Matrix ==========
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows builds
+          - os: windows-latest
+            arch: x64
+            vcpkg_triplet: x64-windows
+            artifact_name: windows-x64
+
+          - os: windows-latest
+            arch: x86
+            vcpkg_triplet: x86-windows
+            artifact_name: windows-x86
+
+          # Linux builds
+          - os: ubuntu-latest
+            arch: x64
+            vcpkg_triplet: x64-linux
+            artifact_name: linux-x64
+
+          - os: ubuntu-latest
+            arch: arm64
+            vcpkg_triplet: arm64-linux
+            artifact_name: linux-arm64
+            cross_compile: true
+
+          # macOS builds
+          - os: macos-latest
+            arch: x64
+            vcpkg_triplet: x64-osx
+            artifact_name: macos-x64
+
+          - os: macos-latest
+            arch: arm64
+            vcpkg_triplet: arm64-osx
+            artifact_name: macos-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    # ========== Platform-specific Setup ==========
+    - name: Setup Windows Environment
+      if: runner.os == 'Windows'
+      run: |
+        choco install ninja
+        ninja --version
+        cmake --version
+
+    - name: Setup Linux Environment
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build
+
+    - name: Setup Linux Cross-compilation
+      if: matrix.cross_compile && runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+    - name: Setup macOS Environment
+      if: runner.os == 'macOS'
+      run: |
+        brew install ninja
+
+    # ========== vcpkg Setup ==========
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '2d6a6cf3ac9a7cc93942c3d289a2f9c661a6f4a7'
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    - name: Export GitHub Actions cache environment variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    # ========== CMake Configure ==========
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cmake -B build \
+          -G "Ninja" \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet }} \
+          -DCMAKE_INSTALL_PREFIX=install \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_STATIC_LIBS=ON \
+          -DBUILD_EXAMPLES=ON \
+          -DBUILD_TESTS=ON \
+          -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+
+    # ========== Build ==========
+    - name: Build SDK
+      run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+    # ========== Run Tests ==========
+    - name: Run Tests
+      if: matrix.arch == 'x64' && !matrix.cross_compile
+      run: cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+
+    # ========== Package ==========
+    - name: Create Separate Static and Dynamic Packages
+      run: |
+        mkdir -p package-static package-dynamic
+        cmake --install build --prefix package-install
+
+        cp -r package-install/include package-static/ 2>/dev/null || true
+        cp -r package-install/include package-dynamic/ 2>/dev/null || true
+        cp -r package-install/share package-static/ 2>/dev/null || true
+        cp -r package-install/share package-dynamic/ 2>/dev/null || true
+        cp -r package-install/bin package-static/ 2>/dev/null || true
+        cp -r package-install/bin package-dynamic/ 2>/dev/null || true
+
+        mkdir -p package-static/lib package-dynamic/lib
+
+        find package-install -name "*.a" -exec cp {} package-static/lib/ \; 2>/dev/null || true
+        find package-install -name "*.lib" -exec cp {} package-static/lib/ \; 2>/dev/null || true
+
+        find package-install -name "*.so*" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+        find package-install -name "*.dylib*" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+        find package-install -name "*.dll" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          powershell Compress-Archive -Path package-static/* -DestinationPath "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
+          powershell Compress-Archive -Path package-dynamic/* -DestinationPath "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
+        else
+          tar -czf "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-static .
+          tar -czf "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-dynamic .
+        fi
+
+        echo "📦 Static package contents:"
+        ls -la package-static/
+        echo "📦 Dynamic package contents:"
+        ls -la package-dynamic/
+        echo "📦 Package files created:"
+        ls -la croupier-cpp-sdk-*-${{ matrix.artifact_name }}.*
+      shell: bash
+
+    # ========== Upload Artifacts ==========
+    - name: Upload Static Library Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-cpp-sdk-static-${{ matrix.artifact_name }}
+        path: croupier-cpp-sdk-static-*-${{ matrix.artifact_name }}.*
+        retention-days: 30
+
+    - name: Upload Dynamic Library Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-cpp-sdk-dynamic-${{ matrix.artifact_name }}
+        path: croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
+        retention-days: 30
+
+  # ========== Create Release ==========
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download All Static Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: croupier-cpp-sdk-static-*
+        path: static-artifacts/
+
+    - name: Download All Dynamic Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: croupier-cpp-sdk-dynamic-*
+        path: dynamic-artifacts/
+
+    - name: Prepare Release Assets
+      run: |
+        mkdir -p release_assets
+
+        find static-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        find dynamic-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        echo "📦 Release assets:"
+        ls -la release_assets/
+        echo ""
+        echo "📊 Package summary:"
+        echo "Static packages: $(ls release_assets/*static* 2>/dev/null | wc -l)"
+        echo "Dynamic packages: $(ls release_assets/*dynamic* 2>/dev/null | wc -l)"
+        echo "Total packages: $(ls release_assets/*.* 2>/dev/null | wc -l)"
+
+    - name: Generate Release Notes
+      id: release_notes
+      run: |
+        if [[ "${{ needs.version.outputs.is_tagged_release }}" == "true" ]]; then
+          RELEASE_TYPE="🎯 Official Release"
+          RELEASE_STATUS="This is an official stable release."
+        else
+          RELEASE_TYPE="🚧 Pre-release Build"
+          RELEASE_STATUS="This is a pre-release build for development and testing purposes."
+        fi
+
+        cat << EOF > RELEASE_NOTES.md
+        # Croupier C++ SDK ${{ needs.version.outputs.version }}
+
+        ${RELEASE_TYPE}
+
+        ${RELEASE_STATUS}
+
+        ## 📦 Available Packages
+
+        ### Static Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`, \`croupier-cpp-sdk-static-*-windows-x86.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
+
+        ### Dynamic Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`, \`croupier-cpp-sdk-dynamic-*-windows-x86.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
+
+        ## 🛠️ Build Information
+        - Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        - Commit: ${{ github.sha }}
+        - Workflow: ${{ github.run_id }}
+        - Version Tag: ${{ needs.version.outputs.version_tag }}
+
+        EOF
+
+        echo "release_notes_file=RELEASE_NOTES.md" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.version.outputs.version_tag }}
+        name: "Croupier C++ SDK ${{ needs.version.outputs.version }}"
+        body_path: RELEASE_NOTES.md
+        files: release_assets/*
+        draft: false
+        prerelease: ${{ needs.version.outputs.is_tagged_release != 'true' }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ========== Notification ==========
+  notify:
+    needs: [version, build, release]
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify Build Status
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const buildStatus = '${{ needs.build.result }}';
+          const releaseStatus = '${{ needs.release.result }}';
+          const version = '${{ needs.version.outputs.version }}';
+
+          console.log(`Daily build completed for version ${version}`);
+          console.log(`Build status: ${buildStatus}`);
+          console.log(`Release status: ${releaseStatus}`);
