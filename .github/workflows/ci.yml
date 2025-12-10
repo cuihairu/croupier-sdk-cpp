@@ -31,14 +31,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential cmake ninja-build pkg-config
         # Verify ninja installation
-        which ninja
+        echo "=== All ninja installations ==="
+        ls -la /usr/bin/ninja* /usr/local/bin/ninja* 2>/dev/null || true
+        which -a ninja
+        echo "=== Using ninja ==="
         ninja --version
-        ls -la /usr/bin/ninja
+        file $(which ninja)
 
     - name: Setup vcpkg
       run: |
         git clone https://github.com/Microsoft/vcpkg.git
         ./vcpkg/bootstrap-vcpkg.sh
+        # Force vcpkg to use system ninja
+        export VCPKG_FORCE_SYSTEM_BINARIES=1
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> $GITHUB_ENV
 
     - name: Cache vcpkg dependencies
       uses: actions/cache@v3
@@ -53,19 +59,18 @@ jobs:
     - name: Install vcpkg dependencies
       run: |
         cd vcpkg
-        # Force use system ninja
+        # Environment variables
         export VCPKG_FORCE_SYSTEM_BINARIES=1
-        # Keep build logs for debugging
         export VCPKG_KEEP_BUILD_TREES=1
         # Show which ninja will be used
         echo "=== NINJA LOCATION ==="
         which ninja
         echo "=== VCPKG DOWNLOADS DIR ==="
         ls -la downloads/tools/ 2>/dev/null || echo "No tools downloaded yet"
-        # Install with full output
+        # Remove --accept-license (no longer supported in new vcpkg)
         set -e
         trap 'echo "=== BUILD LOGS ==="; find buildtrees -name "*.log" -exec echo "=== {} ===" \; -exec cat {} \;' ERR
-        ./vcpkg install --triplet=x64-linux --accept-license
+        ./vcpkg install --triplet=x64-linux
 
     - name: Setup proto files
       run: |
