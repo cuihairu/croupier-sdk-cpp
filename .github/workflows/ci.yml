@@ -26,15 +26,15 @@ jobs:
         path: croupier
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build
+        sudo apt-get install -y build-essential cmake ninja-build pkg-config
 
-        # Install vcpkg
+    - name: Setup vcpkg
+      run: |
         git clone https://github.com/Microsoft/vcpkg.git
         ./vcpkg/bootstrap-vcpkg.sh
-        ./vcpkg/vcpkg install grpc protobuf nlohmann-json
 
     - name: Configure CMake (CI Build)
       run: |
