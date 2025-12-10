@@ -62,22 +62,22 @@ jobs:
         # Environment variables
         export VCPKG_FORCE_SYSTEM_BINARIES=1
         export VCPKG_KEEP_BUILD_TREES=1
-        # Create buildtrees directory early
-        mkdir -p buildtrees
-        # Show which ninja will be used
+        # Show debug info
         echo "=== NINJA LOCATION ==="
         which ninja
-        echo "=== VCPKG DOWNLOADS DIR ==="
-        ls -la downloads/tools/ 2>/dev/null || echo "No tools downloaded yet"
         echo "=== VCPKG VERSION ==="
         ./vcpkg version
-        # Test vcpkg command first
-        echo "=== Testing vcpkg command ==="
-        ./vcpkg help | head -20
-        # Install dependencies
+        echo "=== VCPKG ROOT ==="
+        echo $VCPKG_ROOT
+        echo "=== WORKING DIR ==="
+        pwd
+        echo "=== MANIFEST FILE ==="
+        cat ../vcpkg.json
+        # Install dependencies with error handling
         set -e
         echo "=== Installing dependencies ==="
         ./vcpkg install --triplet=x64-linux
+        echo "=== Build completed successfully ==="
 
     - name: Setup proto files
       run: |
