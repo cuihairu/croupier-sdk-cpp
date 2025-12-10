@@ -19,30 +19,22 @@ jobs:
       with:
         path: sdk
 
-    - name: Checkout main Croupier repository for proto files
-      uses: actions/checkout@v4
-      with:
-        repository: cuihairu/croupier
-        path: croupier
-        token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake ninja-build pkg-config
 
-    - name: Setup vcpkg
+    - name: Install protobuf and gRPC
       run: |
-        git clone https://github.com/Microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
+        sudo apt-get install -y libprotobuf-dev protobuf-compiler libgrpc++-dev libgrpc-dev
 
-    - name: Configure CMake (CI Build)
+    - name: Configure CMake (Use Prebuilt Proto)
       run: |
         cd sdk
         cmake -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCROUPIER_CI_BUILD=ON \
+          -DENABLE_VCPKG=OFF \
+          -DUSE_SYSTEM_PACKAGES=ON \
           -DBUILD_EXAMPLES=ON \
           -DBUILD_TESTS=ON \
           -G Ninja
