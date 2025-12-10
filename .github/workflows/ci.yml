@@ -67,15 +67,20 @@ jobs:
         export VCPKG_ROOT=$(pwd)
         export VCPKG_FORCE_SYSTEM_BINARIES=1
         export VCPKG_KEEP_BUILD_TREES=1
-        echo "=== NINJA LOCATION ==="
+        # Force use Make instead of Ninja to avoid compatibility issues
+        export VCPKG_FORCE_SYSTEM_BINARIES=ON
+        echo "=== TOOL LOCATIONS ==="
         which ninja
+        which make
         echo "=== VCPKG VERSION ==="
         ./vcpkg version
-        # Install dependencies from manifest
+        # Install dependencies from manifest using Make
         # Run from sdk directory so vcpkg can find the manifest
         cd ../sdk
         set -e
-        echo "=== Installing dependencies ==="
+        echo "=== Installing dependencies with Make ==="
+        # Set VCPKG_CMAKE_CONFIGURE_OPTIONS for all subsequent vcpkg commands
+        export VCPKG_CMAKE_CONFIGURE_OPTIONS="-G \"Unix Makefiles\""
         ../vcpkg/vcpkg install --triplet=x64-linux
         echo "=== Build completed successfully ==="
 
