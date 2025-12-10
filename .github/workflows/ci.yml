@@ -59,25 +59,20 @@ jobs:
     - name: Install vcpkg dependencies
       run: |
         cd vcpkg
-        # Environment variables
+        # Set environment variables
+        export VCPKG_ROOT=$(pwd)
         export VCPKG_FORCE_SYSTEM_BINARIES=1
         export VCPKG_KEEP_BUILD_TREES=1
-        # Set VCPKG_ROOT
-        export VCPKG_ROOT=$(pwd)
         echo "=== NINJA LOCATION ==="
         which ninja
         echo "=== VCPKG VERSION ==="
         ./vcpkg version
-        echo "=== VCPKG ROOT ==="
-        echo $VCPKG_ROOT
-        echo "=== WORKING DIR ==="
-        pwd
-        echo "=== MANIFEST FILE ==="
-        cat ../sdk/vcpkg.json
-        # Install dependencies
+        # Install dependencies from manifest
+        # Run from sdk directory so vcpkg can find the manifest
+        cd ../sdk
         set -e
         echo "=== Installing dependencies ==="
-        ./vcpkg install --triplet=x64-linux
+        ../vcpkg/vcpkg install --triplet=x64-linux
         echo "=== Build completed successfully ==="
 
     - name: Setup proto files
