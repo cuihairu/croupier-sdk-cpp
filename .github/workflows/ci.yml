@@ -7,6 +7,52 @@ on:
     branches: [ main ]
 
 jobs:
+  # Code quality checks (format + static analysis)
+  code-quality:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # 仅警告，不阻止合并
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install clang tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format-17 clang-tidy-17
+        sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 100
+        sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 100
+
+    - name: Check code formatting
+      run: |
+        echo "::group::Checking code formatting with clang-format"
+        find src include examples tests -name '*.cpp' -o -name '*.h' | head -100 | while read file; do
+          if ! clang-format --dry-run --Werror "$file" 2>/dev/null; then
+            echo "::warning file=$file::Code formatting issues detected"
+          fi
+        done
+        echo "::endgroup::"
+
+    - name: Run clang-format diff
+      run: |
+        echo "Files with formatting differences:"
+        find src include examples tests -name '*.cpp' -o -name '*.h' | head -100 | xargs -I {} sh -c 'diff -u {} <(clang-format {}) || true' 2>/dev/null | head -200 || true
+
+    - name: Run clang-tidy (basic checks)
+      run: |
+        echo "::group::Running clang-tidy static analysis"
+        # 只检查主要源文件，跳过生成的代码
+        for file in src/*.cpp src/**/*.cpp; do
+          if [ -f "$file" ]; then
+            echo "Checking: $file"
+            clang-tidy "$file" \
+              --checks='-*,bugprone-*,clang-analyzer-*,performance-*,modernize-use-nullptr,modernize-use-override' \
+              --quiet \
+              -- -std=c++17 -I include -I src 2>/dev/null || echo "::warning file=$file::clang-tidy found issues"
+          fi
+        done
+        echo "::endgroup::"
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -28,7 +74,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: 'f5cbc726b123896eef77f5acc1b9047a28a0731e'
+        vcpkgGitCommitId: '5422eb983d4ca8bc4851ac9771d6e74554efc5c8'
         vcpkgJsonGlob: 'vcpkg.json'
 
     - name: Configure CMake
