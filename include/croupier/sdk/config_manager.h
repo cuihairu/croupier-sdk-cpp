@@ -140,6 +140,13 @@ public:
      */
     bool GenerateExampleConfigs(const std::string& output_dir);
 
+    /**
+     * @brief 创建默认的客户端配置
+     *
+     * @return ClientConfig 默认客户端配置
+     */
+    static ClientConfig CreateDefaultClientConfig();
+
 private:
     // 内部辅助方法
     std::string LoadFileContent(const std::string& file_path);

@@ -56,6 +56,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # 允许一个构建失败时其他继续
+      max-parallel: 1   # 串行构建避免 vcpkg 并行配置问题
       matrix:
         build-type: [Release, Debug]
 
@@ -76,8 +78,11 @@ jobs:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgGitCommitId: '5422eb983d4ca8bc4851ac9771d6e74554efc5c8'
         vcpkgJsonGlob: 'vcpkg.json'
+        doNotCache: false  # 启用缓存以避免重复构建
 
     - name: Configure CMake
+      env:
+        VCPKG_MAX_CONCURRENCY: 1  # 限制 vcpkg 内部并行度
       run: |
         cmake -B build \
           -G Ninja \
