@@ -15,11 +15,10 @@
 #include <grpcpp/support/method_handler.h>
 #include <grpcpp/impl/rpc_service_method.h>
 #include <grpcpp/support/server_callback.h>
-#include <grpcpp/impl/server_callback_handlers.h>
+#include <grpcpp/impl/codegen/server_callback_handlers.h>
 #include <grpcpp/server_context.h>
 #include <grpcpp/impl/service_type.h>
 #include <grpcpp/support/sync_stream.h>
-#include <grpcpp/ports_def.inc>
 namespace croupier {
 namespace function {
 namespace v1 {
@@ -207,5 +206,4 @@ FunctionService::Service::~Service() {
 }  // namespace croupier
 }  // namespace function
 }  // namespace v1
-#include <grpcpp/ports_undef.inc>
 
