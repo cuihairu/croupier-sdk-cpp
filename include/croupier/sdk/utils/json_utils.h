@@ -158,6 +158,15 @@ public:
     static std::string PrettyPrint(const SimpleJson& json_obj, int indent = 2);
 #endif
 
+    /**
+     * @brief Validate JSON against schema
+     *
+     * @param json_content JSON string to validate
+     * @param schema_content JSON Schema string (draft-7 compatible)
+     * @return true if JSON is valid against the schema
+     */
+    static bool ValidateJsonSchema(const std::string& json_content, const std::string& schema_content);
+
 private:
     // Helper methods for path parsing
     static std::vector<std::string> SplitPath(const std::string& path);

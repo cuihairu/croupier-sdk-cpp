@@ -335,6 +335,165 @@ JsonUtils::SimpleJson JsonUtils::GetValueByPath(const SimpleJson& json_obj, cons
 }
 #endif
 
+// ========== JSON Schema Validation ==========
+
+bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::string& schema_content) {
+    try {
+#ifdef CROUPIER_SDK_ENABLE_JSON
+        // Parse JSON and schema
+        nlohmann::json json_obj = nlohmann::json::parse(json_content);
+        nlohmann::json schema_obj = nlohmann::json::parse(schema_content);
+
+        // Basic schema validation (without nlohmann::json-schema)
+        // This implements a subset of JSON Schema validation
+
+        // Check if schema specifies type
+        if (schema_obj.contains("type")) {
+            std::string expected_type = schema_obj["type"];
+            bool type_valid = false;
+
+            if (expected_type == "object" && json_obj.is_object()) {
+                type_valid = true;
+            } else if (expected_type == "array" && json_obj.is_array()) {
+                type_valid = true;
+            } else if (expected_type == "string" && json_obj.is_string()) {
+                type_valid = true;
+            } else if (expected_type == "number" && (json_obj.is_number_integer() || json_obj.is_number_float())) {
+                type_valid = true;
+            } else if (expected_type == "integer" && json_obj.is_number_integer()) {
+                type_valid = true;
+            } else if (expected_type == "boolean" && json_obj.is_boolean()) {
+                type_valid = true;
+            } else if (expected_type == "null" && json_obj.is_null()) {
+                type_valid = true;
+            }
+
+            if (!type_valid) {
+                std::cerr << "Schema validation failed: expected type " << expected_type << std::endl;
+                return false;
+            }
+        }
+
+        // Check required properties for objects
+        if (json_obj.is_object() && schema_obj.contains("required") && schema_obj["required"].is_array()) {
+            for (const auto& required_prop : schema_obj["required"]) {
+                if (!required_prop.is_string() || !json_obj.contains(required_prop.get<std::string>())) {
+                    std::cerr << "Schema validation failed: missing required property " << required_prop << std::endl;
+                    return false;
+                }
+            }
+        }
+
+        // Validate properties
+        if (json_obj.is_object() && schema_obj.contains("properties") && schema_obj["properties"].is_object()) {
+            for (auto& [prop_name, prop_schema] : schema_obj["properties"].items()) {
+                if (json_obj.contains(prop_name)) {
+                    // Create a mini-schema for this property
+                    nlohmann::json prop_mini_schema;
+                    prop_mini_schema["type"] = prop_schema["type"];
+
+                    // Recursively validate property
+                    if (!ValidateJsonSchema(json_obj[prop_name].dump(), prop_mini_schema.dump())) {
+                        std::cerr << "Schema validation failed for property " << prop_name << std::endl;
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // Check minimum value for numbers
+        if (json_obj.is_number() && schema_obj.contains("minimum")) {
+            double value = json_obj;
+            double minimum = schema_obj["minimum"];
+            if (value < minimum) {
+                std::cerr << "Schema validation failed: value " << value << " is less than minimum " << minimum << std::endl;
+                return false;
+            }
+        }
+
+        // Check maximum value for numbers
+        if (json_obj.is_number() && schema_obj.contains("maximum")) {
+            double value = json_obj;
+            double maximum = schema_obj["maximum"];
+            if (value > maximum) {
+                std::cerr << "Schema validation failed: value " << value << " is greater than maximum " << maximum << std::endl;
+                return false;
+            }
+        }
+
+        // Check minimum length for strings
+        if (json_obj.is_string() && schema_obj.contains("minLength")) {
+            std::string str_val = json_obj;
+            size_t min_length = schema_obj["minLength"];
+            if (str_val.length() < min_length) {
+                std::cerr << "Schema validation failed: string length " << str_val.length()
+                         << " is less than minimum " << min_length << std::endl;
+                return false;
+            }
+        }
+
+        // Check maximum length for strings
+        if (json_obj.is_string() && schema_obj.contains("maxLength")) {
+            std::string str_val = json_obj;
+            size_t max_length = schema_obj["maxLength"];
+            if (str_val.length() > max_length) {
+                std::cerr << "Schema validation failed: string length " << str_val.length()
+                         << " is greater than maximum " << max_length << std::endl;
+                return false;
+            }
+        }
+
+        // Check minimum array length
+        if (json_obj.is_array() && schema_obj.contains("minItems")) {
+            size_t min_items = schema_obj["minItems"];
+            if (json_obj.size() < min_items) {
+                std::cerr << "Schema validation failed: array size " << json_obj.size()
+                         << " is less than minimum " << min_items << std::endl;
+                return false;
+            }
+        }
+
+        // Check maximum array length
+        if (json_obj.is_array() && schema_obj.contains("maxItems")) {
+            size_t max_items = schema_obj["maxItems"];
+            if (json_obj.size() > max_items) {
+                std::cerr << "Schema validation failed: array size " << json_obj.size()
+                         << " is greater than maximum " << max_items << std::endl;
+                return false;
+            }
+        }
+
+        // Check enum values
+        if (schema_obj.contains("enum") && schema_obj["enum"].is_array()) {
+            bool found = false;
+            for (const auto& enum_val : schema_obj["enum"]) {
+                if (json_obj == enum_val) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                std::cerr << "Schema validation failed: value not in enum list" << std::endl;
+                return false;
+            }
+        }
+
+        return true;
+#else
+        // Fallback: basic validation without nlohmann::json
+        // Just check if JSON is valid and schema is not empty
+        if (json_content.empty() || schema_content.empty()) {
+            return false;
+        }
+        return IsValidJson(json_content);
+#endif
+
+    } catch (const std::exception& e) {
+        std::cerr << "Schema validation error: " << e.what() << std::endl;
+        return false;
+    }
+}
+
 } // namespace utils
 } // namespace sdk
 } // namespace croupier

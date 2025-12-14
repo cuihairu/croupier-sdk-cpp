@@ -1,6 +1,8 @@
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/grpc_service.h"
+#include "croupier/sdk/utils/json_utils.h"
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <atomic>
 #include <random>
@@ -15,6 +17,10 @@
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 #include "croupier/control/v1/control.grpc.pb.h"
 #include <zlib.h>
+#endif
+
+#ifdef CROUPIER_SDK_ENABLE_JSON
+#include <nlohmann/json.hpp>
 #endif
 
 namespace croupier {
@@ -35,43 +41,32 @@ namespace utils {
     }
 
     bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema) {
-        (void)schema; // Suppress unused parameter warning - schema validation not implemented yet
-
-        // Simple validation - check if JSON is properly formatted
-        // This is a placeholder implementation; a real implementation would use a JSON schema library
-        if (json.empty()) return true;
-
-        // Basic JSON syntax validation
-        int brace_count = 0;
-        int bracket_count = 0;
-        bool in_string = false;
-        bool escaped = false;
-
-        for (char c : json) {
-            if (escaped) {
-                escaped = false;
-                continue;
-            }
-
-            if (c == '\\') {
-                escaped = true;
-                continue;
-            }
-
-            if (c == '"' && !escaped) {
-                in_string = !in_string;
-                continue;
-            }
-
-            if (!in_string) {
-                if (c == '{') brace_count++;
-                else if (c == '}') brace_count--;
-                else if (c == '[') bracket_count++;
-                else if (c == ']') bracket_count--;
-            }
+        // If no schema provided, just check if JSON is valid
+        if (schema.empty()) {
+            return croupier::sdk::utils::JsonUtils::IsValidJson(json);
         }
 
-        return brace_count == 0 && bracket_count == 0 && !in_string;
+        // Convert schema map to JSON schema string
+        std::string schema_json = "{";
+        bool first = true;
+        for (const auto& [key, value] : schema) {
+            if (!first) schema_json += ",";
+            schema_json += "\"" + key + "\":";
+
+            // Try to parse value as JSON, fallback to string
+            if ((value.front() == '{' && value.back() == '}') ||
+                (value.front() == '[' && value.back() == ']') ||
+                value == "true" || value == "false" || value == "null") {
+                schema_json += value;
+            } else {
+                schema_json += "\"" + value + "\"";
+            }
+            first = false;
+        }
+        schema_json += "}";
+
+        // Use the new JSON schema validation
+        return croupier::sdk::utils::JsonUtils::ValidateJsonSchema(json, schema_json);
     }
 
     std::map<std::string, std::string> ParseJSON(const std::string& json) {
@@ -668,6 +663,12 @@ public:
     std::map<std::string, std::map<std::string, std::string>> schemas_;
     std::atomic<bool> connected_{false};
 
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+    // gRPC components
+    std::shared_ptr<grpc::Channel> channel_;
+    std::unique_ptr<functionv1::FunctionService::Stub> stub_;
+#endif
+
     explicit Impl(const InvokerConfig& config) : config_(config) {}
 
     bool Connect() {
@@ -675,12 +676,59 @@ public:
 
         std::cout << "Connecting to server/agent at: " << config_.address << std::endl;
 
-        // TODO: Implement actual gRPC connection
-        // For now, simulate connection
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+        try {
+            // Create gRPC channel
+            grpc::ChannelArguments args;
+            args.SetMaxReceiveMessageSize(INT_MAX);
+            args.SetMaxSendMessageSize(INT_MAX);
 
+            // Use insecure credentials for now, can be enhanced to support TLS
+            channel_ = grpc::CreateCustomChannel(config_.address,
+                                                grpc::InsecureChannelCredentials(),
+                                                args);
+
+            if (!channel_) {
+                std::cerr << "Failed to create gRPC channel" << std::endl;
+                return false;
+            }
+
+            // Create stub
+            stub_ = functionv1::FunctionService::NewStub(channel_);
+            if (!stub_) {
+                std::cerr << "Failed to create gRPC stub" << std::endl;
+                return false;
+            }
+
+            // Test connection with a simple health check
+            grpc::ClientContext context;
+            context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(5));
+
+            functionv1::HealthCheckRequest request;
+            functionv1::HealthCheckResponse response;
+
+            // Note: HealthCheck might not be implemented, so we don't fail if it errors
+            grpc::Status status = stub_->HealthCheck(&context, request, &response);
+            if (status.ok()) {
+                std::cout << "Health check passed" << std::endl;
+            } else {
+                std::cout << "Health check failed (non-critical): " << status.error_message() << std::endl;
+            }
+
+            connected_ = true;
+            std::cout << "✅ Connected to: " << config_.address << std::endl;
+            return true;
+
+        } catch (const std::exception& e) {
+            std::cerr << "Connection failed: " << e.what() << std::endl;
+            return false;
+        }
+#else
+        // Fallback to simulated connection when gRPC is not enabled
         connected_ = true;
-        std::cout << "Connected to: " << config_.address << std::endl;
+        std::cout << "⚠️  Connected to: " << config_.address << " (simulated, gRPC not enabled)" << std::endl;
         return true;
+#endif
     }
 
     std::string Invoke(const std::string& function_id, const std::string& payload,
@@ -700,35 +748,123 @@ public:
         }
 
         std::cout << "Invoking function: " << function_id << std::endl;
-        std::cout << "Payload: " << payload << std::endl;
 
-        // TODO: Implement actual gRPC call
-        // For now, simulate response
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+        try {
+            // Create gRPC context
+            grpc::ClientContext context;
 
+            // Set timeout from options or default to 30 seconds
+            auto timeout = std::chrono::seconds(options.timeout_seconds > 0 ? options.timeout_seconds : 30);
+            context.set_deadline(std::chrono::system_clock::now() + timeout);
+
+            // Set metadata
+            if (!options.game_id.empty()) {
+                context.AddMetadata("x-game-id", options.game_id);
+            }
+            if (!options.env.empty()) {
+                context.AddMetadata("x-env", options.env);
+            }
+            if (!options.idempotency_key.empty()) {
+                context.AddMetadata("idempotency-key", options.idempotency_key);
+            }
+
+            // Create request
+            functionv1::InvokeRequest request;
+            request.set_function_id(function_id);
+            request.set_payload(payload);
+
+            // Send request
+            functionv1::InvokeResponse response;
+            grpc::Status status = stub_->Invoke(&context, request, &response);
+
+            if (!status.ok()) {
+                std::string error_msg = "gRPC error: " + status.error_message() +
+                                     " (code: " + std::to_string(status.error_code()) + ")";
+                throw std::runtime_error(error_msg);
+            }
+
+            std::string result = response.payload();
+            std::cout << "✅ Invoke successful, response size: " << result.size() << " bytes" << std::endl;
+            return result;
+
+        } catch (const std::exception& e) {
+            std::cerr << "❌ Invoke failed: " << e.what() << std::endl;
+            throw;
+        }
+#else
+        // Fallback simulation when gRPC is not enabled
         std::string response = "{\"status\":\"success\",\"function_id\":\"" + function_id + "\"}";
-        std::cout << "Response: " << response << std::endl;
-
+        std::cout << "⚠️  Simulated invoke response: " << response << std::endl;
         return response;
+#endif
     }
 
     std::string StartJob(const std::string& function_id, const std::string& payload,
                         const InvokeOptions& options) {
-        (void)payload; // Suppress unused parameter warning - async jobs not implemented yet
-        (void)options; // Suppress unused parameter warning - options not implemented yet
-
         if (!connected_ && !Connect()) {
             throw std::runtime_error("Not connected to server");
         }
 
+        // Client-side validation
+        auto it = schemas_.find(function_id);
+        if (it != schemas_.end()) {
+            if (!utils::ValidateJSON(payload, it->second)) {
+                throw std::runtime_error("Payload validation failed for function: " + function_id);
+            }
+        }
+
         std::cout << "Starting job for function: " << function_id << std::endl;
 
-        // TODO: Implement actual gRPC call
-        // For now, simulate job ID generation
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+        try {
+            // Create gRPC context
+            grpc::ClientContext context;
 
+            // Set timeout from options or default to 30 seconds
+            auto timeout = std::chrono::seconds(options.timeout_seconds > 0 ? options.timeout_seconds : 30);
+            context.set_deadline(std::chrono::system_clock::now() + timeout);
+
+            // Set metadata
+            if (!options.game_id.empty()) {
+                context.AddMetadata("x-game-id", options.game_id);
+            }
+            if (!options.env.empty()) {
+                context.AddMetadata("x-env", options.env);
+            }
+            if (!options.idempotency_key.empty()) {
+                context.AddMetadata("idempotency-key", options.idempotency_key);
+            }
+
+            // Create request
+            functionv1::InvokeRequest request;
+            request.set_function_id(function_id);
+            request.set_payload(payload);
+
+            // Send request
+            functionv1::StartJobResponse response;
+            grpc::Status status = stub_->StartJob(&context, request, &response);
+
+            if (!status.ok()) {
+                std::string error_msg = "gRPC error: " + status.error_message() +
+                                     " (code: " + std::to_string(status.error_code()) + ")";
+                throw std::runtime_error(error_msg);
+            }
+
+            std::string job_id = response.job_id();
+            std::cout << "✅ Job started successfully: " << job_id << std::endl;
+            return job_id;
+
+        } catch (const std::exception& e) {
+            std::cerr << "❌ StartJob failed: " << e.what() << std::endl;
+            throw;
+        }
+#else
+        // Fallback simulation when gRPC is not enabled
         std::string job_id = "job-" + function_id + "-" + utils::NewIdempotencyKey().substr(0, 8);
-        std::cout << "Started job: " << job_id << std::endl;
-
+        std::cout << "⚠️  Simulated job started: " << job_id << std::endl;
         return job_id;
+#endif
     }
 
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id) {
@@ -746,9 +882,68 @@ public:
 
             std::cout << "Streaming job events for: " << job_id << std::endl;
 
-            // TODO: Implement actual gRPC streaming
-            // For now, simulate some events
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+            try {
+                // Create gRPC context
+                grpc::ClientContext context;
+                context.set_deadline(std::chrono::system_clock::now() + std::chrono::minutes(30)); // Long timeout for streaming
 
+                // Create request
+                functionv1::JobStreamRequest request;
+                request.set_job_id(job_id);
+
+                // Create streaming reader
+                std::unique_ptr<grpc::ClientReader<functionv1::JobEvent>> reader(
+                    stub_->StreamJob(&context, request));
+
+                // Read events
+                functionv1::JobEvent grpc_event;
+                while (reader->Read(&grpc_event)) {
+                    JobEvent event;
+                    event.job_id = grpc_event.job_id();
+                    event.event_type = grpc_event.type();
+                    event.payload = grpc_event.payload();
+                    event.timestamp = grpc_event.timestamp();
+                    event.done = grpc_event.done();
+
+                    events.push_back(event);
+
+                    std::cout << "📡 Received event: " << event.event_type << std::endl;
+
+                    // Stop reading if job is done
+                    if (event.done) {
+                        break;
+                    }
+                }
+
+                // Check streaming status
+                grpc::Status status = reader->Finish();
+                if (!status.ok() && status.error_code() != grpc::StatusCode::OK) {
+                    std::cerr << "Stream error: " << status.error_message() << std::endl;
+
+                    // Add error event if stream failed
+                    JobEvent error_event;
+                    error_event.job_id = job_id;
+                    error_event.error = "Stream error: " + status.error_message();
+                    error_event.done = true;
+                    events.push_back(error_event);
+                }
+
+                std::cout << "✅ Streaming completed for job: " << job_id << std::endl;
+                return events;
+
+            } catch (const std::exception& e) {
+                std::cerr << "❌ StreamJob failed: " << e.what() << std::endl;
+
+                JobEvent error_event;
+                error_event.job_id = job_id;
+                error_event.error = e.what();
+                error_event.done = true;
+                events.push_back(error_event);
+                return events;
+            }
+#else
+            // Fallback simulation when gRPC is not enabled
             JobEvent start_event;
             start_event.event_type = "started";
             start_event.job_id = job_id;
@@ -772,7 +967,9 @@ public:
             done_event.done = true;
             events.push_back(done_event);
 
+            std::cout << "⚠️  Simulated streaming for job: " << job_id << std::endl;
             return events;
+#endif
         });
     }
 
@@ -784,10 +981,37 @@ public:
 
         std::cout << "Cancelling job: " << job_id << std::endl;
 
-        // TODO: Implement actual gRPC call
-        // For now, simulate cancellation
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+        try {
+            // Create gRPC context
+            grpc::ClientContext context;
+            context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(30));
 
+            // Create request
+            functionv1::CancelJobRequest request;
+            request.set_job_id(job_id);
+
+            // Send request
+            functionv1::StartJobResponse response;
+            grpc::Status status = stub_->CancelJob(&context, request, &response);
+
+            if (!status.ok()) {
+                std::cerr << "❌ CancelJob failed: " << status.error_message() << std::endl;
+                return false;
+            }
+
+            std::cout << "✅ Job cancelled successfully: " << job_id << std::endl;
+            return true;
+
+        } catch (const std::exception& e) {
+            std::cerr << "❌ CancelJob failed: " << e.what() << std::endl;
+            return false;
+        }
+#else
+        // Fallback simulation when gRPC is not enabled
+        std::cout << "⚠️  Simulated job cancellation: " << job_id << std::endl;
         return true;
+#endif
     }
 
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
@@ -909,28 +1133,185 @@ namespace utils {
 
 // Load virtual object descriptor from JSON file
 VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
-    // TODO: Implement file reading and JSON parsing
-    // For now, return a placeholder
     VirtualObjectDescriptor desc;
-    desc.id = "placeholder";
-    desc.version = "1.0.0";
-    desc.name = "Placeholder Object";
-    desc.description = "Loaded from " + file_path;
-    std::cerr << "LoadObjectDescriptor: File loading not yet implemented for " << file_path << std::endl;
-    return desc;
+
+    try {
+        // Read file content
+        std::ifstream file(file_path);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file: " + file_path);
+        }
+
+        std::string json_content((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+        // Parse JSON
+#ifdef CROUPIER_SDK_ENABLE_JSON
+        nlohmann::json json_obj = nlohmann::json::parse(json_content);
+
+        // Extract basic fields
+        if (json_obj.contains("id")) {
+            desc.id = json_obj["id"];
+        }
+        if (json_obj.contains("version")) {
+            desc.version = json_obj["version"];
+        }
+        if (json_obj.contains("name")) {
+            desc.name = json_obj["name"];
+        }
+        if (json_obj.contains("description")) {
+            desc.description = json_obj["description"];
+        }
+
+        // Extract functions if present
+        if (json_obj.contains("functions") && json_obj["functions"].is_array()) {
+            for (const auto& func : json_obj["functions"]) {
+                FunctionDescriptor func_desc;
+                if (func.contains("id")) {
+                    func_desc.id = func["id"];
+                }
+                if (func.contains("name")) {
+                    func_desc.name = func["name"];
+                }
+                if (func.contains("description")) {
+                    func_desc.description = func["description"];
+                }
+                desc.functions.push_back(func_desc);
+            }
+        }
+
+        // Extract metadata if present
+        if (json_obj.contains("metadata") && json_obj["metadata"].is_object()) {
+            for (auto& [key, value] : json_obj["metadata"].items()) {
+                if (value.is_string()) {
+                    desc.metadata[key] = value.get<std::string>();
+                } else {
+                    desc.metadata[key] = value.dump();
+                }
+            }
+        }
+#else
+        // Fallback: use simple JSON parsing
+        auto json_simple = utils::JsonUtils::ParseJson(json_content);
+
+        desc.id = json_simple.value("id", "unknown");
+        desc.version = json_simple.value("version", "1.0.0");
+        desc.name = json_simple.value("name", "Unnamed Object");
+        desc.description = json_simple.value("description", "No description");
+#endif
+
+        std::cout << "✅ Successfully loaded virtual object descriptor from: " << file_path << std::endl;
+        return desc;
+
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Failed to load object descriptor from " << file_path << ": " << e.what() << std::endl;
+
+        // Return default descriptor on error
+        desc.id = "error";
+        desc.version = "0.0.0";
+        desc.name = "Error Loading Object";
+        desc.description = "Failed to load: " + std::string(e.what());
+        return desc;
+    }
 }
 
 // Load component descriptor from JSON file
 ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
-    // TODO: Implement file reading and JSON parsing
-    // For now, return a placeholder
-    ComponentDescriptor comp;
-    comp.id = "placeholder-component";
-    comp.version = "1.0.0";
-    comp.name = "Placeholder Component";
-    comp.description = "Loaded from " + file_path;
-    std::cerr << "LoadComponentDescriptor: File loading not yet implemented for " << file_path << std::endl;
-    return comp;
+    ComponentDescriptor desc;
+
+    try {
+        // Read file content
+        std::ifstream file(file_path);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file: " + file_path);
+        }
+
+        std::string json_content((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+        // Parse JSON
+#ifdef CROUPIER_SDK_ENABLE_JSON
+        nlohmann::json json_obj = nlohmann::json::parse(json_content);
+
+        // Extract basic fields
+        if (json_obj.contains("id")) {
+            desc.id = json_obj["id"];
+        }
+        if (json_obj.contains("version")) {
+            desc.version = json_obj["version"];
+        }
+        if (json_obj.contains("name")) {
+            desc.name = json_obj["name"];
+        }
+        if (json_obj.contains("description")) {
+            desc.description = json_obj["description"];
+        }
+        if (json_obj.contains("type")) {
+            desc.type = json_obj["type"];
+        }
+
+        // Extract dependencies if present
+        if (json_obj.contains("dependencies") && json_obj["dependencies"].is_array()) {
+            for (const auto& dep : json_obj["dependencies"]) {
+                if (dep.is_string()) {
+                    desc.dependencies.push_back(dep.get<std::string>());
+                }
+            }
+        }
+
+        // Extract config if present
+        if (json_obj.contains("config") && json_obj["config"].is_object()) {
+            for (auto& [key, value] : json_obj["config"].items()) {
+                if (value.is_string()) {
+                    desc.config[key] = value.get<std::string>();
+                } else {
+                    desc.config[key] = value.dump();
+                }
+            }
+        }
+
+        // Extract metadata if present
+        if (json_obj.contains("metadata") && json_obj["metadata"].is_object()) {
+            for (auto& [key, value] : json_obj["metadata"].items()) {
+                if (value.is_string()) {
+                    desc.metadata[key] = value.get<std::string>();
+                } else {
+                    desc.metadata[key] = value.dump();
+                }
+            }
+        }
+
+        // Check if component is enabled (default to true if not specified)
+        if (json_obj.contains("enabled")) {
+            desc.enabled = json_obj["enabled"].get<bool>();
+        }
+#else
+        // Fallback: use simple JSON parsing
+        auto json_simple = utils::JsonUtils::ParseJson(json_content);
+
+        desc.id = json_simple.value("id", "unknown");
+        desc.version = json_simple.value("version", "1.0.0");
+        desc.name = json_simple.value("name", "Unnamed Component");
+        desc.description = json_simple.value("description", "No description");
+        desc.type = json_simple.value("type", "generic");
+        desc.enabled = true; // Default to enabled
+#endif
+
+        std::cout << "✅ Successfully loaded component descriptor from: " << file_path << std::endl;
+        return desc;
+
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Failed to load component descriptor from " << file_path << ": " << e.what() << std::endl;
+
+        // Return default descriptor on error
+        desc.id = "error";
+        desc.version = "0.0.0";
+        desc.name = "Error Loading Component";
+        desc.description = "Failed to load: " + std::string(e.what());
+        desc.type = "error";
+        desc.enabled = false;
+        return desc;
+    }
 }
 
 // Validate virtual object descriptor completeness
