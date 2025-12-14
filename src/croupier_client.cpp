@@ -16,6 +16,7 @@
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 #include "croupier/control/v1/control.grpc.pb.h"
+#include "croupier/function/v1/function.grpc.pb.h"
 #include <zlib.h>
 #endif
 

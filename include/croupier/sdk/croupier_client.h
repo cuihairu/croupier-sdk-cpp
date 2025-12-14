@@ -44,6 +44,8 @@ struct VirtualObjectDescriptor {
     std::map<std::string, std::string> schema;   // JSON Schema definition
     std::map<std::string, std::string> operations; // Operation mappings: "read" -> "wallet.get"
     std::map<std::string, RelationshipDef> relationships; // Relationship definitions
+    std::vector<FunctionDescriptor> functions;       // Function descriptors
+    std::map<std::string, std::string> metadata;      // Additional metadata
 };
 
 // Component descriptor (complete module)
@@ -52,10 +54,14 @@ struct ComponentDescriptor {
     std::string version;                        // Component version
     std::string name;                           // Component name
     std::string description;                    // Component description
+    std::string type;                           // Component type
     std::vector<VirtualObjectDescriptor> entities;  // Contained entities
     std::vector<FunctionDescriptor> functions;      // Contained functions
     std::map<std::string, std::string> resources;   // UI resource definitions
     std::map<std::string, std::string> config;      // Component configuration
+    std::vector<std::string> dependencies;         // Dependencies
+    std::map<std::string, std::string> metadata;      // Additional metadata
+    bool enabled = true;                           // Component enabled flag
 };
 
 // Local function descriptor matching agent/local/v1/local.proto
