@@ -180,7 +180,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '5422eb983d4ca8bc4851ac9771d6e74554efc5c8'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: false  # 启用缓存
 
@@ -197,7 +197,7 @@ jobs:
       env:
         VCPKG_MAX_CONCURRENCY: 1
       run: |
-        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -208,6 +208,7 @@ jobs:
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" \
           -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet }} \
           -DCMAKE_INSTALL_PREFIX=install \
           -DBUILD_SHARED_LIBS=ON \
