@@ -60,3 +60,27 @@ Testing/
 
 # Package managers
 vcpkg_installed/
+
+# Protobuf generated files
+*.pb.h
+*.pb.cc
+*.pb.cpp
+*.pb.c
+*_pb2.py
+*.pb.go
+*.pb.java
+*.pb.swift
+*.ts
+
+# Build outputs
+build/
+cmake-build-*/
+out/
+*.tgz
+
+# Generated directory
+generated/
+
+# Keep buf configuration files
+!buf.gen.yaml
+!buf.yaml
