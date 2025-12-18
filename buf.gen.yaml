@@ -1,6 +1,6 @@
-version: v1
+version: v2
 plugins:
-  - name: cpp
+  - remote: buf.build/protocolbuffers/cpp
     out: generated
-    opt:
-      - paths=source_relative
+  - remote: buf.build/grpc/cpp
+    out: generated
