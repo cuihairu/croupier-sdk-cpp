@@ -20,6 +20,10 @@
   ],
   "overrides": [
     {
+      "name": "grpc",
+      "version": "1.70.1"
+    },
+    {
       "name": "protobuf",
       "version": "5.29.5"
     },
