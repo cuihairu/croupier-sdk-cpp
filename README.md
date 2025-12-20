@@ -9,6 +9,9 @@
   <a href="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/ci.yml">
     <img src="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
+  <a href="https://codecov.io/gh/cuihairu/croupier-sdk-cpp">
+    <img src="https://codecov.io/gh/cuihairu/croupier-sdk-cpp/branch/main/graph/badge.svg" alt="Coverage">
+  </a>
   <a href="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/nightly.yml">
     <img src="https://github.com/cuihairu/croupier-sdk-cpp/actions/workflows/nightly.yml/badge.svg" alt="Nightly Build">
   </a>

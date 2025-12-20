@@ -108,3 +108,65 @@ jobs:
         path: |
           build/bin/
           build/lib/
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build gcovr
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgJsonGlob: 'vcpkg.json'
+        doNotCache: false
+
+    - name: Configure CMake (coverage)
+      env:
+        VCPKG_MAX_CONCURRENCY: 1
+      run: |
+        cmake -B build-coverage \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" \
+          -DVCPKG_TARGET_TRIPLET=x64-linux \
+          -DBUILD_TESTS=ON \
+          -DBUILD_EXAMPLES=OFF \
+          -DCMAKE_C_FLAGS="--coverage" \
+          -DCMAKE_CXX_FLAGS="--coverage" \
+          -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+
+    - name: Build (coverage)
+      run: cmake --build build-coverage --config Debug --parallel
+
+    - name: Test (coverage)
+      run: cd build-coverage && ctest --build-config Debug --output-on-failure
+
+    - name: Generate coverage report
+      run: |
+        gcovr -r . \
+          --xml-pretty -o coverage.xml \
+          --filter '^(src|include)/' \
+          --exclude 'build' \
+          --exclude 'build-coverage' \
+          --exclude 'vcpkg' \
+          --exclude 'tests'
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: coverage.xml
+        flags: cpp-sdk
+        fail_ci_if_error: false
