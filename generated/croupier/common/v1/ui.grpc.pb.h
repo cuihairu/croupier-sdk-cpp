@@ -24,7 +24,6 @@
 #include <grpcpp/support/status.h>
 #include <grpcpp/support/stub_options.h>
 #include <grpcpp/support/sync_stream.h>
-#include <grpcpp/ports_def.inc>
 
 namespace croupier {
 namespace common {
@@ -35,5 +34,4 @@ namespace v1 {
 }  // namespace croupier
 
 
-#include <grpcpp/ports_undef.inc>
 #endif  // GRPC_croupier_2fcommon_2fv1_2fui_2eproto__INCLUDED

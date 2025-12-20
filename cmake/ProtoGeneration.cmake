@@ -186,44 +186,23 @@ function(setup_ci_build)
     if(DEFINED ENV{CI} OR CROUPIER_CI_BUILD)
         message(STATUS "CI build detected, setting up proto generation...")
 
-        # First check if we have pre-copied proto files (from CI)
-        set(PROTO_SOURCE_DIR "${CPP_SDK_DIR}/generated/croupier")
+        # Always generate in CI to guarantee protoc/runtime version alignment.
         set(PROTO_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-        if(EXISTS ${PROTO_SOURCE_DIR})
-            message(STATUS "✅ Using pre-copied proto files from CI")
-
-            set(PREBUILT_PROTO_DIR "${CPP_SDK_DIR}/generated")
-            file(GLOB_RECURSE PREBUILT_PROTO_SRCS "${PREBUILT_PROTO_DIR}/*.cc")
-            file(GLOB_RECURSE PREBUILT_PROTO_HDRS "${PREBUILT_PROTO_DIR}/*.h")
-
-            if(PREBUILT_PROTO_SRCS)
-                list(LENGTH PREBUILT_PROTO_SRCS file_count)
-                message(STATUS "✅ Reusing ${file_count} generated proto source files")
-                set(CROUPIER_SDK_ENABLE_GRPC ON PARENT_SCOPE)
-                set(PROTO_GENERATED_DIR ${PREBUILT_PROTO_DIR} PARENT_SCOPE)
-                set(GENERATED_PROTO_SOURCES ${PREBUILT_PROTO_SRCS} PARENT_SCOPE)
-                set(GENERATED_PROTO_HEADERS ${PREBUILT_PROTO_HDRS} PARENT_SCOPE)
-                return()
-            else()
-                message(STATUS "⚠️ Prebuilt proto directory exists but no generated files found, regenerating...")
-            endif()
+        # Prefer local proto submodule
+        set(SDK_PROTO_DIR "${CPP_SDK_DIR}/proto")
+        if(EXISTS "${SDK_PROTO_DIR}/croupier")
+            message(STATUS "📦 Using proto submodule at ${SDK_PROTO_DIR}")
+            generate_grpc_code(${SDK_PROTO_DIR} ${PROTO_GENERATED_DIR})
+        elseif(EXISTS "${PROJECT_ROOT_DIR}/proto/croupier")
+            message(STATUS "🏠 Using main repo proto directory at ${PROJECT_ROOT_DIR}/proto")
+            generate_grpc_code("${PROJECT_ROOT_DIR}/proto" ${PROTO_GENERATED_DIR})
         else()
-            # Prefer local proto submodule
-            set(SDK_PROTO_DIR "${CPP_SDK_DIR}/proto")
-            if(EXISTS "${SDK_PROTO_DIR}/croupier")
-                message(STATUS "📦 Using proto submodule at ${SDK_PROTO_DIR}")
-                generate_grpc_code(${SDK_PROTO_DIR} ${PROTO_GENERATED_DIR})
-            elseif(EXISTS "${PROJECT_ROOT_DIR}/proto/croupier")
-                message(STATUS "🏠 Using main repo proto directory at ${PROJECT_ROOT_DIR}/proto")
-                generate_grpc_code("${PROJECT_ROOT_DIR}/proto" ${PROTO_GENERATED_DIR})
-            else()
-                # Fallback: download from proto repository
-                message(STATUS "⬇️  Proto files not found locally, downloading from croupier-proto...")
-                set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
-                download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
-                generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
-            endif()
+            # Fallback: download from proto repository
+            message(STATUS "⬇️  Proto files not found locally, downloading from croupier-proto...")
+            set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
+            download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
+            generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
         endif()
 
         # Enable gRPC and set paths

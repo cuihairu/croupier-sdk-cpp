@@ -1,6 +1,9 @@
 version: v2
+clean: true
 plugins:
-  - remote: buf.build/protocolbuffers/cpp
+  # Pin to Protobuf C++ 5.29.5 (PROTOBUF_VERSION=5029005) to match vcpkg.
+  - remote: buf.build/protocolbuffers/cpp:v29.5
     out: generated
-  - remote: buf.build/grpc/cpp
+  # Pin to gRPC 1.70.1 to match vcpkg.
+  - remote: buf.build/grpc/cpp:v1.70.1
     out: generated

@@ -129,6 +129,8 @@ struct InvokerConfig {
 
 // Invoke options for function calls
 struct InvokeOptions {
+    // Optional per-request override; when 0, uses the invoker's default timeout.
+    int timeout_seconds = 0;
     std::string idempotency_key;
     std::string route; // "lb", "broadcast", "targeted", "hash"
     std::string target_service_id;
@@ -141,6 +143,8 @@ struct InvokeOptions {
 struct JobEvent {
     std::string event_type;
     std::string job_id;
+    std::string message;
+    int progress = 0;
     std::string payload;
     std::string error;
     bool done = false;

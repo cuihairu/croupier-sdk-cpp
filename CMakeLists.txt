@@ -153,66 +153,42 @@ else()
 
     # Enable debug info in release builds for better profiling
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-g)
+    add_compile_options(-g)
     endif()
 endif()
 
 # ========== Generated Proto Files ==========
-set(GENERATED_PROTO_SOURCES "")
-set(GENERATED_PROTO_HEADERS "")
+# `cmake/ProtoGeneration.cmake` populates:
+# - `GENERATED_PROTO_SOURCES` / `GENERATED_PROTO_HEADERS`
+# - `PROTO_GENERATED_DIR`
+#
+# Keep a minimal fallback for older/alternate layouts only if nothing was configured.
+if(ENABLE_GRPC AND NOT GENERATED_PROTO_SOURCES)
+    message(STATUS "⚠️ No generated proto sources were configured; attempting fallback discovery")
 
-if(ENABLE_GRPC)
-    # Monorepo mode: Use main project's generated files
-    set(MAIN_PROJECT_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../gen")
-
-    message(STATUS "🏠 Monorepo build detected")
-    message(STATUS "Using generated files from: ${MAIN_PROJECT_GEN_DIR}")
-
-    # Check if main project generated files exist
-    if(EXISTS ${MAIN_PROJECT_GEN_DIR})
-        # Collect all generated C++ proto files from main project
-        file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${MAIN_PROJECT_GEN_DIR}/**/*.cc")
-        file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${MAIN_PROJECT_GEN_DIR}/**/*.h")
-
+    set(MONOREPO_GEN_DIR "${PROJECT_ROOT_DIR}/gen")
+    if(EXISTS "${MONOREPO_GEN_DIR}/croupier")
+        file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${MONOREPO_GEN_DIR}/**/*.cc")
+        file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${MONOREPO_GEN_DIR}/**/*.h")
         if(GENERATED_PROTO_SOURCES)
-            list(LENGTH GENERATED_PROTO_SOURCES file_count)
-            message(STATUS "✅ Found ${file_count} generated proto source files")
-            set(PROTO_GENERATED_DIR ${MAIN_PROJECT_GEN_DIR})
-        else()
-            message(STATUS "⚠️ Generated files directory exists but no .cc/.h files found")
-            message(STATUS "Please run 'make proto' from project root")
+            set(PROTO_GENERATED_DIR "${MONOREPO_GEN_DIR}")
         endif()
-    else()
-        message(STATUS "⚠️ Main project generated files not found: ${MAIN_PROJECT_GEN_DIR}")
-        message(STATUS "Please run 'make proto' from project root to generate proto files")
     endif()
 
-    # Fallback to SDK-local generated artifacts
     if(NOT GENERATED_PROTO_SOURCES)
-        set(LOCAL_GENERATED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-        if(EXISTS ${LOCAL_GENERATED_DIR})
-            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${LOCAL_GENERATED_DIR}/**/*.cc")
-            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${LOCAL_GENERATED_DIR}/**/*.h")
+        set(SDK_GENERATED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated")
+        if(EXISTS "${SDK_GENERATED_DIR}/croupier")
+            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${SDK_GENERATED_DIR}/**/*.cc")
+            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${SDK_GENERATED_DIR}/**/*.h")
             if(GENERATED_PROTO_SOURCES)
-                list(LENGTH GENERATED_PROTO_SOURCES file_count)
-                message(STATUS "✅ Found ${file_count} generated proto source files under sdks/cpp/generated")
-                set(PROTO_GENERATED_DIR ${LOCAL_GENERATED_DIR})
-            else()
-                message(STATUS "⚠️ sdks/cpp/generated exists but no generated sources found")
+                set(PROTO_GENERATED_DIR "${SDK_GENERATED_DIR}")
             endif()
         endif()
     endif()
 
-    # Fallback: Check standalone build options
     if(NOT GENERATED_PROTO_SOURCES)
-        if(CROUPIER_STANDALONE_BUILD)
-            setup_standalone_build()
-        elseif(CROUPIER_CI_BUILD)
-            setup_ci_build()
-        else()
-            message(STATUS "🔧 No proto files found, using mock gRPC implementation")
-            set(ENABLE_GRPC OFF)
-        endif()
+        message(STATUS "🔧 No proto files found, using mock gRPC implementation")
+        set(ENABLE_GRPC OFF)
     endif()
 endif()
 

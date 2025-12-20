@@ -27,6 +27,10 @@
 namespace croupier {
 namespace sdk {
 
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+namespace functionv1 = ::croupier::function::v1;
+#endif
+
 // Utility function implementations
 namespace utils {
     std::string NewIdempotencyKey() {
@@ -701,21 +705,6 @@ public:
                 return false;
             }
 
-            // Test connection with a simple health check
-            grpc::ClientContext context;
-            context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(5));
-
-            functionv1::HealthCheckRequest request;
-            functionv1::HealthCheckResponse response;
-
-            // Note: HealthCheck might not be implemented, so we don't fail if it errors
-            grpc::Status status = stub_->HealthCheck(&context, request, &response);
-            if (status.ok()) {
-                std::cout << "Health check passed" << std::endl;
-            } else {
-                std::cout << "Health check failed (non-critical): " << status.error_message() << std::endl;
-            }
-
             connected_ = true;
             std::cout << "✅ Connected to: " << config_.address << std::endl;
             return true;
@@ -734,8 +723,6 @@ public:
 
     std::string Invoke(const std::string& function_id, const std::string& payload,
                       const InvokeOptions& options) {
-        (void)options; // Suppress unused parameter warning - options not implemented yet
-
         if (!connected_ && !Connect()) {
             throw std::runtime_error("Not connected to server");
         }
@@ -750,30 +737,48 @@ public:
 
         std::cout << "Invoking function: " << function_id << std::endl;
 
-#ifdef CROUPIER_SDK_ENABLE_GRPC
+ #ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
             // Create gRPC context
             grpc::ClientContext context;
 
-            // Set timeout from options or default to 30 seconds
-            auto timeout = std::chrono::seconds(options.timeout_seconds > 0 ? options.timeout_seconds : 30);
+            // Set timeout from options or invoker default
+            const int timeout_seconds = options.timeout_seconds > 0 ? options.timeout_seconds : config_.timeout_seconds;
+            auto timeout = std::chrono::seconds(timeout_seconds > 0 ? timeout_seconds : 30);
             context.set_deadline(std::chrono::system_clock::now() + timeout);
 
             // Set metadata
-            if (!options.game_id.empty()) {
-                context.AddMetadata("x-game-id", options.game_id);
+            if (!config_.game_id.empty()) {
+                context.AddMetadata("x-game-id", config_.game_id);
             }
-            if (!options.env.empty()) {
-                context.AddMetadata("x-env", options.env);
+            if (!config_.env.empty()) {
+                context.AddMetadata("x-env", config_.env);
             }
             if (!options.idempotency_key.empty()) {
                 context.AddMetadata("idempotency-key", options.idempotency_key);
+            }
+            if (!config_.auth_token.empty()) {
+                context.AddMetadata("authorization", "Bearer " + config_.auth_token);
+            }
+            for (const auto& [k, v] : config_.headers) {
+                context.AddMetadata(k, v);
             }
 
             // Create request
             functionv1::InvokeRequest request;
             request.set_function_id(function_id);
+            if (!options.idempotency_key.empty()) {
+                request.set_idempotency_key(options.idempotency_key);
+            }
             request.set_payload(payload);
+            auto* request_metadata = request.mutable_metadata();
+            if (!options.route.empty()) (*request_metadata)["route"] = options.route;
+            if (!options.target_service_id.empty()) (*request_metadata)["target_service_id"] = options.target_service_id;
+            if (!options.hash_key.empty()) (*request_metadata)["hash_key"] = options.hash_key;
+            if (!options.trace_id.empty()) (*request_metadata)["trace_id"] = options.trace_id;
+            for (const auto& [k, v] : options.metadata) {
+                (*request_metadata)[k] = v;
+            }
 
             // Send request
             functionv1::InvokeResponse response;
@@ -822,25 +827,43 @@ public:
             // Create gRPC context
             grpc::ClientContext context;
 
-            // Set timeout from options or default to 30 seconds
-            auto timeout = std::chrono::seconds(options.timeout_seconds > 0 ? options.timeout_seconds : 30);
+            // Set timeout from options or invoker default
+            const int timeout_seconds = options.timeout_seconds > 0 ? options.timeout_seconds : config_.timeout_seconds;
+            auto timeout = std::chrono::seconds(timeout_seconds > 0 ? timeout_seconds : 30);
             context.set_deadline(std::chrono::system_clock::now() + timeout);
 
             // Set metadata
-            if (!options.game_id.empty()) {
-                context.AddMetadata("x-game-id", options.game_id);
+            if (!config_.game_id.empty()) {
+                context.AddMetadata("x-game-id", config_.game_id);
             }
-            if (!options.env.empty()) {
-                context.AddMetadata("x-env", options.env);
+            if (!config_.env.empty()) {
+                context.AddMetadata("x-env", config_.env);
             }
             if (!options.idempotency_key.empty()) {
                 context.AddMetadata("idempotency-key", options.idempotency_key);
+            }
+            if (!config_.auth_token.empty()) {
+                context.AddMetadata("authorization", "Bearer " + config_.auth_token);
+            }
+            for (const auto& [k, v] : config_.headers) {
+                context.AddMetadata(k, v);
             }
 
             // Create request
             functionv1::InvokeRequest request;
             request.set_function_id(function_id);
+            if (!options.idempotency_key.empty()) {
+                request.set_idempotency_key(options.idempotency_key);
+            }
             request.set_payload(payload);
+            auto* request_metadata = request.mutable_metadata();
+            if (!options.route.empty()) (*request_metadata)["route"] = options.route;
+            if (!options.target_service_id.empty()) (*request_metadata)["target_service_id"] = options.target_service_id;
+            if (!options.hash_key.empty()) (*request_metadata)["hash_key"] = options.hash_key;
+            if (!options.trace_id.empty()) (*request_metadata)["trace_id"] = options.trace_id;
+            for (const auto& [k, v] : options.metadata) {
+                (*request_metadata)[k] = v;
+            }
 
             // Send request
             functionv1::StartJobResponse response;
@@ -901,11 +924,15 @@ public:
                 functionv1::JobEvent grpc_event;
                 while (reader->Read(&grpc_event)) {
                     JobEvent event;
-                    event.job_id = grpc_event.job_id();
+                    event.job_id = job_id;
                     event.event_type = grpc_event.type();
+                    event.message = grpc_event.message();
+                    event.progress = grpc_event.progress();
                     event.payload = grpc_event.payload();
-                    event.timestamp = grpc_event.timestamp();
-                    event.done = grpc_event.done();
+                    if (event.event_type == "error") {
+                        event.error = event.message;
+                    }
+                    event.done = (event.event_type == "done" || event.event_type == "error");
 
                     events.push_back(event);
 
