@@ -95,13 +95,7 @@ TEST_F(IntegrationTest, ComponentRegistration) {
     wallet.name = "经济钱包";
     wallet.operations["balance"] = "economy.wallet.balance";
 
-    economy.virtual_objects["wallet"] = wallet;
-
-    // 添加处理器
-    economy.function_handlers["economy.wallet.balance"] =
-        [](const std::string& context, const std::string& payload) -> std::string {
-            return R"({"balance": 2500, "currency": "gold"})";
-        };
+    economy.entities.push_back(wallet);
 
     // 注册组件
     bool result = client->RegisterComponent(economy);
@@ -177,6 +171,7 @@ TEST_F(IntegrationTest, UnregistrationFunctions) {
     test_obj.id = "test.unregister.object";
     test_obj.version = "1.0.0";
     test_obj.name = "测试注销对象";
+    test_obj.operations["call"] = "test.function";
 
     std::map<std::string, FunctionHandler> handlers;
     handlers["test.function"] = [](const std::string& context, const std::string& payload) -> std::string {

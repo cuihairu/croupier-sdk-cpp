@@ -433,22 +433,46 @@ endif()
 if(BUILD_TESTS)
     enable_testing()
 
-    find_package(GTest CONFIG)
+    find_package(GTest CONFIG QUIET)
+    if(NOT GTest_FOUND)
+        include(FetchContent)
 
-    if(GTest_FOUND)
+        # Keep this minimal: only used when GTest isn't provided by vcpkg/system packages.
+        # Pin to a stable tag to avoid test flakiness from upstream changes.
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG v1.15.2
+        )
+
+        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(googletest)
+    endif()
+
+    # Targets are available either from `find_package(GTest)` (vcpkg/system) or FetchContent.
+    if(TARGET GTest::gtest_main OR TARGET gtest_main)
         add_executable(croupier-sdk-tests
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
             tests/test_integration.cpp
         )
 
+        if(TARGET GTest::gtest_main)
+            set(_croupier_gtest_main GTest::gtest_main)
+        else()
+            set(_croupier_gtest_main gtest_main)
+        endif()
+
         target_link_libraries(croupier-sdk-tests
             PRIVATE
                 croupier::sdk
-                GTest::gtest_main
+                ${_croupier_gtest_main}
         )
 
         add_test(NAME CroupierSDKTests COMMAND croupier-sdk-tests)
+    else()
+        message(WARNING "BUILD_TESTS=ON but GTest is unavailable; skipping croupier-sdk-tests target")
     endif()
 endif()
 

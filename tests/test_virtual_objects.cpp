@@ -99,6 +99,7 @@ TEST_F(VirtualObjectTest, GetRegisteredObjects) {
     wallet.id = "test.wallet";
     wallet.version = "1.0.0";
     wallet.name = "测试钱包";
+    wallet.operations["get"] = "wallet.get";
 
     std::map<std::string, FunctionHandler> handlers;
     handlers["wallet.get"] = [](const std::string& context, const std::string& payload) -> std::string {
@@ -134,15 +135,22 @@ TEST_F(VirtualObjectTest, RegisterComponent) {
     wallet.id = "economy.wallet";
     wallet.version = "1.0.0";
     wallet.name = "钱包";
-    comp.virtual_objects["wallet"] = wallet;
-
-    // 添加函数映射
-    comp.function_handlers["economy.wallet.get"] = [](const std::string& context, const std::string& payload) -> std::string {
-        return R"({"component": "economy", "function": "wallet.get"})";
-    };
+    wallet.operations["get"] = "economy.wallet.get";
+    comp.entities.push_back(wallet);
 
     bool result = client->RegisterComponent(comp);
     EXPECT_TRUE(result);
+
+    // 组件注册后，实体定义会被记录到 objects 列表里
+    auto objects = client->GetRegisteredObjects();
+    bool found = false;
+    for (const auto& obj : objects) {
+        if (obj.id == "economy.wallet") {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
 }
 
 // 测试注销虚拟对象
@@ -151,6 +159,7 @@ TEST_F(VirtualObjectTest, UnregisterVirtualObject) {
     VirtualObjectDescriptor test_obj;
     test_obj.id = "test.unregister";
     test_obj.version = "1.0.0";
+    test_obj.operations["call"] = "test.function";
 
     std::map<std::string, FunctionHandler> handlers;
     handlers["test.function"] = [](const std::string& context, const std::string& payload) -> std::string {

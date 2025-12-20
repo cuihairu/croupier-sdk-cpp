@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "croupier/sdk/croupier_client.h"
+#include <algorithm>
 #include <sstream>
 #include <random>
 
@@ -139,18 +140,19 @@ TEST_F(UtilsTest, FunctionDescriptorCreation) {
     FunctionDescriptor desc;
     desc.id = "player.create";
     desc.version = "1.0.0";
-    desc.schema["type"] = "object";
-    desc.schema["properties"] = R"({
-        "name": {"type": "string", "required": true},
-        "level": {"type": "integer", "minimum": 1},
-        "email": {"type": "string", "format": "email"}
-    })";
+    desc.category = "player";
+    desc.risk = "low";
+    desc.entity = "player";
+    desc.operation = "create";
+    desc.enabled = true;
 
     EXPECT_EQ(desc.id, "player.create");
     EXPECT_EQ(desc.version, "1.0.0");
-    EXPECT_EQ(desc.schema.size(), 2);
-    EXPECT_EQ(desc.schema["type"], "object");
-    EXPECT_FALSE(desc.schema["properties"].empty());
+    EXPECT_EQ(desc.category, "player");
+    EXPECT_EQ(desc.risk, "low");
+    EXPECT_EQ(desc.entity, "player");
+    EXPECT_EQ(desc.operation, "create");
+    EXPECT_TRUE(desc.enabled);
 }
 
 // 测试关系定义验证
@@ -186,25 +188,27 @@ TEST_F(UtilsTest, ComplexDataStructures) {
     // 添加多个虚拟对象
     VirtualObjectDescriptor wallet;
     wallet.id = "economy.wallet";
+    wallet.version = "2.0.0";
     wallet.name = "钱包系统";
     wallet.operations["get"] = "wallet.get";
     wallet.operations["transfer"] = "wallet.transfer";
 
     VirtualObjectDescriptor shop;
     shop.id = "economy.shop";
+    shop.version = "2.0.0";
     shop.name = "商店系统";
     shop.operations["list"] = "shop.list";
     shop.operations["buy"] = "shop.buy";
 
-    comp.virtual_objects["wallet"] = wallet;
-    comp.virtual_objects["shop"] = shop;
+    comp.entities.push_back(wallet);
+    comp.entities.push_back(shop);
 
     // 验证结构完整性
-    EXPECT_EQ(comp.virtual_objects.size(), 2);
-    EXPECT_EQ(comp.virtual_objects["wallet"].id, "economy.wallet");
-    EXPECT_EQ(comp.virtual_objects["shop"].id, "economy.shop");
-    EXPECT_EQ(comp.virtual_objects["wallet"].operations.size(), 2);
-    EXPECT_EQ(comp.virtual_objects["shop"].operations.size(), 2);
+    ASSERT_EQ(comp.entities.size(), 2);
+    EXPECT_EQ(comp.entities[0].id, "economy.wallet");
+    EXPECT_EQ(comp.entities[1].id, "economy.shop");
+    EXPECT_EQ(comp.entities[0].operations.size(), 2);
+    EXPECT_EQ(comp.entities[1].operations.size(), 2);
 }
 
 // 测试配置边界条件
@@ -283,26 +287,16 @@ TEST_F(UtilsTest, TLSConfiguration) {
 
 // 测试幂等键生成逻辑
 TEST_F(UtilsTest, IdempotencyKeyGeneration) {
-    // 模拟幂等键生成（真实实现在源代码中）
-    auto generateKey = []() -> std::string {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, 15);
+    std::string key1 = utils::NewIdempotencyKey();
+    std::string key2 = utils::NewIdempotencyKey();
 
-        const char* chars = "0123456789abcdef";
-        std::string key = "idem_";
-        for (int i = 0; i < 32; i++) {
-            key += chars[dis(gen)];
-        }
-        return key;
+    auto is_hex = [](unsigned char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
     };
 
-    std::string key1 = generateKey();
-    std::string key2 = generateKey();
-
-    EXPECT_NE(key1, key2); // 两个键应该不同
-    EXPECT_EQ(key1.length(), 37); // "idem_" + 32字符 = 37
-    EXPECT_EQ(key2.length(), 37);
-    EXPECT_TRUE(key1.starts_with("idem_"));
-    EXPECT_TRUE(key2.starts_with("idem_"));
+    EXPECT_NE(key1, key2);
+    EXPECT_EQ(key1.size(), 32);
+    EXPECT_EQ(key2.size(), 32);
+    EXPECT_TRUE(std::all_of(key1.begin(), key1.end(), is_hex));
+    EXPECT_TRUE(std::all_of(key2.begin(), key2.end(), is_hex));
 }
