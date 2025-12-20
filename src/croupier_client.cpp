@@ -1198,11 +1198,23 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
                 if (func.contains("id")) {
                     func_desc.id = func["id"];
                 }
-                if (func.contains("name")) {
-                    func_desc.name = func["name"];
+                if (func.contains("version")) {
+                    func_desc.version = func["version"];
                 }
-                if (func.contains("description")) {
-                    func_desc.description = func["description"];
+                if (func.contains("category")) {
+                    func_desc.category = func["category"];
+                }
+                if (func.contains("risk")) {
+                    func_desc.risk = func["risk"];
+                }
+                if (func.contains("entity")) {
+                    func_desc.entity = func["entity"];
+                }
+                if (func.contains("operation")) {
+                    func_desc.operation = func["operation"];
+                }
+                if (func.contains("enabled")) {
+                    func_desc.enabled = func["enabled"];
                 }
                 desc.functions.push_back(func_desc);
             }
