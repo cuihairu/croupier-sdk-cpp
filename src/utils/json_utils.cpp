@@ -54,9 +54,84 @@ bool JsonUtils::IsValidJson(const std::string& json_content) {
 #ifdef CROUPIER_SDK_ENABLE_JSON
         [[maybe_unused]] auto parsed = nlohmann::json::parse(json_content);
 #else
-        // Simple validation for basic JSON structure
-        if (json_content.empty() ||
-            (json_content.front() != '{' && json_content.front() != '[')) {
+        auto begin = json_content.find_first_not_of(" \t\r\n");
+        if (begin == std::string::npos) {
+            return false;
+        }
+        auto end = json_content.find_last_not_of(" \t\r\n");
+        if (end == std::string::npos || end < begin) {
+            return false;
+        }
+
+        const char first = json_content[begin];
+        const char last = json_content[end];
+        if (first == '{') {
+            if (last != '}') {
+                return false;
+            }
+        } else if (first == '[') {
+            if (last != ']') {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        // Balanced bracket check (best-effort) ignoring content within quoted strings.
+        int brace_depth = 0;
+        int bracket_depth = 0;
+        bool in_string = false;
+        bool escaped = false;
+        for (size_t i = begin; i <= end; i++) {
+            const char ch = json_content[i];
+            if (in_string) {
+                if (escaped) {
+                    escaped = false;
+                    continue;
+                }
+                if (ch == '\\') {
+                    escaped = true;
+                    continue;
+                }
+                if (ch == '"') {
+                    in_string = false;
+                }
+                continue;
+            }
+
+            if (ch == '"') {
+                in_string = true;
+                continue;
+            }
+
+            switch (ch) {
+                case '{':
+                    brace_depth++;
+                    break;
+                case '}':
+                    brace_depth--;
+                    if (brace_depth < 0) {
+                        return false;
+                    }
+                    break;
+                case '[':
+                    bracket_depth++;
+                    break;
+                case ']':
+                    bracket_depth--;
+                    if (bracket_depth < 0) {
+                        return false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (in_string || escaped) {
+            return false;
+        }
+        if (brace_depth != 0 || bracket_depth != 0) {
             return false;
         }
 #endif

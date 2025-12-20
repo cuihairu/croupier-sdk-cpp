@@ -932,7 +932,8 @@ public:
                     if (event.event_type == "error") {
                         event.error = event.message;
                     }
-                    event.done = (event.event_type == "done" || event.event_type == "error");
+                    event.done = (event.event_type == "done" || event.event_type == "completed" ||
+                                  event.event_type == "cancelled" || event.event_type == "error");
 
                     events.push_back(event);
 

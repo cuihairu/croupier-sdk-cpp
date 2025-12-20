@@ -456,6 +456,7 @@ if(BUILD_TESTS)
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
             tests/test_integration.cpp
+            tests/test_invoker.cpp
         )
 
         if(TARGET GTest::gtest_main)
