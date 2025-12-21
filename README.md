@@ -169,7 +169,14 @@ cmake --build build --parallel
 本仓库提供了 `croupier-sdk-cpp/CMakePresets.json`（默认走 vcpkg）：
 - 确保已经把 vcpkg clone 到 `croupier-sdk-cpp/vcpkg` 并执行过 `./vcpkg/bootstrap-vcpkg.sh`
 - VS Code：`CMake: Select Configure Preset` → 选择 `macos-*-*-vcpkg`（Apple Silicon 选 `macos-arm64-...`）
-- 如果之前已经 Configure 过（生成了 `croupier-sdk-cpp/build`），请先删掉 `croupier-sdk-cpp/build` 再重新 Configure（toolchain 必须在第一次 configure 时生效）
+- 如果之前已经 Configure 过，请先删掉 `croupier-sdk-cpp/build/*` 再重新 Configure（toolchain 必须在第一次 configure 时生效）
+
+跨平台预设（可提交到 Git，推荐）：
+- macOS：`macos-arm64-*-vcpkg` / `macos-x64-*-vcpkg`
+- Linux：`linux-x64-*-vcpkg`
+- Windows：`windows-x64-*-vcpkg`（Visual Studio 17 2022 生成器，不依赖 Ninja）
+
+个人本机差异（例如你想用全局安装的 vcpkg 路径，而不是仓库内 `./vcpkg`），建议放到 `CMakeUserPresets.json`，不要提交到 Git。
 
 ## 使用示例
 
