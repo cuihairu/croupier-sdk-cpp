@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 3.20)
 get_filename_component(_CROUPIER_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 set(_CROUPIER_VCPKG_ROOT "${_CROUPIER_REPO_ROOT}/vcpkg")
 set(_CROUPIER_VCPKG_TOOLCHAIN "${_CROUPIER_VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+set(_CROUPIER_VCPKG_CHAINLOAD_OSX "${_CROUPIER_REPO_ROOT}/cmake/vcpkg-chainload-osx.cmake")
 if(WIN32)
   set(_CROUPIER_VCPKG_BOOTSTRAP "${_CROUPIER_VCPKG_ROOT}/bootstrap-vcpkg.bat")
 else()
@@ -20,6 +21,10 @@ endif()
 
 if(NOT DEFINED CROUPIER_BOOTSTRAP_VCPKG)
   set(CROUPIER_BOOTSTRAP_VCPKG ON CACHE BOOL "Auto-clone and bootstrap vcpkg into ./vcpkg when missing" )
+endif()
+
+if(NOT DEFINED CROUPIER_VCPKG_FORCE_OSX_CHAINLOAD)
+  set(CROUPIER_VCPKG_FORCE_OSX_CHAINLOAD ON CACHE BOOL "On macOS, force a vcpkg chainload toolchain that prefers vcpkg headers over /usr/local/include and enforces C++17")
 endif()
 
 if(NOT EXISTS "${_CROUPIER_VCPKG_TOOLCHAIN}")
@@ -73,5 +78,14 @@ endif()
 
 # Help downstream tooling/ports.
 set(ENV{VCPKG_ROOT} "${_CROUPIER_VCPKG_ROOT}")
+
+# macOS: Apple Clang injects `/usr/local/include` ahead of `-isystem` paths, which can
+# cause vcpkg builds to accidentally pick up Homebrew headers (e.g. `absl`, `protobuf`)
+# and then fail or mismatch runtime versions. We chainload a tiny wrapper toolchain that:
+# - forces C++17
+# - adds the vcpkg include dir as `-I...` so it wins over `/usr/local/include`
+if(APPLE AND CROUPIER_VCPKG_FORCE_OSX_CHAINLOAD AND EXISTS "${_CROUPIER_VCPKG_CHAINLOAD_OSX}")
+  set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${_CROUPIER_VCPKG_CHAINLOAD_OSX}" CACHE FILEPATH "vcpkg chainload toolchain file" FORCE)
+endif()
 
 include("${_CROUPIER_VCPKG_TOOLCHAIN}")

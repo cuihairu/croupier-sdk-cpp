@@ -20,7 +20,8 @@
         "ENABLE_VCPKG": "ON",
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
-        "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays"
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-overlays/triplets"
       }
     },
     {
@@ -135,6 +136,7 @@
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-overlays/triplets",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
     },
@@ -159,6 +161,7 @@
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-overlays/triplets",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
     }

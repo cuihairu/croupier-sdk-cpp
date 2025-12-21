@@ -133,19 +133,17 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 ### 手动 CMake 构建
 
 ```bash
-# 1. 设置 vcpkg（建议放在仓库目录下的 ./vcpkg，便于 CMake Tools 自动找到）
-git clone https://github.com/Microsoft/vcpkg.git vcpkg
-./vcpkg/bootstrap-vcpkg.sh
-
-# 2. 配置构建
+# 1. 配置构建（默认会自动 clone + bootstrap vcpkg 到 ./vcpkg）
 cmake -B build \
-  -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_TOOLCHAIN_FILE=./cmake/vcpkg-bootstrap.cmake \
+  -DVCPKG_OVERLAY_PORTS=./vcpkg-overlays \
+  -DVCPKG_OVERLAY_TRIPLETS=./vcpkg-overlays/triplets \
   -DCMAKE_BUILD_TYPE=Release
 
-# 3. 构建
+# 2. 构建
 cmake --build build --parallel
 
-# 4. 运行示例（需要本地 Agent）
+# 3. 运行示例（需要本地 Agent）
 #
 # SDK 示例默认连接 `127.0.0.1:19090`（见 `examples/*.cpp` 里的 `agent_addr`），请先确保 Croupier Agent 已启动。
 #
@@ -167,9 +165,9 @@ cmake --build build --parallel
 `Protobuf C++ gencode is built with an incompatible version of Protobuf C++ headers/runtime`。
 
 本仓库提供了 `croupier-sdk-cpp/CMakePresets.json`（默认走 vcpkg）：
-- 确保已经把 vcpkg clone 到 `croupier-sdk-cpp/vcpkg` 并执行过 `./vcpkg/bootstrap-vcpkg.sh`
 - VS Code：`CMake: Select Configure Preset` → 选择 `macos-*-*-vcpkg`（Apple Silicon 选 `macos-arm64-...`）
 - 如果之前已经 Configure 过，请先删掉 `croupier-sdk-cpp/build/*` 再重新 Configure（toolchain 必须在第一次 configure 时生效）
+- macOS 下我们额外提供了 `vcpkg-overlays/triplets`（preset 已自动配置），避免 AppleClang 优先使用 `/usr/local/include` 导致误用 Homebrew 的 `protobuf/absl` 头文件
 
 跨平台预设（可提交到 Git，推荐）：
 - macOS：`macos-arm64-*-vcpkg` / `macos-x64-*-vcpkg`
