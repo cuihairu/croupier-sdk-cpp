@@ -15,7 +15,7 @@ diff --git a/src/core/resolver/xds/xds_config.cc b/src/core/resolver/xds/xds_con
 index 8b7e2f2..f1f57f4 100644
 --- a/src/core/resolver/xds/xds_config.cc
 +++ b/src/core/resolver/xds/xds_config.cc
-@@ -36,14 +36,14 @@ XdsConfig::ClusterConfig::ClusterConfig(
+@@ -36,13 +36,13 @@ XdsConfig::ClusterConfig::ClusterConfig(
      std::shared_ptr<const XdsClusterResource> cluster,
      std::shared_ptr<const XdsEndpointResource> endpoints,
      std::string resolution_note)
