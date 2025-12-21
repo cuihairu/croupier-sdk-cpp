@@ -161,6 +161,17 @@ cmake --build build --parallel
 ./build/bin/croupier-virtual-object-demo
 ```
 
+### VS Code (CMake Tools) 使用 vcpkg（固定 Protobuf 5.29.5）
+
+`CMake Tools` 本身不会“自动使用 vcpkg”，它只会按你当前的 CMake 配置去 `find_package()`。
+如果你本机装过 Homebrew 的 `protobuf/grpc`，而 CMake 没用 vcpkg toolchain，就会误用系统 protobuf，进而报：
+`Protobuf C++ gencode is built with an incompatible version of Protobuf C++ headers/runtime`。
+
+本仓库提供了 `croupier-sdk-cpp/CMakePresets.json`（默认走 vcpkg）：
+- 先设置环境变量：`export VCPKG_ROOT=/path/to/vcpkg`
+- VS Code：`CMake: Select Configure Preset` → 选择 `macos-*-*-vcpkg`
+- 如果之前已经 Configure 过（生成了 `croupier-sdk-cpp/build`），请先删掉 `croupier-sdk-cpp/build` 再重新 Configure（toolchain 必须在第一次 configure 时生效）
+
 ## 使用示例
 
 ### 基础函数注册
