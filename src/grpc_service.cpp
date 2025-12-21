@@ -821,7 +821,6 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
     cancelled.set_type("cancelled");
     cancelled.set_message("job cancelled by requester");
     EnqueueEvent(state, std::move(cancelled), true);
-    FinishJob(request->job_id());
 
     response->set_job_id(request->job_id());
     return ::grpc::Status::OK;
