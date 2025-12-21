@@ -11,12 +11,16 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
+      "environment": {
+        "VCPKG_ROOT": "${sourceDir}/vcpkg",
+        "PATH": "${env:PATH}:/usr/local/bin:/opt/homebrew/bin"
+      },
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "BUILD_EXAMPLES": "ON",
         "BUILD_TESTS": "OFF",
         "ENABLE_VCPKG": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays"
       }
@@ -85,4 +89,3 @@
     }
   ]
 }
-
