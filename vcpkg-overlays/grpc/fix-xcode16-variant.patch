@@ -3,15 +3,14 @@ index 7b4c17a..3e0f6b9 100644
 --- a/src/core/call/request_buffer.cc
 +++ b/src/core/call/request_buffer.cc
 @@ -24,7 +24,7 @@ namespace grpc_core {
-
+ 
  RequestBuffer::Buffering::Buffering() {}
-
+ 
 -RequestBuffer::RequestBuffer() : state_(absl::in_place_type_t<Buffering>()) {}
 +RequestBuffer::RequestBuffer() : state_(std::in_place_type_t<Buffering>{}) {}
-
+ 
  ValueOrFailure<size_t> RequestBuffer::PushClientInitialMetadata(
      ClientMetadataHandle md) {
-
 diff --git a/src/core/resolver/xds/xds_config.cc b/src/core/resolver/xds/xds_config.cc
 index 8b7e2f2..f1f57f4 100644
 --- a/src/core/resolver/xds/xds_config.cc
@@ -32,7 +31,6 @@ index 8b7e2f2..f1f57f4 100644
 -      children(absl::in_place_type_t<AggregateConfig>(),
 +      children(std::in_place_type_t<AggregateConfig>{},
                 std::move(leaf_clusters)) {}
-
 diff --git a/src/core/lib/event_engine/ares_resolver.h b/src/core/lib/event_engine/ares_resolver.h
 index 0d2ee43..f90783b 100644
 --- a/src/core/lib/event_engine/ares_resolver.h
