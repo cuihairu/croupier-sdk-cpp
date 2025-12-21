@@ -103,7 +103,9 @@ private:
 
     // 状态管理
     std::atomic<ConnectionState> state_;
-    std::atomic<bool> should_reconnect_;
+    std::atomic<bool> auto_reconnect_enabled_;
+    std::atomic<bool> reconnect_requested_;
+    std::atomic<bool> reconnect_running_;
     std::atomic<bool> heartbeat_running_;
 
     // 线程管理
@@ -124,7 +126,7 @@ private:
 
     // 内部方法
     void DoConnect();
-    void DoReconnect();
+    void StartReconnectLoop();
     void HeartbeatLoop(const std::string& session_id);
     std::shared_ptr<grpc::Channel> CreateChannel();
     bool ValidateConnection();

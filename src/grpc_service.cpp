@@ -10,6 +10,7 @@
 #include <shared_mutex>
 #include <chrono>
 #include <random>
+#include <algorithm>
 
 // Note: This implementation requires protobuf generated code
 // In a real project, we need to generate gRPC proto files first, then implement the actual services
@@ -45,7 +46,9 @@ namespace functionv1 = ::croupier::function::v1;
 GrpcClientManager::GrpcClientManager(const ClientConfig& config)
     : config_(config)
     , state_(ConnectionState::DISCONNECTED)
-    , should_reconnect_(false)
+    , auto_reconnect_enabled_(config.auto_reconnect)
+    , reconnect_requested_(false)
+    , reconnect_running_(false)
     , heartbeat_running_(false)
     , local_port_(0)
 {
@@ -102,12 +105,19 @@ bool GrpcClientManager::Connect() {
 }
 
 void GrpcClientManager::Disconnect() {
-    std::lock_guard<std::mutex> lock(state_mutex_);
+    {
+        std::lock_guard<std::mutex> lock(state_mutex_);
+        reconnect_requested_ = false;
+        state_ = ConnectionState::DISCONNECTED;
+    }
 
-    should_reconnect_ = false;
-
-    // Stop heartbeat
+    // Stop heartbeat (may join a thread).
     StopHeartbeatLoop();
+
+    // Stop reconnect (may join a thread).
+    if (reconnect_thread_.joinable()) {
+        reconnect_thread_.join();
+    }
 
     // Stop local server
     StopLocalServer();
@@ -115,8 +125,6 @@ void GrpcClientManager::Disconnect() {
     // Cleanup connections
     agent_stub_.reset();
     agent_channel_.reset();
-
-    state_ = ConnectionState::DISCONNECTED;
 
     std::cout << "📴 Disconnected from Agent" << std::endl;
 }
@@ -337,9 +345,13 @@ void GrpcClientManager::HandleError(const std::string& error) {
         error_callback_(error);
     }
 
-    // If auto-reconnect is configured, start reconnect logic
-    if (should_reconnect_) {
-        DoReconnect();
+    if (state_ != ConnectionState::DISCONNECTED) {
+        state_ = ConnectionState::FAILED;
+    }
+
+    if (auto_reconnect_enabled_) {
+        reconnect_requested_ = true;
+        StartReconnectLoop();
     }
 }
 
@@ -349,39 +361,65 @@ void GrpcClientManager::NotifyReconnect() {
     }
 }
 
-void GrpcClientManager::DoReconnect() {
-    // Spawn reconnect thread if not already running
-    if (reconnect_thread_.joinable()) {
-        return; // Already reconnecting
+void GrpcClientManager::StartReconnectLoop() {
+    if (!auto_reconnect_enabled_ || !reconnect_requested_) {
+        return;
     }
 
-    should_reconnect_ = true;
-    reconnect_thread_ = std::thread([this]() {
-        const int max_attempts = 10;
+    // Join any previous completed thread.
+    if (reconnect_thread_.joinable() && !reconnect_running_) {
+        reconnect_thread_.join();
+    }
+
+    // Spawn reconnect thread if not already running.
+    if (reconnect_running_.exchange(true)) {
+        return;
+    }
+
+    const int interval_seconds = std::max(1, config_.reconnect_interval_seconds);
+    const int max_attempts = std::max(0, config_.reconnect_max_attempts);
+
+    reconnect_thread_ = std::thread([this, interval_seconds, max_attempts]() {
         int attempts = 0;
 
-        while (should_reconnect_ && attempts < max_attempts) {
-            std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait 5 seconds between attempts
+        while (reconnect_requested_) {
+            if (max_attempts > 0 && attempts >= max_attempts) {
+                break;
+            }
 
-            std::cout << "🔄 Attempting to reconnect to Agent... (attempt " << (attempts + 1) << ")" << std::endl;
+            state_ = ConnectionState::RECONNECTING;
+            std::cout << "🔄 Attempting to reconnect to Agent... (attempt " << (attempts + 1) << ")"
+                      << std::endl;
 
             if (Connect()) {
-                should_reconnect_ = false;
                 std::cout << "✅ Reconnection successful!" << std::endl;
                 NotifyReconnect();
-                return;
+                reconnect_requested_ = false;
+                break;
             }
 
             attempts++;
+            std::this_thread::sleep_for(std::chrono::seconds(interval_seconds));
         }
 
-        if (should_reconnect_) {
-            std::cerr << "❌ Reconnection failed, max attempts reached" << std::endl;
+        if (reconnect_requested_) {
+            std::cerr << "❌ Reconnection failed"
+                      << (max_attempts > 0 ? " (max attempts reached)" : "")
+                      << std::endl;
+            reconnect_requested_ = false;
+            state_ = ConnectionState::FAILED;
         }
+
+        reconnect_running_ = false;
     });
 }
 
 void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
+    // Join old finished heartbeat thread (if any).
+    if (heartbeat_thread_.joinable() && !heartbeat_running_) {
+        heartbeat_thread_.join();
+    }
+
     if (heartbeat_running_) {
         return;
     }
@@ -398,7 +436,7 @@ void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
 
             if (!SendHeartbeat(session_id)) {
                 std::cerr << "💔 Heartbeat failed, may need reconnection" << std::endl;
-                 HandleError("heartbeat failed");
+                HandleError("heartbeat failed");
                 break;
             }
 
@@ -407,6 +445,7 @@ void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
         }
 
         std::cout << "💓 Heartbeat loop stopped" << std::endl;
+        heartbeat_running_ = false;
     });
 }
 

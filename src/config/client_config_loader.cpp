@@ -4,6 +4,7 @@
 #include <iostream>
 #include <regex>
 #include <cstdlib>
+#include <algorithm>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -121,6 +122,14 @@ std::vector<std::string> ClientConfigLoader::ValidateConfig(const ClientConfig& 
         errors.push_back("timeout_seconds must be greater than 0");
     }
 
+    if (config.reconnect_interval_seconds <= 0) {
+        errors.push_back("reconnect_interval_seconds must be greater than 0");
+    }
+
+    if (config.reconnect_max_attempts < 0) {
+        errors.push_back("reconnect_max_attempts must be >= 0 (0 means unlimited)");
+    }
+
     if (!config.local_listen.empty() && !ValidateNetworkAddress(config.local_listen)) {
         errors.push_back("local_listen format is invalid (should be host:port)");
     }
@@ -163,6 +172,9 @@ ClientConfig ClientConfigLoader::CreateDefaultConfig() {
     config.provider_sdk = "croupier-cpp-sdk";
     config.insecure = true;
     config.timeout_seconds = 30;
+    config.auto_reconnect = true;
+    config.reconnect_interval_seconds = 5;
+    config.reconnect_max_attempts = 0;
 
     return config;
 }
@@ -181,6 +193,9 @@ std::string ClientConfigLoader::GenerateExampleConfig(const std::string& environ
     config["local_listen"] = "0.0.0.0:0";
     config["control_addr"] = "127.0.0.1:18080";
     config["timeout_seconds"] = 30;
+    config["auto_reconnect"] = true;
+    config["reconnect_interval_seconds"] = 5;
+    config["reconnect_max_attempts"] = 0;
     config["provider_lang"] = "cpp";
     config["provider_sdk"] = "croupier-cpp-sdk";
 
@@ -219,6 +234,9 @@ std::string ClientConfigLoader::GenerateExampleConfig(const std::string& environ
   "control_addr": "127.0.0.1:18080",
   "insecure": true,
   "timeout_seconds": 30,
+  "auto_reconnect": true,
+  "reconnect_interval_seconds": 5,
+  "reconnect_max_attempts": 0,
   "provider_lang": "cpp",
   "provider_sdk": "croupier-cpp-sdk"
 })";
@@ -282,6 +300,12 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
         config.insecure = (insecure_env == "true" || insecure_env == "1" || insecure_env == "yes");
     }
 
+    std::string auto_reconnect_env = GetEnvironmentVariable(env_prefix + "AUTO_RECONNECT", "");
+    if (!auto_reconnect_env.empty()) {
+        std::transform(auto_reconnect_env.begin(), auto_reconnect_env.end(), auto_reconnect_env.begin(), ::tolower);
+        config.auto_reconnect = (auto_reconnect_env == "true" || auto_reconnect_env == "1" || auto_reconnect_env == "yes");
+    }
+
     // Numeric environment variables
     std::string timeout_env = GetEnvironmentVariable(env_prefix + "TIMEOUT_SECONDS", "");
     if (!timeout_env.empty()) {
@@ -289,6 +313,24 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
             config.timeout_seconds = std::stoi(timeout_env);
         } catch (const std::exception& /* e */) {
             std::cerr << "Invalid timeout value in environment: " << timeout_env << std::endl;
+        }
+    }
+
+    std::string reconnect_interval_env = GetEnvironmentVariable(env_prefix + "RECONNECT_INTERVAL_SECONDS", "");
+    if (!reconnect_interval_env.empty()) {
+        try {
+            config.reconnect_interval_seconds = std::stoi(reconnect_interval_env);
+        } catch (const std::exception& /* e */) {
+            std::cerr << "Invalid reconnect_interval_seconds value in environment: " << reconnect_interval_env << std::endl;
+        }
+    }
+
+    std::string reconnect_attempts_env = GetEnvironmentVariable(env_prefix + "RECONNECT_MAX_ATTEMPTS", "");
+    if (!reconnect_attempts_env.empty()) {
+        try {
+            config.reconnect_max_attempts = std::stoi(reconnect_attempts_env);
+        } catch (const std::exception& /* e */) {
+            std::cerr << "Invalid reconnect_max_attempts value in environment: " << reconnect_attempts_env << std::endl;
         }
     }
 
@@ -391,6 +433,9 @@ ClientConfig ClientConfigLoader::ParseJsonToClientConfig(const nlohmann::json& c
     config.control_addr = utils::JsonUtils::GetStringValue(config_json, "control_addr", "");
     config.insecure = utils::JsonUtils::GetBoolValue(config_json, "insecure", true);
     config.timeout_seconds = utils::JsonUtils::GetIntValue(config_json, "timeout_seconds", 30);
+    config.auto_reconnect = utils::JsonUtils::GetBoolValue(config_json, "auto_reconnect", true);
+    config.reconnect_interval_seconds = utils::JsonUtils::GetIntValue(config_json, "reconnect_interval_seconds", 5);
+    config.reconnect_max_attempts = utils::JsonUtils::GetIntValue(config_json, "reconnect_max_attempts", 0);
     config.provider_lang = utils::JsonUtils::GetStringValue(config_json, "provider_lang", "cpp");
     config.provider_sdk = utils::JsonUtils::GetStringValue(config_json, "provider_sdk", "croupier-cpp-sdk");
 
@@ -426,6 +471,9 @@ ClientConfig ClientConfigLoader::ParseSimpleJsonToClientConfig(const utils::Json
     config.control_addr = utils::JsonUtils::GetStringValue(config_json, "control_addr", "");
     config.insecure = utils::JsonUtils::GetBoolValue(config_json, "insecure", true);
     config.timeout_seconds = utils::JsonUtils::GetIntValue(config_json, "timeout_seconds", 30);
+    config.auto_reconnect = utils::JsonUtils::GetBoolValue(config_json, "auto_reconnect", true);
+    config.reconnect_interval_seconds = utils::JsonUtils::GetIntValue(config_json, "reconnect_interval_seconds", 5);
+    config.reconnect_max_attempts = utils::JsonUtils::GetIntValue(config_json, "reconnect_max_attempts", 0);
     config.provider_lang = utils::JsonUtils::GetStringValue(config_json, "provider_lang", "cpp");
     config.provider_sdk = utils::JsonUtils::GetStringValue(config_json, "provider_sdk", "croupier-cpp-sdk");
 

@@ -6,6 +6,9 @@
   "local_listen": "0.0.0.0:0",
   "insecure": false,
   "timeout_seconds": 60,
+  "auto_reconnect": true,
+  "reconnect_interval_seconds": 10,
+  "reconnect_max_attempts": 0,
   "security": {
     "cert_file": "/etc/tls/croupier/client.crt",
     "key_file": "/etc/tls/croupier/client.key",

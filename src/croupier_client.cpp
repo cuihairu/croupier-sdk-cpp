@@ -420,11 +420,6 @@ public:
     }
 
     void Serve() {
-        if (!connected_ && !Connect()) {
-            std::cerr << "❌ 连接失败，无法启动服务" << std::endl;
-            return;
-        }
-
         running_ = true;
         std::cout << "🚀 Croupier 客户端服务启动" << std::endl;
         std::cout << "📍 本地服务地址: " << local_address_ << std::endl;
@@ -435,11 +430,39 @@ public:
         std::cout << "===============================================" << std::endl;
 
         // 保持服务运行，等待来自 Agent 的调用
+        const int reconnect_interval_seconds = std::max(1, config_.reconnect_interval_seconds);
+        int reconnect_attempts = 0;
+
         while (running_) {
             // 检查连接状态
             if (!grpc_manager_->IsConnected()) {
+                connected_ = false;
                 std::cerr << "⚠️ 与 Agent 的连接已断开" << std::endl;
-                break;
+
+                if (!config_.auto_reconnect) {
+                    break;
+                }
+
+                if (config_.reconnect_max_attempts > 0 && reconnect_attempts >= config_.reconnect_max_attempts) {
+                    std::cerr << "❌ Reconnect failed: max attempts reached" << std::endl;
+                    break;
+                }
+
+                reconnect_attempts++;
+                std::cout << "🔄 Reconnect attempt " << reconnect_attempts
+                          << " (every " << reconnect_interval_seconds << "s)..." << std::endl;
+
+                if (grpc_manager_->Connect()) {
+                    RegisterAllFunctions();
+                    local_address_ = grpc_manager_->GetLocalServerAddress();
+                    connected_ = true;
+                    reconnect_attempts = 0;
+                    std::cout << "✅ Reconnected and re-registered with Agent" << std::endl;
+                } else {
+                    std::this_thread::sleep_for(std::chrono::seconds(reconnect_interval_seconds));
+                }
+
+                continue;
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

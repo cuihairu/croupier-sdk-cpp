@@ -502,6 +502,9 @@ ClientConfig ConfigManager::ParseClientConfigFromJson(const nlohmann::json& json
     config.local_listen = json.value("local_listen", "127.0.0.1:0");
     config.insecure = json.value("insecure", true);
     config.timeout_seconds = json.value("timeout_seconds", 30);
+    config.auto_reconnect = json.value("auto_reconnect", true);
+    config.reconnect_interval_seconds = json.value("reconnect_interval_seconds", 5);
+    config.reconnect_max_attempts = json.value("reconnect_max_attempts", 0);
 
     // 安全配置
     if (json.contains("security")) {
@@ -611,6 +614,9 @@ nlohmann::json ConfigManager::GenerateExampleClientConfigJson() {
         {"local_listen", "0.0.0.0:0"},
         {"insecure", true},
         {"timeout_seconds", 30},
+        {"auto_reconnect", true},
+        {"reconnect_interval_seconds", 5},
+        {"reconnect_max_attempts", 0},
         {"security", {
             {"cert_file", "/etc/tls/client.crt"},
             {"key_file", "/etc/tls/client.key"},
@@ -769,6 +775,9 @@ ClientConfig ConfigManager::CreateDefaultClientConfig() {
     config.local_listen = "127.0.0.1:0";
     config.insecure = true;
     config.timeout_seconds = 30;
+    config.auto_reconnect = true;
+    config.reconnect_interval_seconds = 5;
+    config.reconnect_max_attempts = 0;
     return config;
 }
 

@@ -146,8 +146,19 @@ cmake -B build \
 # 3. 构建
 cmake --build build --parallel
 
-# 4. 运行示例
-./build/bin/virtual-object-demo
+# 4. 运行示例（需要本地 Agent）
+#
+# SDK 示例默认连接 `127.0.0.1:19090`（见 `examples/*.cpp` 里的 `agent_addr`），请先确保 Croupier Agent 已启动。
+#
+# 如果你在 croupier 主仓库里（包含 `server/`），可以用下面命令启动本地 Server + Agent：
+#
+#   cd server
+#   go run ./services/server -f services/server/etc/server.yaml
+#   go run ./services/agent  -f services/agent/etc/agent.yaml
+#
+# 然后运行 C++ 示例：
+./build/bin/croupier-example
+./build/bin/croupier-virtual-object-demo
 ```
 
 ## 使用示例
@@ -245,8 +256,23 @@ struct ClientConfig {
     std::string env = "development";
     std::string service_id = "cpp-service";
     bool insecure = true;
+    bool auto_reconnect = true;
+    int reconnect_interval_seconds = 5;
+    int reconnect_max_attempts = 0; // 0 = unlimited
 };
 ```
+
+### 连接与重连配置说明
+
+- `auto_reconnect`：默认 `true`；当 Agent 重启/断开时，`Serve()` 会自动尝试重连并重新注册函数；设为 `false` 时，连接断开会退出 `Serve()`。
+- `reconnect_interval_seconds`：重连间隔（秒），默认 `5`（最小 `1`）。
+- `reconnect_max_attempts`：最大重连次数，默认 `0` 表示无限重试；大于 0 时，达到次数后停止重连并退出 `Serve()`。
+
+### 环境变量覆盖（`CROUPIER_` 前缀）
+
+- `CROUPIER_AUTO_RECONNECT=true|false`
+- `CROUPIER_RECONNECT_INTERVAL_SECONDS=5`
+- `CROUPIER_RECONNECT_MAX_ATTEMPTS=0`
 
 ## 部署与分发
 

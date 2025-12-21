@@ -86,6 +86,9 @@ int main(int argc, char* argv[]) {
         std::cout << "  Local Listen: " << config.local_listen << std::endl;
         std::cout << "  Insecure:     " << (config.insecure ? "true" : "false") << std::endl;
         std::cout << "  Timeout:      " << config.timeout_seconds << "s" << std::endl;
+        std::cout << "  AutoReconnect:" << (config.auto_reconnect ? "true" : "false") << std::endl;
+        std::cout << "  ReconnectInt: " << config.reconnect_interval_seconds << "s" << std::endl;
+        std::cout << "  ReconnectMax: " << config.reconnect_max_attempts << std::endl;
 
         if (!config.insecure) {
             std::cout << "  TLS Cert:     " << config.cert_file << std::endl;

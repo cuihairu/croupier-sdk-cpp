@@ -80,6 +80,14 @@ struct ClientConfig {
     std::string provider_lang = "cpp";
     std::string provider_sdk = "croupier-cpp-sdk";
 
+    // ========== Connection Resiliency ==========
+    // When true, the SDK will keep trying to reconnect to the Agent and re-register on reconnect.
+    bool auto_reconnect = true;
+    // Seconds between reconnect attempts (default: 5s).
+    int reconnect_interval_seconds = 5;
+    // Max reconnect attempts (0 = unlimited).
+    int reconnect_max_attempts = 0;
+
     // ========== Agent Registration ==========
     std::string agent_id;              // Agent unique identifier (auto-generated if empty)
 
