@@ -178,6 +178,12 @@ cmake --build build --parallel
 
 个人本机差异（例如你想用全局安装的 vcpkg 路径，而不是仓库内 `./vcpkg`），建议放到 `CMakeUserPresets.json`，不要提交到 Git。
 
+### 自动安装 vcpkg
+
+默认 preset 使用 `croupier-sdk-cpp/cmake/vcpkg-bootstrap.cmake` 作为 toolchain：
+- 如果仓库根目录下没有 `./vcpkg`，会自动 `git clone` 并执行 `bootstrap-vcpkg`（只做一次）
+- 如需禁用自动下载（离线环境），configure 时加 `-DCROUPIER_BOOTSTRAP_VCPKG=OFF`，然后手动准备 `./vcpkg`
+
 ## 使用示例
 
 ### 基础函数注册

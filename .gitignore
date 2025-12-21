@@ -60,6 +60,7 @@ Testing/
 
 # Package managers
 vcpkg_installed/
+vcpkg/
 
 # Protobuf generated files
 *.pb.h

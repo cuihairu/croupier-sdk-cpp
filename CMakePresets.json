@@ -18,7 +18,7 @@
         "BUILD_EXAMPLES": "ON",
         "BUILD_TESTS": "OFF",
         "ENABLE_VCPKG": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays"
       }
@@ -132,7 +132,7 @@
         "BUILD_EXAMPLES": "ON",
         "BUILD_TESTS": "OFF",
         "ENABLE_VCPKG": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
@@ -156,7 +156,7 @@
         "BUILD_EXAMPLES": "ON",
         "BUILD_TESTS": "OFF",
         "ENABLE_VCPKG": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/vcpkg-bootstrap.cmake",
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
