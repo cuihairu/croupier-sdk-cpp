@@ -240,9 +240,8 @@ if(BUILD_SHARED_LIBS)
     target_include_directories(croupier-sdk-shared
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<$<AND:$<BOOL:${ENABLE_GRPC}>,$<BOOL:${PROTO_GENERATED_DIR}>>:$<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>>
             $<INSTALL_INTERFACE:include>
-        PRIVATE
-            $<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>
     )
 
     target_link_libraries(croupier-sdk-shared
@@ -295,9 +294,8 @@ if(BUILD_STATIC_LIBS)
     target_include_directories(croupier-sdk-static
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<$<AND:$<BOOL:${ENABLE_GRPC}>,$<BOOL:${PROTO_GENERATED_DIR}>>:$<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>>
             $<INSTALL_INTERFACE:include>
-        PRIVATE
-            $<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>
     )
 
     target_link_libraries(croupier-sdk-static
@@ -475,6 +473,36 @@ if(BUILD_TESTS)
     else()
         message(WARNING "BUILD_TESTS=ON but GTest is unavailable; skipping croupier-sdk-tests target")
     endif()
+endif()
+
+# ========== Install Rules ==========
+include(GNUInstallDirs)
+
+# Public SDK headers
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+# Generated proto headers are part of the public API surface (grpc_service.h includes them).
+if(ENABLE_GRPC AND PROTO_GENERATED_DIR AND EXISTS "${PROTO_GENERATED_DIR}/croupier")
+    install(DIRECTORY "${PROTO_GENERATED_DIR}/croupier/"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/croupier"
+        FILES_MATCHING PATTERN "*.h"
+    )
+endif()
+
+if(BUILD_SHARED_LIBS)
+    install(TARGETS croupier-sdk-shared
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    )
+endif()
+
+if(BUILD_STATIC_LIBS)
+    install(TARGETS croupier-sdk-static
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    )
 endif()
 
 # ========== Package Information ==========
