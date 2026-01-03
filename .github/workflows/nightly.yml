@@ -29,7 +29,8 @@ permissions:
 
 env:
   BUILD_TYPE: Release
-  SDK_VERSION_BASE: "1.0"
+  # Read base version from VERSION.cmake
+  SDK_VERSION_BASE: "0.1"
   # Nightly builds ship Release artifacts only; building vcpkg Debug+Release
   # doubles disk usage and can exceed GitHub Actions runner limits.
   VCPKG_BUILD_TYPE: release

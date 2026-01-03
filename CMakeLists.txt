@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 
+# Load version configuration
+include(VERSION.cmake)
+
 project(croupier-cpp-sdk
-    VERSION 0.1.0
-    DESCRIPTION "Croupier C++ SDK for Game Function Registration"
+    VERSION ${CROUPIER_SDK_VERSION}
+    DESCRIPTION "${CROUPIER_SDK_DESCRIPTION}"
+    HOMEPAGE_URL "${CROUPIER_SDK_HOMEPAGE_URL}"
     LANGUAGES CXX
 )
 
