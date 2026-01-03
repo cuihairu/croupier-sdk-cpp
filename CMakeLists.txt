@@ -242,6 +242,15 @@ if(BUILD_SHARED_LIBS)
         EXPORT_NAME "croupier-sdk"
     )
 
+    # Set output directories for the shared library
+    # On Windows: .dll goes to bin/, .lib (import library) stays in build root for linking
+    set_target_properties(croupier-sdk-shared PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        # Keep import library in build root so linker can find it directly
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
     target_include_directories(croupier-sdk-shared
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -296,6 +305,7 @@ if(BUILD_STATIC_LIBS)
     set_target_properties(croupier-sdk-static PROPERTIES
         OUTPUT_NAME "croupier-sdk-static"
         EXPORT_NAME "croupier-sdk-static"
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
     target_include_directories(croupier-sdk-static
