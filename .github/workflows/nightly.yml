@@ -1,14 +1,15 @@
 name: Nightly Build & Release
 
 on:
+  # Push to main branch or tag triggers release build
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+
   # Daily build at 02:00 UTC
   schedule:
     - cron: '0 2 * * *'
-
-  # Tag push triggers official release
-  push:
-    tags:
-      - 'v*'
 
   # Manual trigger
   workflow_dispatch:
