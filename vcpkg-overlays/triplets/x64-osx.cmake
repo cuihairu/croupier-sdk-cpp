@@ -1,8 +1,8 @@
-include("${VCPKG_ROOT_DIR}/triplets/community/x64-osx.cmake")
+# Croupier macOS x64 triplet with C++17 enforcement
+set(VCPKG_CRT_LINKAGE dynamic)
+set(VCPKG_LIBRARY_LINKAGE static)
 
-# Apple Clang injects `/usr/local/include` into the header search path. This can
-# cause vcpkg port builds to accidentally pick up Homebrew headers instead of
-# the vcpkg-installed ones. Chainload a wrapper toolchain that prefers vcpkg
-# headers and enforces C++17.
-set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/../../cmake/vcpkg-chainload-osx.cmake")
-
+# 强制 C++17 标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)

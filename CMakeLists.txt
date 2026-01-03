@@ -30,7 +30,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # ========== Build Options ==========
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(BUILD_STATIC_LIBS "Build static libraries" ON)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_TESTS "Build unit tests" OFF)
@@ -115,6 +115,7 @@ if(ENABLE_GRPC)
     set(GRPC_LIBRARIES
         gRPC::grpc++
         gRPC::grpc++_reflection
+        gRPC::gpr
         protobuf::libprotobuf
     )
 endif()
@@ -258,6 +259,8 @@ if(BUILD_SHARED_LIBS)
         target_compile_definitions(croupier-sdk-shared
             PUBLIC
                 CROUPIER_SDK_ENABLE_GRPC
+                PROTOBUF_NONNULL=
+                PROTOBUF_NULLABLE=
         )
     endif()
 
@@ -312,6 +315,8 @@ if(BUILD_STATIC_LIBS)
         target_compile_definitions(croupier-sdk-static
             PUBLIC
                 CROUPIER_SDK_ENABLE_GRPC
+                PROTOBUF_NONNULL=
+                PROTOBUF_NULLABLE=
         )
     endif()
 

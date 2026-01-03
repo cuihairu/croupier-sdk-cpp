@@ -180,8 +180,8 @@ setup_vcpkg() {
 # ========== vcpkg Triplet Detection ==========
 get_vcpkg_triplet() {
     case "$PLATFORM-$ARCH" in
-        windows-x64)    echo "x64-windows" ;;
-        windows-x86)    echo "x86-windows" ;;
+        windows-x64)    echo "x64-windows-static" ;;
+        windows-x86)    echo "x86-windows-static" ;;
         linux-x64)      echo "x64-linux" ;;
         linux-arm64)    echo "arm64-linux" ;;
         macos-x64)      echo "x64-osx" ;;
@@ -231,7 +231,7 @@ configure_cmake() {
     cmake_args+=("-DENABLE_GRPC=$ENABLE_GRPC")
     cmake_args+=("-DBUILD_EXAMPLES=$BUILD_EXAMPLES")
     cmake_args+=("-DBUILD_TESTS=$BUILD_TESTS")
-    cmake_args+=("-DBUILD_SHARED_LIBS=ON")
+    cmake_args+=("-DBUILD_SHARED_LIBS=OFF")
     cmake_args+=("-DBUILD_STATIC_LIBS=ON")
 
     # Cross-compilation setup
