@@ -6,6 +6,7 @@
 #include <memory>
 #include <future>
 #include <vector>
+#include <optional>
 
 namespace croupier {
 namespace sdk {
@@ -112,6 +113,27 @@ struct ClientConfig {
     int heartbeat_interval = 60;  // Heartbeat interval in seconds
 };
 
+// Reconnection configuration with exponential backoff
+struct ReconnectConfig {
+    bool enabled = true;             // Enable automatic reconnection
+    int max_attempts = 0;            // Max reconnection attempts (0 = infinite)
+    int initial_delay_ms = 1000;     // Initial reconnection delay in milliseconds
+    int max_delay_ms = 30000;        // Maximum reconnection delay in milliseconds
+    double backoff_multiplier = 2.0; // Exponential backoff multiplier
+    double jitter_factor = 0.2;      // Jitter factor (0-1) to add randomness
+};
+
+// Retry configuration with exponential backoff
+struct RetryConfig {
+    bool enabled = true;             // Enable retry on failure
+    int max_attempts = 3;            // Max retry attempts
+    int initial_delay_ms = 100;      // Initial retry delay in milliseconds
+    int max_delay_ms = 5000;         // Maximum retry delay in milliseconds
+    double backoff_multiplier = 2.0; // Exponential backoff multiplier
+    double jitter_factor = 0.1;      // Jitter factor (0-1) to add randomness
+    std::vector<int> retryable_status_codes = {14, 13, 2, 10, 4}; // gRPC status codes
+};
+
 // Invoker configuration
 struct InvokerConfig {
     std::string address;              // Server/Agent address
@@ -133,6 +155,9 @@ struct InvokerConfig {
 
     // ========== Timeouts ==========
     int timeout_seconds = 30;        // Request timeout
+
+    // ========== Retry Configuration ==========
+    RetryConfig retry;               // Retry configuration
 };
 
 // Invoke options for function calls
@@ -145,6 +170,7 @@ struct InvokeOptions {
     std::string hash_key;
     std::string trace_id;
     std::map<std::string, std::string> metadata;
+    std::optional<RetryConfig> retry; // Retry configuration override
 };
 
 // Job event for streaming operations
@@ -244,6 +270,12 @@ public:
 
     // Set schema for client-side validation
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema);
+
+    // Set reconnection configuration
+    void SetReconnectConfig(const ReconnectConfig& config);
+
+    // Set retry configuration
+    void SetRetryConfig(const RetryConfig& config);
 
     // Close connection
     void Close();

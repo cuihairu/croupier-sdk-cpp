@@ -688,8 +688,17 @@ std::string CroupierClient::Impl::GzipCompress(const std::string& input) const {
 class CroupierInvoker::Impl {
 public:
     InvokerConfig config_;
+    ReconnectConfig reconnect_config_;
+    RetryConfig retry_config_;
     std::map<std::string, std::map<std::string, std::string>> schemas_;
     std::atomic<bool> connected_{false};
+
+    // Reconnection state
+    std::atomic<bool> is_reconnecting_{false};
+    std::atomic<int> reconnect_attempts_{0};
+    std::atomic<bool> should_stop_reconnecting_{false};
+    std::thread reconnect_thread_;
+    std::string last_error_;
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
     // gRPC components
@@ -697,9 +706,41 @@ public:
     std::unique_ptr<functionv1::FunctionService::Stub> stub_;
 #endif
 
-    explicit Impl(const InvokerConfig& config) : config_(config) {}
+    explicit Impl(const InvokerConfig& config) : config_(config) {
+        // Set default reconnect config
+        reconnect_config_.enabled = true;
+        reconnect_config_.max_attempts = 0;  // Infinite
+        reconnect_config_.initial_delay_ms = 1000;
+        reconnect_config_.max_delay_ms = 30000;
+        reconnect_config_.backoff_multiplier = 2.0;
+        reconnect_config_.jitter_factor = 0.2;
+
+        // Initialize retry config from config or use defaults
+        retry_config_ = config_.retry;
+        if (!retry_config_.enabled) {
+            // Use default retry config if not set
+            retry_config_.enabled = true;
+            retry_config_.max_attempts = 3;
+            retry_config_.initial_delay_ms = 100;
+            retry_config_.max_delay_ms = 5000;
+            retry_config_.backoff_multiplier = 2.0;
+            retry_config_.jitter_factor = 0.1;
+            if (retry_config_.retryable_status_codes.empty()) {
+                retry_config_.retryable_status_codes = {14, 13, 2, 10, 4}; // Default codes
+            }
+        }
+    }
 
     bool Connect() {
+        bool result = connectInternal();
+        if (!result && IsConnectionError()) {
+            ScheduleReconnectIfNeeded();
+        }
+        return result;
+    }
+
+    // Internal connect method that doesn't trigger reconnection
+    bool connectInternal() {
         if (connected_) return true;
 
         std::cout << "Connecting to server/agent at: " << config_.address << std::endl;
@@ -729,11 +770,14 @@ public:
             }
 
             connected_ = true;
+            reconnect_attempts_ = 0;
+            is_reconnecting_ = false;
             std::cout << "✅ Connected to: " << config_.address << std::endl;
             return true;
 
         } catch (const std::exception& e) {
             std::cerr << "Connection failed: " << e.what() << std::endl;
+            last_error_ = e.what();
             return false;
         }
 #else
@@ -746,7 +790,10 @@ public:
 
     std::string Invoke(const std::string& function_id, const std::string& payload,
                       const InvokeOptions& options) {
-        if (!connected_ && !Connect()) {
+        if (!connected_ && !connectInternal()) {
+            if (IsConnectionError()) {
+                ScheduleReconnectIfNeeded();
+            }
             throw std::runtime_error("Not connected to server");
         }
 
@@ -758,6 +805,61 @@ public:
             }
         }
 
+        // Get retry config (use options retry if provided, otherwise use config retry)
+        const RetryConfig& retry_config = options.retry.has_value() ? *options.retry : retry_config_;
+
+        // If retry is disabled, execute directly
+        if (!retry_config.enabled) {
+            return invokeInternal(function_id, payload, options);
+        }
+
+        // Execute with retry
+        int max_attempts = retry_config.max_attempts;
+        std::string last_error;
+
+        for (int attempt = 0; attempt < max_attempts; ++attempt) {
+            try {
+                return invokeInternal(function_id, payload, options);
+            } catch (const std::exception& e) {
+                last_error = e.what();
+
+                // Check if this error is retryable and not the last attempt
+                if (attempt >= max_attempts - 1) {
+                    throw std::runtime_error("Invoke failed after " + std::to_string(max_attempts) +
+                                           " attempts: " + last_error);
+                }
+
+                // Check if error is retryable (simplified check)
+                bool is_retryable = last_error.find("UNAVAILABLE") != std::string::npos ||
+                                   last_error.find("INTERNAL") != std::string::npos ||
+                                   last_error.find("DEADLINE") != std::string::npos ||
+                                   last_error.find("connection") != std::string::npos ||
+                                   last_error.find("timeout") != std::string::npos;
+
+                if (!is_retryable) {
+                    throw std::runtime_error("Invoke failed with non-retryable error: " + last_error);
+                }
+
+                // Connection errors should trigger reconnection
+                if (IsConnectionError() && reconnect_config_.enabled) {
+                    connected_ = false;
+                    ScheduleReconnectIfNeeded();
+                }
+
+                // Calculate delay and wait
+                int delay = CalculateRetryDelay(attempt);
+                std::cout << "Invocation attempt " << (attempt + 1)
+                          << " failed, retrying in " << delay << " ms: " << last_error << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            }
+        }
+
+        throw std::runtime_error("Invoke failed after " + std::to_string(max_attempts) +
+                               " attempts: " + last_error);
+    }
+
+    std::string invokeInternal(const std::string& function_id, const std::string& payload,
+                               const InvokeOptions& options) {
         std::cout << "Invoking function: " << function_id << std::endl;
 
  #ifdef CROUPIER_SDK_ENABLE_GRPC
@@ -819,6 +921,7 @@ public:
 
         } catch (const std::exception& e) {
             std::cerr << "❌ Invoke failed: " << e.what() << std::endl;
+            last_error_ = e.what();
             throw;
         }
 #else
@@ -831,7 +934,10 @@ public:
 
     std::string StartJob(const std::string& function_id, const std::string& payload,
                         const InvokeOptions& options) {
-        if (!connected_ && !Connect()) {
+        if (!connected_ && !connectInternal()) {
+            if (IsConnectionError()) {
+                ScheduleReconnectIfNeeded();
+            }
             throw std::runtime_error("Not connected to server");
         }
 
@@ -843,6 +949,61 @@ public:
             }
         }
 
+        // Get retry config (use options retry if provided, otherwise use config retry)
+        const RetryConfig& retry_config = options.retry.has_value() ? *options.retry : retry_config_;
+
+        // If retry is disabled, execute directly
+        if (!retry_config.enabled) {
+            return startJobInternal(function_id, payload, options);
+        }
+
+        // Execute with retry
+        int max_attempts = retry_config.max_attempts;
+        std::string last_error;
+
+        for (int attempt = 0; attempt < max_attempts; ++attempt) {
+            try {
+                return startJobInternal(function_id, payload, options);
+            } catch (const std::exception& e) {
+                last_error = e.what();
+
+                // Check if this error is retryable and not the last attempt
+                if (attempt >= max_attempts - 1) {
+                    throw std::runtime_error("StartJob failed after " + std::to_string(max_attempts) +
+                                           " attempts: " + last_error);
+                }
+
+                // Check if error is retryable (simplified check)
+                bool is_retryable = last_error.find("UNAVAILABLE") != std::string::npos ||
+                                   last_error.find("INTERNAL") != std::string::npos ||
+                                   last_error.find("DEADLINE") != std::string::npos ||
+                                   last_error.find("connection") != std::string::npos ||
+                                   last_error.find("timeout") != std::string::npos;
+
+                if (!is_retryable) {
+                    throw std::runtime_error("StartJob failed with non-retryable error: " + last_error);
+                }
+
+                // Connection errors should trigger reconnection
+                if (IsConnectionError() && reconnect_config_.enabled) {
+                    connected_ = false;
+                    ScheduleReconnectIfNeeded();
+                }
+
+                // Calculate delay and wait
+                int delay = CalculateRetryDelay(attempt);
+                std::cout << "StartJob attempt " << (attempt + 1)
+                          << " failed, retrying in " << delay << " ms: " << last_error << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            }
+        }
+
+        throw std::runtime_error("StartJob failed after " + std::to_string(max_attempts) +
+                               " attempts: " + last_error);
+    }
+
+    std::string startJobInternal(const std::string& function_id, const std::string& payload,
+                                 const InvokeOptions& options) {
         std::cout << "Starting job for function: " << function_id << std::endl;
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
@@ -904,6 +1065,7 @@ public:
 
         } catch (const std::exception& e) {
             std::cerr << "❌ StartJob failed: " << e.what() << std::endl;
+            last_error_ = e.what();
             throw;
         }
 #else
@@ -918,7 +1080,10 @@ public:
         return std::async(std::launch::async, [this, job_id]() {
             std::vector<JobEvent> events;
 
-            if (!connected_ && !Connect()) {
+            if (!connected_ && !connectInternal()) {
+                if (IsConnectionError()) {
+                    ScheduleReconnectIfNeeded();
+                }
                 JobEvent error_event;
                 error_event.job_id = job_id;
                 error_event.error = "Not connected to server";
@@ -1026,7 +1191,10 @@ public:
     }
 
     bool CancelJob(const std::string& job_id) {
-        if (!connected_ && !Connect()) {
+        if (!connected_ && !connectInternal()) {
+            if (IsConnectionError()) {
+                ScheduleReconnectIfNeeded();
+            }
             std::cerr << "Not connected to server" << std::endl;
             return false;
         }
@@ -1071,10 +1239,155 @@ public:
         std::cout << "Set schema for function: " << function_id << std::endl;
     }
 
+    void SetReconnectConfig(const ReconnectConfig& config) {
+        reconnect_config_ = config;
+    }
+
+    void SetRetryConfig(const RetryConfig& config) {
+        retry_config_ = config;
+    }
+
     void Close() {
+        // Stop reconnection thread
+        should_stop_reconnecting_ = true;
+        if (reconnect_thread_.joinable()) {
+            reconnect_thread_.join();
+        }
+
         connected_ = false;
         schemas_.clear();
         std::cout << "Invoker closed" << std::endl;
+    }
+
+    // Check if error is a connection error
+    bool IsConnectionError() const {
+        std::string lower_error = last_error_;
+        std::transform(lower_error.begin(), lower_error.end(), lower_error.begin(), ::tolower);
+
+        // Check for common connection error patterns
+        return lower_error.find("connection") != std::string::npos ||
+               lower_error.find("refused") != std::string::npos ||
+               lower_error.find("reset") != std::string::npos ||
+               lower_error.find("unreachable") != std::string::npos ||
+               lower_error.find("timeout") != std::string::npos;
+    }
+
+    // Calculate reconnection delay with exponential backoff and jitter
+    int CalculateReconnectDelay() const {
+        // Calculate base delay using exponential backoff
+        int base_delay = reconnect_config_.initial_delay_ms;
+        int exponential_delay = static_cast<int>(
+            base_delay * std::pow(reconnect_config_.backoff_multiplier, reconnect_attempts_ - 1)
+        );
+
+        // Cap at max delay
+        if (exponential_delay > reconnect_config_.max_delay_ms) {
+            exponential_delay = reconnect_config_.max_delay_ms;
+        }
+
+        // Add jitter to prevent thundering herd
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(-reconnect_config_.jitter_factor, reconnect_config_.jitter_factor);
+        double jitter_ratio = dis(gen);
+
+        int jitter = static_cast<int>(exponential_delay * jitter_ratio);
+        int final_delay = exponential_delay + jitter;
+
+        if (final_delay < 0) {
+            final_delay = 0;
+        }
+
+        return final_delay;
+    }
+
+    // Schedule reconnection if enabled
+    void ScheduleReconnectIfNeeded() {
+        if (!reconnect_config_.enabled) {
+            return;
+        }
+
+        if (is_reconnecting_) {
+            return;
+        }
+
+        // Check max attempts
+        if (reconnect_config_.max_attempts > 0 &&
+            reconnect_attempts_ >= reconnect_config_.max_attempts) {
+            std::cout << "Max reconnection attempts (" << reconnect_config_.max_attempts
+                      << ") reached, giving up" << std::endl;
+            return;
+        }
+
+        is_reconnecting_ = true;
+        reconnect_attempts_++;
+
+        int delay = CalculateReconnectDelay();
+        std::cout << "Scheduling reconnection attempt " << reconnect_attempts_
+                  << " in " << delay << " ms" << std::endl;
+
+        // Stop existing reconnect thread if any
+        if (reconnect_thread_.joinable()) {
+            reconnect_thread_.join();
+        }
+
+        // Start reconnection thread
+        reconnect_thread_ = std::thread([this, delay]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+
+            if (should_stop_reconnecting_) {
+                is_reconnecting_ = false;
+                return;
+            }
+
+            std::cout << "Reconnecting... (attempt " << reconnect_attempts_ << ")" << std::endl;
+            if (connectInternal()) {
+                std::cout << "Reconnection successful" << std::endl;
+            } else {
+                std::cout << "Reconnection attempt " << reconnect_attempts_ << " failed" << std::endl;
+                // Schedule next attempt
+                ScheduleReconnectIfNeeded();
+            }
+        });
+    }
+
+    // Check if error is retryable based on gRPC status code
+    bool IsRetryableError(int grpc_status_code) const {
+        for (int code : retry_config_.retryable_status_codes) {
+            if (code == grpc_status_code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Calculate retry delay with exponential backoff and jitter
+    int CalculateRetryDelay(int attempt) const {
+        // Calculate base delay using exponential backoff
+        int base_delay = retry_config_.initial_delay_ms;
+        int exponential_delay = static_cast<int>(
+            base_delay * std::pow(retry_config_.backoff_multiplier, attempt)
+        );
+
+        // Cap at max delay
+        if (exponential_delay > retry_config_.max_delay_ms) {
+            exponential_delay = retry_config_.max_delay_ms;
+        }
+
+        // Add jitter to prevent thundering herd
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(-retry_config_.jitter_factor, retry_config_.jitter_factor);
+        double jitter_ratio = dis(gen);
+
+        int jitter = static_cast<int>(exponential_delay * jitter_ratio);
+        int final_delay = exponential_delay + jitter;
+
+        if (final_delay < 0) {
+            final_delay = 0;
+        }
+
+        return final_delay;
     }
 };
 
@@ -1174,6 +1487,14 @@ bool CroupierInvoker::CancelJob(const std::string& job_id) {
 void CroupierInvoker::SetSchema(const std::string& function_id,
                                const std::map<std::string, std::string>& schema) {
     impl_->SetSchema(function_id, schema);
+}
+
+void CroupierInvoker::SetReconnectConfig(const ReconnectConfig& config) {
+    impl_->SetReconnectConfig(config);
+}
+
+void CroupierInvoker::SetRetryConfig(const RetryConfig& config) {
+    impl_->SetRetryConfig(config);
 }
 
 void CroupierInvoker::Close() {
