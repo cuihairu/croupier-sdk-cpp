@@ -53,4 +53,246 @@ jobs:
             vcpkg_triplet: x64-windows
             artifact_name: windows-x64
 
-          - os: windows-latest
+          - os: ubuntu-latest
+            arch: x64
+            vcpkg_triplet: x64-linux
+            artifact_name: linux-x64
+
+          - os: ubuntu-latest
+            arch: arm64
+            vcpkg_triplet: arm64-linux
+            artifact_name: linux-arm64
+            cross_compile: true
+
+          - os: macos-latest
+            arch: x64
+            vcpkg_triplet: x64-osx
+            artifact_name: macos-x64
+
+          - os: macos-latest
+            arch: arm64
+            vcpkg_triplet: arm64-osx
+            artifact_name: macos-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Setup Windows Environment
+      if: runner.os == 'Windows'
+      run: |
+        choco install ninja
+        ninja --version
+        cmake --version
+
+    - name: Setup MSVC Developer Command Prompt
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.arch }}
+
+    - name: Setup Linux Environment
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build
+
+    - name: Setup Linux Cross-compilation
+      if: matrix.cross_compile && runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+    - name: Setup macOS Environment
+      if: runner.os == 'macOS'
+      run: |
+        brew install ninja
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
+        VCPKG_BUILD_TYPE: ${{ env.VCPKG_BUILD_TYPE }}
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgJsonGlob: 'vcpkg.json'
+        doNotCache: false
+
+    - name: Export GitHub Actions cache environment variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      env:
+        VCPKG_MAX_CONCURRENCY: 1
+      run: |
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+
+    - name: Configure CMake (Unix)
+      if: runner.os != 'Windows'
+      env:
+        VCPKG_MAX_CONCURRENCY: 1
+      run: |
+        BUILD_TESTS=ON
+        BUILD_EXAMPLES=ON
+        if [[ "${{ matrix.cross_compile }}" == "true" ]]; then
+          BUILD_TESTS=OFF
+          BUILD_EXAMPLES=OFF
+        fi
+        cmake -B build \
+          -G "Ninja" \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" \
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet }} \
+          -DVCPKG_BUILD_TYPE=${{ env.VCPKG_BUILD_TYPE }} \
+          -DCMAKE_INSTALL_PREFIX=install \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_STATIC_LIBS=ON \
+          -DBUILD_EXAMPLES=${BUILD_EXAMPLES} \
+          -DBUILD_TESTS=${BUILD_TESTS} \
+          -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+
+    - name: Build SDK
+      run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+    - name: Run Tests
+      if: matrix.arch == 'x64' && !matrix.cross_compile
+      run: cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+
+    - name: Create Separate Static and Dynamic Packages
+      run: |
+        mkdir -p package-static package-dynamic
+        cmake --install build --prefix package-install
+
+        cp -r package-install/include package-static/ 2>/dev/null || true
+        cp -r package-install/include package-dynamic/ 2>/dev/null || true
+        cp -r package-install/share package-static/ 2>/dev/null || true
+        cp -r package-install/share package-dynamic/ 2>/dev/null || true
+        cp -r package-install/bin package-static/ 2>/dev/null || true
+        cp -r package-install/bin package-dynamic/ 2>/dev/null || true
+
+        mkdir -p package-static/lib package-dynamic/lib
+
+        find package-install -name "*.a" -exec cp {} package-static/lib/ \; 2>/dev/null || true
+        find package-install -name "*.lib" -exec cp {} package-static/lib/ \; 2>/dev/null || true
+
+        find package-install -name "*.so*" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+        find package-install -name "*.dylib*" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+        find package-install -name "*.dll" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
+
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          powershell Compress-Archive -Path package-static/* -DestinationPath "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
+          powershell Compress-Archive -Path package-dynamic/* -DestinationPath "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
+        else
+          tar -czf "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-static .
+          tar -czf "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-dynamic .
+        fi
+
+        echo "📦 Package files created:"
+        ls -la croupier-cpp-sdk-*-${{ matrix.artifact_name }}.*
+      shell: bash
+
+    - name: Upload Static Library Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-cpp-sdk-static-${{ matrix.artifact_name }}
+        path: croupier-cpp-sdk-static-*-${{ matrix.artifact_name }}.*
+        retention-days: 30
+
+    - name: Upload Dynamic Library Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-cpp-sdk-dynamic-${{ matrix.artifact_name }}
+        path: croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
+        retention-days: 30
+
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download All Static Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: croupier-cpp-sdk-static-*
+        path: static-artifacts/
+
+    - name: Download All Dynamic Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: croupier-cpp-sdk-dynamic-*
+        path: dynamic-artifacts/
+
+    - name: Prepare Release Assets
+      run: |
+        mkdir -p release_assets
+
+        find static-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        find dynamic-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        echo "📦 Release assets:"
+        ls -la release_assets/
+        echo ""
+        echo "📊 Package summary:"
+        echo "Static packages: $(ls release_assets/*static* 2>/dev/null | wc -l)"
+        echo "Dynamic packages: $(ls release_assets/*dynamic* 2>/dev/null | wc -l)"
+        echo "Total packages: $(ls release_assets/*.* 2>/dev/null | wc -l)"
+
+    - name: Generate Release Notes
+      run: |
+        cat << EOF > RELEASE_NOTES.md
+        # Croupier C++ SDK Nightly Build ${{ needs.version.outputs.version }}
+
+        ## 📦 Available Packages
+
+        ### Static Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
+
+        ### Dynamic Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
+
+        ## 🛠️ Build Information
+        - Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        - Commit: ${{ github.sha }}
+        - Workflow: ${{ github.run_id }}
+        - Version Tag: ${{ needs.version.outputs.version_tag }}
+
+        ---
+        ⚠️ **This is a nightly build and may be unstable.** For stable releases, please use the official tagged releases.
+
+        EOF
+
+    - name: Create Nightly Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.version.outputs.version_tag }}
+        name: "Croupier C++ SDK Nightly ${{ needs.version.outputs.version }}"
+        body_path: RELEASE_NOTES.md
+        files: release_assets/*
+        draft: false
+        prerelease: true
+        generate_release_notes: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
