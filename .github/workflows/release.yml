@@ -1,10 +1,9 @@
-name: Nightly Build
+name: Release
 
 on:
   push:
-    branches: [ main ]
-  schedule:
-    - cron: '0 2 * * *'
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +20,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       version_tag: ${{ steps.version.outputs.version_tag }}
+      is_tagged_release: ${{ steps.version.outputs.is_tagged_release }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -29,14 +29,22 @@ jobs:
     - name: Generate Version
       id: version
       run: |
-        DATE=$(date +%Y%m%d)
-        TIME=$(date +%H%M)
-        COMMIT_SHORT=$(git rev-parse --short HEAD)
-        VERSION="${SDK_VERSION_BASE}.0-nightly.${DATE}.${COMMIT_SHORT}"
-        VERSION_TAG="nightly-${DATE}-${COMMIT_SHORT}"
+        CURRENT_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+        IS_TAGGED_RELEASE="false"
+
+        if [[ -n "$CURRENT_TAG" ]]; then
+          VERSION="${CURRENT_TAG#v}"
+          VERSION_TAG="$CURRENT_TAG"
+          IS_TAGGED_RELEASE="true"
+          echo "🎯 Tagged release detected: $CURRENT_TAG"
+        else
+          VERSION="${SDK_VERSION_BASE}.0"
+          VERSION_TAG="v${VERSION}"
+        fi
 
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+        echo "is_tagged_release=${IS_TAGGED_RELEASE}" >> $GITHUB_OUTPUT
 
         echo "Generated version: ${VERSION}"
         echo "Generated tag: ${VERSION_TAG}"
@@ -221,15 +229,80 @@ jobs:
         path: croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
         retention-days: 30
 
-  notify:
+  release:
     needs: [version, build]
-    if: always()
     runs-on: ubuntu-latest
+
     steps:
-    - name: Notify Build Status
-      uses: actions/github-script@v7
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download All Static Artifacts
+      uses: actions/download-artifact@v4
       with:
-        script: |
-          const buildStatus = '${{ needs.build.result }}';
-          const version = '${{ needs.version.outputs.version }}';
-          console.log(`Nightly build completed for version ${version}, status: ${buildStatus}`);
+        pattern: croupier-cpp-sdk-static-*
+        path: static-artifacts/
+
+    - name: Download All Dynamic Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: croupier-cpp-sdk-dynamic-*
+        path: dynamic-artifacts/
+
+    - name: Prepare Release Assets
+      run: |
+        mkdir -p release_assets
+
+        find static-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        find dynamic-artifacts/ -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release_assets/
+        done
+
+        echo "📦 Release assets:"
+        ls -la release_assets/
+        echo ""
+        echo "📊 Package summary:"
+        echo "Static packages: $(ls release_assets/*static* 2>/dev/null | wc -l)"
+        echo "Dynamic packages: $(ls release_assets/*dynamic* 2>/dev/null | wc -l)"
+        echo "Total packages: $(ls release_assets/*.* 2>/dev/null | wc -l)"
+
+    - name: Generate Release Notes
+      run: |
+        cat << EOF > RELEASE_NOTES.md
+        # Croupier C++ SDK ${{ needs.version.outputs.version }}
+
+        ## 📦 Available Packages
+
+        ### Static Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`, \`croupier-cpp-sdk-static-*-windows-x86.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
+
+        ### Dynamic Library Packages
+        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`, \`croupier-cpp-sdk-dynamic-*-windows-x86.zip\`
+        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-linux-arm64.tar.gz\`
+        - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
+
+        ## 🛠️ Build Information
+        - Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        - Commit: ${{ github.sha }}
+        - Workflow: ${{ github.run_id }}
+        - Version Tag: ${{ needs.version.outputs.version_tag }}
+
+        EOF
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.version.outputs.version_tag }}
+        name: "Croupier C++ SDK ${{ needs.version.outputs.version }}"
+        body_path: RELEASE_NOTES.md
+        files: release_assets/*
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
