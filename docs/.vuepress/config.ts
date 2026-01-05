@@ -16,7 +16,7 @@ export default defineUserConfig({
     ['meta', { property: 'og:title', content: 'Croupier C++ SDK' }],
     ['meta', { property: 'og:site_name', content: 'Croupier C++ SDK' }],
   ],
-  base: '/',
+  base: '/croupier-sdk-cpp/',
   bundler: viteBundler({
     viteOptions: {
       build: {
