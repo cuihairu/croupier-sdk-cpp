@@ -51,6 +51,10 @@ export default defineUserConfig({
         link: '/configuration/',
       },
       {
+        text: 'Croupier 主项目',
+        link: 'https://cuihairu.github.io/croupier/',
+      },
+      {
         text: '其他 SDK',
         children: [
           {
