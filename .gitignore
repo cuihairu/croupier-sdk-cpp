@@ -85,3 +85,6 @@ generated/
 # Keep buf configuration files
 !buf.gen.yaml
 !buf.yaml
+
+# Keep VuePress config
+!docs/.vuepress/config.ts
