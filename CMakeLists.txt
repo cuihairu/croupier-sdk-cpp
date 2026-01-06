@@ -361,49 +361,66 @@ elseif(BUILD_STATIC_LIBS)
     add_library(croupier::sdk ALIAS croupier-sdk-static)
 endif()
 
+# ========== Determine SDK Library Target for Linking ==========
+# Determine which library target to use for linking (examples and tests)
+# This ensures direct target linking instead of alias resolution issues
+if(BUILD_SHARED_LIBS)
+    set(_CROUPIER_SDK_TARGET croupier-sdk-shared)
+elseif(BUILD_STATIC_LIBS)
+    set(_CROUPIER_SDK_TARGET croupier-sdk-static)
+else()
+    message(FATAL_ERROR "At least one of BUILD_SHARED_LIBS or BUILD_STATIC_LIBS must be ON")
+endif()
+
 # ========== Example Programs ==========
 if(BUILD_EXAMPLES)
     # Basic example
     add_executable(croupier-example examples/example.cpp)
     target_link_libraries(croupier-example
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-example ${_CROUPIER_SDK_TARGET})
 
     # Virtual Object Demo
     add_executable(croupier-virtual-object-demo examples/virtual_object_demo.cpp)
     target_link_libraries(croupier-virtual-object-demo
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-virtual-object-demo ${_CROUPIER_SDK_TARGET})
 
     # Complete Example with gRPC
     add_executable(croupier-complete-example examples/complete_example.cpp)
     target_link_libraries(croupier-complete-example
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-complete-example ${_CROUPIER_SDK_TARGET})
 
     # Advanced Configuration Example
     add_executable(croupier-config-example examples/config_example.cpp)
     target_link_libraries(croupier-config-example
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-config-example ${_CROUPIER_SDK_TARGET})
 
     # Plugin System Demo
     add_executable(croupier-plugin-demo examples/plugin_demo.cpp)
     target_link_libraries(croupier-plugin-demo
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-plugin-demo ${_CROUPIER_SDK_TARGET})
 
     # Comprehensive Demo - Shows ALL SDK interfaces
     add_executable(croupier-comprehensive-demo examples/comprehensive_demo.cpp)
     target_link_libraries(croupier-comprehensive-demo
         PRIVATE
-            croupier::sdk
+            ${_CROUPIER_SDK_TARGET}
     )
+    add_dependencies(croupier-comprehensive-demo ${_CROUPIER_SDK_TARGET})
 
     # Example Plugin (shared library)
     add_library(example_plugin SHARED examples/plugins/example_plugin.cpp)
@@ -484,9 +501,10 @@ if(BUILD_TESTS)
 
         target_link_libraries(croupier-sdk-tests
             PRIVATE
-                croupier::sdk
+                ${_CROUPIER_SDK_TARGET}
                 ${_croupier_gtest_main}
         )
+        add_dependencies(croupier-sdk-tests ${_CROUPIER_SDK_TARGET})
 
         add_test(NAME CroupierSDKTests COMMAND croupier-sdk-tests)
     else()
