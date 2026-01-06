@@ -149,9 +149,18 @@ jobs:
       run: |
         BUILD_TESTS=ON
         BUILD_EXAMPLES=ON
+        CMAKE_ARCH_ARGS=""
         if [[ "${{ matrix.cross_compile }}" == "true" ]]; then
           BUILD_TESTS=OFF
           BUILD_EXAMPLES=OFF
+        fi
+        # macOS 交叉编译需要明确指定目标架构
+        if [[ "${{ runner.os }}" == "macOS" ]]; then
+          if [[ "${{ matrix.arch }}" == "x64" ]]; then
+            CMAKE_ARCH_ARGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
+          elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            CMAKE_ARCH_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
+          fi
         fi
         cmake -B build \
           -G "Ninja" \
@@ -165,6 +174,7 @@ jobs:
           -DBUILD_STATIC_LIBS=ON \
           -DBUILD_EXAMPLES=${BUILD_EXAMPLES} \
           -DBUILD_TESTS=${BUILD_TESTS} \
+          ${CMAKE_ARCH_ARGS} \
           -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Build SDK
