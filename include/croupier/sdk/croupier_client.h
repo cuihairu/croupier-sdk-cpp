@@ -111,6 +111,11 @@ struct ClientConfig {
     // ========== Timeouts ==========
     int timeout_seconds = 30;     // Connection timeout
     int heartbeat_interval = 60;  // Heartbeat interval in seconds
+
+    // ========== Logging Configuration ==========
+    bool disable_logging = false;   // Disable all logging
+    bool debug_logging = false;     // Enable debug level logging
+    std::string log_level = "INFO"; // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
 };
 
 // Reconnection configuration with exponential backoff
@@ -158,6 +163,11 @@ struct InvokerConfig {
 
     // ========== Retry Configuration ==========
     RetryConfig retry;               // Retry configuration
+
+    // ========== Logging Configuration ==========
+    bool disable_logging = false;   // Disable all logging
+    bool debug_logging = false;     // Enable debug level logging
+    std::string log_level = "INFO"; // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
 };
 
 // Invoke options for function calls

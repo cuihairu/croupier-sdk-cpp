@@ -1,6 +1,7 @@
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/grpc_service.h"
 #include "croupier/sdk/utils/json_utils.h"
+#include "croupier/sdk/logger.h"
 #include <iostream>
 #include <fstream>
 #include <thread>
@@ -23,6 +24,32 @@
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
 #endif
+
+// Logging macros with configuration support
+// These check the global logger configuration before outputting
+#define SDK_LOG_INFO(msg) \
+    do { \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) break; \
+        std::cout << "[INFO] [croupier] " << msg << std::endl; \
+    } while(0)
+
+#define SDK_LOG_WARN(msg) \
+    do { \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) break; \
+        std::cerr << "[WARN] [croupier] " << msg << std::endl; \
+    } while(0)
+
+#define SDK_LOG_ERROR(msg) \
+    do { \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERROR)) break; \
+        std::cerr << "[ERROR] [croupier] " << msg << std::endl; \
+    } while(0)
+
+#define SDK_LOG_DEBUG(msg) \
+    do { \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) break; \
+        std::cout << "[DEBUG] [croupier] " << msg << std::endl; \
+    } while(0)
 
 namespace croupier {
 namespace sdk {
@@ -129,32 +156,43 @@ public:
     std::string local_address_;
 
     explicit Impl(const ClientConfig& config) : config_(config) {
+        // ========== Initialize Logger Configuration ==========
+        auto& logger = Logger::GetInstance();
+
+        if (config_.disable_logging) {
+            logger.SetLevel(Logger::Level::OFF);
+        } else if (config_.debug_logging) {
+            logger.SetLevel(Logger::Level::DEBUG);
+        } else {
+            logger.SetLevelFromString(config_.log_level);
+        }
+
         // Validate required configuration
         if (config_.game_id.empty()) {
-            std::cerr << "Warning: game_id is required for proper backend separation" << std::endl;
+            SDK_LOG_WARN("game_id is required for proper backend separation");
         }
 
         // Validate environment
         if (config_.env != "development" && config_.env != "staging" && config_.env != "production") {
-            std::cerr << "Warning: Unknown environment '" << config_.env
-                      << "'. Valid values: development, staging, production" << std::endl;
+            SDK_LOG_WARN("Unknown environment '" << config_.env
+                       << "'. Valid values: development, staging, production");
         }
 
-        std::cout << "Initialized CroupierClient for game '" << config_.game_id
-                  << "' in '" << config_.env << "' environment" << std::endl;
+        SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id
+                  << "' in '" << config_.env << "' environment");
 
         // 初始化 gRPC 管理器
         grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
 
         // Set error callback
         grpc_manager_->SetErrorCallback([](const std::string& error) {
-            std::cerr << "🚨 gRPC Error: " << error << std::endl;
+            SDK_LOG_ERROR("gRPC Error: " << error);
             // Error handling logic can be implemented here
         });
 
         // Set reconnect callback
         grpc_manager_->SetReconnectCallback([this]() {
-            std::cout << "🔄 gRPC Reconnected, re-registering functions..." << std::endl;
+            SDK_LOG_INFO("gRPC Reconnected, re-registering functions...");
             // Re-register all functions
             RegisterAllFunctions();
         });
@@ -166,14 +204,14 @@ public:
 
     bool RegisterFunction(const FunctionDescriptor& desc, FunctionHandler handler) {
         if (running_) {
-            std::cerr << "Cannot register functions while client is running" << std::endl;
+            SDK_LOG_ERROR("Cannot register functions while client is running");
             return false;
         }
 
         handlers_[desc.id] = handler;
         descriptors_[desc.id] = desc;
 
-        std::cout << "Registered function: " << desc.id << " (version: " << desc.version << ")" << std::endl;
+        SDK_LOG_INFO("Registered function: " << desc.id << " (version: " << desc.version << ")");
         return true;
     }
 
@@ -181,13 +219,13 @@ public:
     bool RegisterVirtualObject(const VirtualObjectDescriptor& desc,
                               const std::map<std::string, FunctionHandler>& handlers) {
         if (running_) {
-            std::cerr << "Cannot register virtual objects while client is running" << std::endl;
+            SDK_LOG_ERROR("Cannot register virtual objects while client is running");
             return false;
         }
 
         // Validate object descriptor
         if (!utils::ValidateObjectDescriptor(desc)) {
-            std::cerr << "Invalid virtual object descriptor: " << desc.id << std::endl;
+            SDK_LOG_ERROR("Invalid virtual object descriptor: " << desc.id);
             return false;
         }
 
@@ -365,22 +403,22 @@ public:
         std::string new_session_id;
         if (grpc_manager_->RegisterWithAgent(local_functions, new_session_id)) {
             session_id_ = new_session_id;
-            std::cout << "✅ Re-registration successful, session_id: " << session_id_ << std::endl;
+            SDK_LOG_INFO("Re-registration successful, session_id: " << session_id_);
         } else {
-            std::cerr << "❌ Re-registration failed" << std::endl;
+            SDK_LOG_ERROR("Re-registration failed");
         }
     }
 
     bool Connect() {
         if (connected_) return true;
 
-        std::cout << "🔌 连接到 Croupier Agent: " << config_.agent_addr << std::endl;
+        SDK_LOG_INFO("Connecting to Croupier Agent: " << config_.agent_addr);
 
         grpc_manager_->UpdateHandlers(handlers_);
 
         // 使用 gRPC 管理器连接
         if (!grpc_manager_->Connect()) {
-            std::cerr << "❌ 无法连接到 Agent" << std::endl;
+            SDK_LOG_ERROR("Failed to connect to Agent");
             return false;
         }
 
@@ -395,7 +433,7 @@ public:
 
         // Register with Agent (first layer: SDK -> Agent)
         if (!grpc_manager_->RegisterWithAgent(local_functions, session_id_)) {
-            std::cerr << "❌ Failed to register service with Agent" << std::endl;
+            SDK_LOG_ERROR("Failed to register service with Agent");
             grpc_manager_->Disconnect();
             return false;
         }
@@ -404,14 +442,14 @@ public:
         local_address_ = grpc_manager_->GetLocalServerAddress();
 
         connected_ = true;
-        std::cout << "✅ 成功连接并注册到 Agent" << std::endl;
-        std::cout << "📍 本地服务地址: " << local_address_ << std::endl;
-        std::cout << "🔑 会话 ID: " << session_id_ << std::endl;
+        SDK_LOG_INFO("Successfully connected and registered to Agent");
+        SDK_LOG_INFO("Local service address: " << local_address_);
+        SDK_LOG_DEBUG("Session ID: " << session_id_);
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
         if (!config_.control_addr.empty()) {
             if (!UploadCapabilitiesManifest()) {
-                std::cerr << "⚠️  Failed to upload provider capabilities manifest" << std::endl;
+                SDK_LOG_WARN("Failed to upload provider capabilities manifest");
             }
         }
 #endif
@@ -421,9 +459,9 @@ public:
 
     void Serve() {
         running_ = true;
-        std::cout << "🚀 Croupier 客户端服务启动" << std::endl;
-        std::cout << "📍 本地服务地址: " << local_address_ << std::endl;
-        std::cout << "🎯 已注册函数: " << handlers_.size() << " 个" << std::endl;
+        SDK_LOG_INFO("Croupier client service started");
+        SDK_LOG_INFO("Local service address: " << local_address_);
+        SDK_LOG_INFO("Registered functions: " << handlers_.size());
         std::cout << "📦 已注册虚拟对象: " << objects_.size() << " 个" << std::endl;
         std::cout << "🔧 已注册组件: " << components_.size() << " 个" << std::endl;
         std::cout << "💡 使用 Stop() 方法停止服务" << std::endl;
@@ -468,14 +506,14 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        std::cout << "🛑 服务已停止" << std::endl;
+        SDK_LOG_INFO("Service stopped");
     }
 
     void Stop() {
         running_ = false;
         connected_ = false;
 
-        std::cout << "🛑 正在停止 Croupier 客户端..." << std::endl;
+        SDK_LOG_INFO("Stopping Croupier client...");
 
         // Signal reconnection thread to stop
         should_stop_reconnecting_ = true;
@@ -496,7 +534,7 @@ public:
             server_thread_.join();
         }
 
-        std::cout << "✅ 客户端已完全停止" << std::endl;
+        SDK_LOG_INFO("Client fully stopped");
     }
 
     void Close() {
@@ -716,6 +754,17 @@ public:
 #endif
 
     explicit Impl(const InvokerConfig& config) : config_(config) {
+        // ========== Initialize Logger Configuration ==========
+        auto& logger = Logger::GetInstance();
+
+        if (config_.disable_logging) {
+            logger.SetLevel(Logger::Level::OFF);
+        } else if (config_.debug_logging) {
+            logger.SetLevel(Logger::Level::DEBUG);
+        } else {
+            logger.SetLevelFromString(config_.log_level);
+        }
+
         // Set default reconnect config
         reconnect_config_.enabled = true;
         reconnect_config_.max_attempts = 0;  // Infinite
@@ -752,7 +801,7 @@ public:
     bool connectInternal() {
         if (connected_) return true;
 
-        std::cout << "Connecting to server/agent at: " << config_.address << std::endl;
+        SDK_LOG_INFO("Connecting to server/agent at: " << config_.address);
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
@@ -767,25 +816,25 @@ public:
                                                 args);
 
             if (!channel_) {
-                std::cerr << "Failed to create gRPC channel" << std::endl;
+                SDK_LOG_ERROR("Failed to create gRPC channel");
                 return false;
             }
 
             // Create stub
             stub_ = functionv1::FunctionService::NewStub(channel_);
             if (!stub_) {
-                std::cerr << "Failed to create gRPC stub" << std::endl;
+                SDK_LOG_ERROR("Failed to create gRPC stub");
                 return false;
             }
 
             connected_ = true;
             reconnect_attempts_ = 0;
             is_reconnecting_ = false;
-            std::cout << "✅ Connected to: " << config_.address << std::endl;
+            SDK_LOG_INFO("Connected to: " << config_.address);
             return true;
 
         } catch (const std::exception& e) {
-            std::cerr << "Connection failed: " << e.what() << std::endl;
+            SDK_LOG_ERROR("Connection failed: " << e.what());
             last_error_ = e.what();
             return false;
         }

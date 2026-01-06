@@ -211,6 +211,7 @@ set(SDK_SOURCES
 
 set(SDK_HEADERS
     include/croupier/sdk/croupier_client.h
+    include/croupier/sdk/logger.h
     include/croupier/sdk/grpc_service.h
     include/croupier/sdk/config_driven_loader.h
     include/croupier/sdk/utils/json_utils.h
