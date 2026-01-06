@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <regex>
 
 // Optional: Use spdlog if available
 // Uncomment to use spdlog instead of simple logger
@@ -19,6 +20,38 @@
 
 namespace croupier {
 namespace sdk {
+
+// ========== Sensitive Data Masking Utilities ==========
+// These utilities help comply with SDK specification requirements for log data masking
+
+// Mask a sensitive value (token, password, key) for logging
+// Format: abc...xyz (shows first 3 and last 3 characters)
+inline std::string MaskSensitive(const std::string& value) {
+    if (value.empty()) return "";
+    const size_t min_visible = 3;
+    if (value.length() <= min_visible * 2) {
+        return std::string(value.length(), '*');
+    }
+    return value.substr(0, min_visible) + "..." + value.substr(value.length() - min_visible);
+}
+
+// Mask a value but preserve its length (all asterisks)
+inline std::string MaskFully(const std::string& value) {
+    if (value.empty()) return "";
+    return std::string(value.length(), '*');
+}
+
+// Mask JSON value by key (for logging JSON payloads)
+inline std::string MaskJsonSensitive(const std::string& json, const std::vector<std::string>& keys_to_mask) {
+    std::string result = json;
+    for (const auto& key : keys_to_mask) {
+        std::regex pattern("\"" + key + "\"\\s*:\\s*\"([^\"]+)\"");
+        std::string replacement = "\"" + key + "\":\"" + MaskSensitive("$1") + "\"";
+        // Simple replacement - in production, use a proper JSON parser
+        result = std::regex_replace(result, pattern, "\"" + key + "\":\"***masked***\"");
+    }
+    return result;
+}
 
 // Simple logger for Croupier SDK
 // Can be configured to use spdlog if CROUPIER_USE_SPDLOG is defined
@@ -103,6 +136,14 @@ public:
         std::cout << timestamp << " [" << level_str << "] [" << component << "] " << message << std::endl;
     }
 
+    // Log with sensitive data masking (for tokens, passwords, etc.)
+    void LogMasked(Level level, const std::string& component, const std::string& message, const std::string& sensitive_value) {
+        if (!IsEnabled(level)) {
+            return;
+        }
+        Log(level, component, message + " (masked: " + MaskSensitive(sensitive_value) + ")");
+    }
+
     // Convenience methods
     void Debug(const std::string& component, const std::string& message) {
         Log(Level::DEBUG, component, message);
@@ -180,6 +221,10 @@ private:
 
 #define CROUPIER_LOG_ERROR(component, message) \
     croupier::sdk::Logger::GetInstance().Error(component, message)
+
+// Convenience macro for logging with masked sensitive value
+#define CROUPIER_LOG_INFO_MASKED(component, message, sensitive_value) \
+    croupier::sdk::Logger::GetInstance().LogMasked(croupier::sdk::Logger::Level::INFO, component, message, sensitive_value)
 
 // Scoped logger for specific component
 class ComponentLogger {
