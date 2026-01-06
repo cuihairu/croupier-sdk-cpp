@@ -18,6 +18,9 @@ protected:
         config.local_listen = "127.0.0.1:0";
         config.insecure = true;
 
+        // Disable auto-reconnect for tests to avoid thread hanging
+        config.auto_reconnect = false;
+
         client = std::make_unique<CroupierClient>(config);
     }
 

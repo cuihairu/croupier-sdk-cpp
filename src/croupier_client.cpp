@@ -477,12 +477,21 @@ public:
 
         std::cout << "🛑 正在停止 Croupier 客户端..." << std::endl;
 
-        // 断开 gRPC 连接
+        // Signal reconnection thread to stop
+        should_stop_reconnecting_ = true;
+
+        // Disconnect gRPC manager first to prevent new connections
         if (grpc_manager_) {
             grpc_manager_->Disconnect();
         }
 
-        // 等待服务器线程结束
+        // Wait for reconnection thread to finish (before server thread to avoid deadlock)
+        is_reconnecting_ = false;
+        if (reconnect_thread_.joinable()) {
+            reconnect_thread_.join();
+        }
+
+        // Wait for server thread to finish
         if (server_thread_.joinable()) {
             server_thread_.join();
         }
@@ -1333,7 +1342,15 @@ public:
 
         // Start reconnection thread
         reconnect_thread_ = std::thread([this, delay]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            // Use interruptible sleep with 100ms intervals to check for stop signal
+            const int sleep_interval_ms = 100;
+            int elapsed = 0;
+            while (elapsed < delay && !should_stop_reconnecting_) {
+                int remaining = delay - elapsed;
+                int sleep_time = (remaining < sleep_interval_ms) ? remaining : sleep_interval_ms;
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+                elapsed += sleep_time;
+            }
 
             if (should_stop_reconnecting_) {
                 is_reconnecting_ = false;
@@ -1345,8 +1362,10 @@ public:
                 std::cout << "Reconnection successful" << std::endl;
             } else {
                 std::cout << "Reconnection attempt " << reconnect_attempts_ << " failed" << std::endl;
-                // Schedule next attempt
-                ScheduleReconnectIfNeeded();
+                // Schedule next attempt (only if not stopping)
+                if (!should_stop_reconnecting_) {
+                    ScheduleReconnectIfNeeded();
+                }
             }
         });
     }
