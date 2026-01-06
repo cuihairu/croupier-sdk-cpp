@@ -61,10 +61,6 @@ jobs:
             vcpkg_triplet: x64-windows
             artifact_name: windows-x64
 
-          - os: windows-latest
-            arch: x86
-            vcpkg_triplet: x86-windows
-            artifact_name: windows-x86
 
           - os: ubuntu-latest
             arch: x64
@@ -277,12 +273,12 @@ jobs:
         ## 📦 Available Packages
 
         ### Static Library Packages
-        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`, \`croupier-cpp-sdk-static-*-windows-x86.zip\`
+        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`
         - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-linux-arm64.tar.gz\`
         - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
 
         ### Dynamic Library Packages
-        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`, \`croupier-cpp-sdk-dynamic-*-windows-x86.zip\`
+        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`
         - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-linux-arm64.tar.gz\`
         - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
 
