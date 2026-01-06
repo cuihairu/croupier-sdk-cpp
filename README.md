@@ -77,9 +77,11 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 
 ## 支持平台
 
+> **⚠️ 重要说明**：本 SDK **仅支持 64 位 (x64/ARM64) 架构**，不支持 32 位 (x86) 架构。
+
 | 平台 | 架构 | 状态 |
 |------|------|------|
-| **Windows** | x64, x86 | ✅ 支持 |
+| **Windows** | x64 | ✅ 支持 |
 | **Linux** | x64, ARM64 | ✅ 支持 |
 | **macOS** | x64, ARM64 (Apple Silicon) | ✅ 支持 |
 
@@ -87,7 +89,7 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 
 - 🏗️ **虚拟对象注册系统** - 完整的对象和函数组注册机制
 - 📡 **gRPC 集成** - 真实的 Protobuf + gRPC 通信（通过 vcpkg）
-- 🔧 **多平台支持** - Windows、Linux、macOS（x64/ARM64）
+- 🔧 **多平台支持** - Windows、Linux、macOS（64位）
 - 📦 **vcpkg 包管理** - 自动依赖管理和跨平台构建
 - 🚀 **高性能设计** - ID 引用模式，无状态函数，轻量参数
 - 🛡️ **类型安全** - JSON Schema 验证，编译时类型检查
@@ -97,9 +99,11 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 
 ### 系统要求
 
+- **64位操作系统** (Windows x64 / Linux x64 or ARM64 / macOS x64 or ARM64)
 - **C++17** 编译器（GCC 8+, Clang 10+, MSVC 2019+）
 - **CMake 3.20+**
 - **vcpkg**（推荐，用于依赖管理）
+- **Ninja**（推荐，用于更快构建）
 
 ### 依赖库（自动安装）
 
