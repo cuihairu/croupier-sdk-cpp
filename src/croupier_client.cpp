@@ -155,6 +155,11 @@ public:
     std::thread server_thread_;
     std::string local_address_;
 
+    // Reconnection state
+    std::atomic<bool> is_reconnecting_{false};
+    std::atomic<bool> should_stop_reconnecting_{false};
+    std::thread reconnect_thread_;
+
     explicit Impl(const ClientConfig& config) : config_(config) {
         // ========== Initialize Logger Configuration ==========
         auto& logger = Logger::GetInstance();

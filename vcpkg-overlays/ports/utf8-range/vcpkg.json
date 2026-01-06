@@ -1,0 +1,10 @@
+{
+  "name": "utf8-range",
+  "version-string": "5.29.5",
+  "description": "UTF-8 range operations",
+  "homepage": "https://github.com/protocolbuffers/protobuf",
+  "license": "BSD-3-Clause",
+  "dependencies": [
+    "abseil"
+  ]
+}
