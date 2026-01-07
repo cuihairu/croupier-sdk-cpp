@@ -58,12 +58,6 @@ jobs:
             vcpkg_triplet: x64-linux
             artifact_name: linux-x64
 
-          - os: ubuntu-latest
-            arch: arm64
-            vcpkg_triplet: arm64-linux
-            artifact_name: linux-arm64
-            cross_compile: true
-
           - os: macos-latest
             arch: x64
             vcpkg_triplet: x64-osx
@@ -271,12 +265,12 @@ jobs:
 
         ### Static Library Packages
         - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`
-        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-linux-arm64.tar.gz\`
+        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`
         - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
 
         ### Dynamic Library Packages
         - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`
-        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-linux-arm64.tar.gz\`
+        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`
         - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
 
         ## 🛠️ Build Information

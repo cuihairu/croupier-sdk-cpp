@@ -61,7 +61,7 @@ public:
         DEBUG = 0,
         INFO = 1,
         WARN = 2,
-        ERROR = 3,
+        ERR = 3,
         OFF = 4
     };
 
@@ -82,7 +82,7 @@ public:
         } else if (level == "WARN" || level == "warn") {
             SetLevel(Level::WARN);
         } else if (level == "ERROR" || level == "error") {
-            SetLevel(Level::ERROR);
+            SetLevel(Level::ERR);
         } else if (level == "OFF" || level == "off") {
             SetLevel(Level::OFF);
         }
@@ -119,7 +119,7 @@ public:
                 case Level::WARN:
                     spdlog_logger_->warn("[{}] {}", component, message);
                     break;
-                case Level::ERROR:
+                case Level::ERR:
                     spdlog_logger_->error("[{}] {}", component, message);
                     break;
                 default:
@@ -158,7 +158,7 @@ public:
     }
 
     void Error(const std::string& component, const std::string& message) {
-        Log(Level::ERROR, component, message);
+        Log(Level::ERR, component, message);
     }
 
 #ifdef CROUPIER_USE_SPDLOG
@@ -185,7 +185,7 @@ private:
             case Level::DEBUG: return "DEBUG";
             case Level::INFO:  return "INFO";
             case Level::WARN:  return "WARN";
-            case Level::ERROR: return "ERROR";
+            case Level::ERR: return "ERROR";
             default:           return "UNKNOWN";
         }
     }

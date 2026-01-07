@@ -41,7 +41,7 @@
 
 #define SDK_LOG_ERROR(msg) \
     do { \
-        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERROR)) break; \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) break; \
         std::cerr << "[ERROR] [croupier] " << msg << std::endl; \
     } while(0)
 

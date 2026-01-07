@@ -82,7 +82,7 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 | 平台 | 架构 | 状态 |
 |------|------|------|
 | **Windows** | x64 | ✅ 支持 |
-| **Linux** | x64, ARM64 | ✅ 支持 |
+| **Linux** | x64 | ✅ 支持 |
 | **macOS** | x64, ARM64 (Apple Silicon) | ✅ 支持 |
 
 ## 核心特性
@@ -99,7 +99,7 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 
 ### 系统要求
 
-- **64位操作系统** (Windows x64 / Linux x64 or ARM64 / macOS x64 or ARM64)
+- **64位操作系统** (Windows x64 / Linux x64 / macOS x64 or ARM64)
 - **C++17** 编译器（GCC 8+, Clang 10+, MSVC 2019+）
 - **CMake 3.20+**
 - **vcpkg**（推荐，用于依赖管理）
@@ -317,11 +317,13 @@ struct ClientConfig {
 **静态库包：**
 - `croupier-cpp-sdk-static-{version}-windows-x64.zip`
 - `croupier-cpp-sdk-static-{version}-linux-x64.tar.gz`
+- `croupier-cpp-sdk-static-{version}-macos-x64.tar.gz`
 - `croupier-cpp-sdk-static-{version}-macos-arm64.tar.gz`
 
 **动态库包：**
 - `croupier-cpp-sdk-dynamic-{version}-windows-x64.zip`
 - `croupier-cpp-sdk-dynamic-{version}-linux-x64.tar.gz`
+- `croupier-cpp-sdk-dynamic-{version}-macos-x64.tar.gz`
 - `croupier-cpp-sdk-dynamic-{version}-macos-arm64.tar.gz`
 
 > 💡 **提示**：推送 `v*` 格式的 tag（如 `v1.0.0`）会自动触发正式 Release 构建
