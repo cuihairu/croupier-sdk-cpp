@@ -1,0 +1,114 @@
+<template><div><h1 id="安装指南" tabindex="-1"><a class="header-anchor" href="#安装指南"><span>安装指南</span></a></h1>
+<p>本指南将帮助你在各种平台上安装和构建 Croupier C++ SDK。</p>
+<h2 id="方法一-使用预构建包-推荐" tabindex="-1"><a class="header-anchor" href="#方法一-使用预构建包-推荐"><span>方法一：使用预构建包（推荐）</span></a></h2>
+<h3 id="下载预构建包" tabindex="-1"><a class="header-anchor" href="#下载预构建包"><span>下载预构建包</span></a></h3>
+<p>访问 <a href="https://github.com/cuihairu/croupier-sdk-cpp/releases" target="_blank" rel="noopener noreferrer">Releases 页面</a> 下载：</p>
+<p><strong>静态库包：</strong></p>
+<ul>
+<li><code v-pre>croupier-cpp-sdk-static-{version}-windows-x64.zip</code></li>
+<li><code v-pre>croupier-cpp-sdk-static-{version}-linux-x64.tar.gz</code></li>
+<li><code v-pre>croupier-cpp-sdk-static-{version}-macos-arm64.tar.gz</code></li>
+</ul>
+<p><strong>动态库包：</strong></p>
+<ul>
+<li><code v-pre>croupier-cpp-sdk-dynamic-{version}-windows-x64.zip</code></li>
+<li><code v-pre>croupier-cpp-sdk-dynamic-{version}-linux-x64.tar.gz</code></li>
+<li><code v-pre>croupier-cpp-sdk-dynamic-{version}-macos-arm64.tar.gz</code></li>
+</ul>
+<h3 id="使用预构建包" tabindex="-1"><a class="header-anchor" href="#使用预构建包"><span>使用预构建包</span></a></h3>
+<p>解压后包含：</p>
+<ul>
+<li>头文件 (<code v-pre>include/</code>)</li>
+<li>库文件 (<code v-pre>lib/</code>)</li>
+<li>示例程序 (<code v-pre>bin/</code>)</li>
+</ul>
+<p>在你的 CMake 项目中：</p>
+<div class="language-cmake line-numbers-mode" data-highlighter="prismjs" data-ext="cmake"><pre v-pre><code class="language-cmake"><span class="line"><span class="token keyword">find_package</span><span class="token punctuation">(</span>croupier-sdk REQUIRED<span class="token punctuation">)</span></span>
+<span class="line"><span class="token keyword">target_link_libraries</span><span class="token punctuation">(</span>your-target <span class="token namespace">PRIVATE</span> croupier-<span class="token inserted class-name">sdk::croupier</span>-sdk<span class="token punctuation">)</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="方法二-从源代码构建" tabindex="-1"><a class="header-anchor" href="#方法二-从源代码构建"><span>方法二：从源代码构建</span></a></h2>
+<h3 id="linux-macos" tabindex="-1"><a class="header-anchor" href="#linux-macos"><span>Linux/macOS</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 克隆仓库</span></span>
+<span class="line"><span class="token function">git</span> clone https://github.com/cuihairu/croupier-sdk-cpp.git</span>
+<span class="line"><span class="token builtin class-name">cd</span> croupier-sdk-cpp</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 基础构建</span></span>
+<span class="line">./scripts/build.sh</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 清理重构建</span></span>
+<span class="line">./scripts/build.sh <span class="token parameter variable">--clean</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 启用测试</span></span>
+<span class="line">./scripts/build.sh <span class="token parameter variable">--tests</span> ON</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="windows" tabindex="-1"><a class="header-anchor" href="#windows"><span>Windows</span></a></h3>
+<div class="language-powershell line-numbers-mode" data-highlighter="prismjs" data-ext="powershell"><pre v-pre><code class="language-powershell"><span class="line"><span class="token comment"># 克隆仓库</span></span>
+<span class="line">git clone https:<span class="token operator">/</span><span class="token operator">/</span>github<span class="token punctuation">.</span>com/cuihairu/croupier-sdk-<span class="token function">cpp</span><span class="token punctuation">.</span>git</span>
+<span class="line">cd croupier-sdk-<span class="token function">cpp</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 基础构建</span></span>
+<span class="line"><span class="token punctuation">.</span>\scripts\build<span class="token punctuation">.</span>ps1</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># Debug 构建</span></span>
+<span class="line"><span class="token punctuation">.</span>\scripts\build<span class="token punctuation">.</span>ps1 <span class="token operator">-</span>BuildType Debug</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="方法三-手动-cmake-构建" tabindex="-1"><a class="header-anchor" href="#方法三-手动-cmake-构建"><span>方法三：手动 CMake 构建</span></a></h2>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 1. 配置构建</span></span>
+<span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_TOOLCHAIN_FILE</span><span class="token operator">=</span>./cmake/vcpkg-bootstrap.cmake <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DVCPKG_OVERLAY_PORTS</span><span class="token operator">=</span>./vcpkg-overlays <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DVCPKG_OVERLAY_TRIPLETS</span><span class="token operator">=</span>./vcpkg-overlays/triplets <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_BUILD_TYPE</span><span class="token operator">=</span>Release</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 2. 构建</span></span>
+<span class="line">cmake <span class="token parameter variable">--build</span> build <span class="token parameter variable">--parallel</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 3. 安装（可选）</span></span>
+<span class="line">cmake <span class="token parameter variable">--install</span> build <span class="token parameter variable">--prefix</span> /usr/local</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="依赖库" tabindex="-1"><a class="header-anchor" href="#依赖库"><span>依赖库</span></a></h2>
+<p>SDK 会自动安装以下依赖（通过 vcpkg）：</p>
+<ul>
+<li><strong>gRPC</strong> - RPC 通信框架</li>
+<li><strong>Protobuf 5.29.x LTS</strong> - 协议缓冲区</li>
+<li><strong>nlohmann/json</strong> - JSON 处理库</li>
+</ul>
+<h2 id="vs-code-配置" tabindex="-1"><a class="header-anchor" href="#vs-code-配置"><span>VS Code 配置</span></a></h2>
+<p>使用 <code v-pre>CMakePresets.json</code> 进行配置：</p>
+<ol>
+<li>选择 Configure Preset：<code v-pre>CMake: Select Configure Preset</code></li>
+<li>根据平台选择：
+<ul>
+<li>macOS：<code v-pre>macos-arm64-*-vcpkg</code> 或 <code v-pre>macos-x64-*-vcpkg</code></li>
+<li>Linux：<code v-pre>linux-x64-*-vcpkg</code></li>
+<li>Windows：<code v-pre>windows-x64-*-vcpkg</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="验证安装" tabindex="-1"><a class="header-anchor" href="#验证安装"><span>验证安装</span></a></h2>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 运行示例程序</span></span>
+<span class="line">./build/bin/croupier-example</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 如果看到 "Connecting to agent..." 输出，说明安装成功</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="故障排除" tabindex="-1"><a class="header-anchor" href="#故障排除"><span>故障排除</span></a></h2>
+<h3 id="protobuf-版本冲突" tabindex="-1"><a class="header-anchor" href="#protobuf-版本冲突"><span>Protobuf 版本冲突</span></a></h3>
+<p>如果看到 <code v-pre>incompatible version of Protobuf</code> 错误：</p>
+<ol>
+<li>确保使用 vcpkg toolchain</li>
+<li>清理构建目录：<code v-pre>rm -rf build</code></li>
+<li>重新配置构建</li>
+</ol>
+<h3 id="vcpkg-下载失败" tabindex="-1"><a class="header-anchor" href="#vcpkg-下载失败"><span>vcpkg 下载失败</span></a></h3>
+<p>中国大陆用户可设置镜像：</p>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token builtin class-name">export</span> <span class="token assign-left variable">VCPKG_DOWNLOADS</span><span class="token operator">=</span>https://mirrors.tuna.tsinghua.edu.cn/vcpkg</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div></div></div><h3 id="windows-上找不到-dll" tabindex="-1"><a class="header-anchor" href="#windows-上找不到-dll"><span>Windows 上找不到 DLL</span></a></h3>
+<p>确保将以下目录添加到 PATH：</p>
+<ul>
+<li><code v-pre>build\bin\</code> （你的构建输出目录）</li>
+<li><code v-pre>vcpkg\installed\x64-windows\bin\</code></li>
+</ul>
+</div></template>
+
+

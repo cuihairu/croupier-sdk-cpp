@@ -1,0 +1,218 @@
+<template><div><h1 id="构建指南" tabindex="-1"><a class="header-anchor" href="#构建指南"><span>构建指南</span></a></h1>
+<p>本指南详细介绍了各种构建选项和配置。</p>
+<h2 id="构建脚本" tabindex="-1"><a class="header-anchor" href="#构建脚本"><span>构建脚本</span></a></h2>
+<h3 id="linux-macos-build-sh" tabindex="-1"><a class="header-anchor" href="#linux-macos-build-sh"><span>Linux/macOS: <code v-pre>build.sh</code></span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">./scripts/build.sh <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span></span>
+<span class="line"></span>
+<span class="line">选项:</span>
+<span class="line">  <span class="token parameter variable">--clean</span>          清理构建目录后重新构建</span>
+<span class="line">  <span class="token parameter variable">--tests</span> ON/OFF   启用/禁用测试 <span class="token punctuation">(</span>默认: OFF<span class="token punctuation">)</span></span>
+<span class="line">  <span class="token parameter variable">--examples</span> ON/OFF 启用/禁用示例 <span class="token punctuation">(</span>默认: ON<span class="token punctuation">)</span></span>
+<span class="line">  <span class="token parameter variable">--help</span>           显示帮助信息</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="windows-build-ps1" tabindex="-1"><a class="header-anchor" href="#windows-build-ps1"><span>Windows: <code v-pre>build.ps1</code></span></a></h3>
+<div class="language-powershell line-numbers-mode" data-highlighter="prismjs" data-ext="powershell"><pre v-pre><code class="language-powershell"><span class="line"><span class="token punctuation">.</span>\scripts\build<span class="token punctuation">.</span>ps1 <span class="token namespace">[OPTIONS]</span></span>
+<span class="line"></span>
+<span class="line">选项:</span>
+<span class="line">  <span class="token operator">-</span>BuildType &lt;Debug<span class="token punctuation">|</span>Release>  构建类型 <span class="token punctuation">(</span>默认: Release<span class="token punctuation">)</span></span>
+<span class="line">  <span class="token operator">-</span>Clean                     清理构建目录</span>
+<span class="line">  <span class="token operator">-</span>Tests &lt;ON<span class="token punctuation">|</span>OFF>            启用<span class="token operator">/</span>禁用测试</span>
+<span class="line">  <span class="token operator">-</span>Examples &lt;ON<span class="token punctuation">|</span>OFF>         启用<span class="token operator">/</span>禁用示例</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="cmake-选项" tabindex="-1"><a class="header-anchor" href="#cmake-选项"><span>CMake 选项</span></a></h2>
+<h3 id="基础选项" tabindex="-1"><a class="header-anchor" href="#基础选项"><span>基础选项</span></a></h3>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code v-pre>CMAKE_BUILD_TYPE</code></td>
+<td><code v-pre>Release</code></td>
+<td>构建类型</td>
+</tr>
+<tr>
+<td><code v-pre>BUILD_TESTING</code></td>
+<td><code v-pre>OFF</code></td>
+<td>构建测试</td>
+</tr>
+<tr>
+<td><code v-pre>BUILD_EXAMPLES</code></td>
+<td><code v-pre>ON</code></td>
+<td>构建示例</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vcpkg-相关" tabindex="-1"><a class="header-anchor" href="#vcpkg-相关"><span>vcpkg 相关</span></a></h3>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code v-pre>CROUPIER_BOOTSTRAP_VCPKG</code></td>
+<td><code v-pre>ON</code></td>
+<td>自动下载 vcpkg</td>
+</tr>
+<tr>
+<td><code v-pre>VCPKG_OVERLAY_PORTS</code></td>
+<td><code v-pre>./vcpkg-overlays</code></td>
+<td>vcpkg overlay ports</td>
+</tr>
+<tr>
+<td><code v-pre>VCPKG_OVERLAY_TRIPLETS</code></td>
+<td><code v-pre>./vcpkg-overlays/triplets</code></td>
+<td>vcpkg overlay triplets</td>
+</tr>
+</tbody>
+</table>
+<h3 id="示例配置" tabindex="-1"><a class="header-anchor" href="#示例配置"><span>示例配置</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_BUILD_TYPE</span><span class="token operator">=</span>Debug <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DBUILD_TESTING</span><span class="token operator">=</span>ON <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DBUILD_EXAMPLES</span><span class="token operator">=</span>ON <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_TOOLCHAIN_FILE</span><span class="token operator">=</span>./cmake/vcpkg-bootstrap.cmake</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="cmake-presets" tabindex="-1"><a class="header-anchor" href="#cmake-presets"><span>CMake Presets</span></a></h2>
+<p>项目提供了跨平台的 CMake Presets：</p>
+<h3 id="可用-presets" tabindex="-1"><a class="header-anchor" href="#可用-presets"><span>可用 Presets</span></a></h3>
+<p><strong>macOS:</strong></p>
+<ul>
+<li><code v-pre>macos-arm64-debug-vcpkg</code></li>
+<li><code v-pre>macos-arm64-release-vcpkg</code></li>
+<li><code v-pre>macos-x64-debug-vcpkg</code></li>
+<li><code v-pre>macos-x64-release-vcpkg</code></li>
+</ul>
+<p><strong>Linux:</strong></p>
+<ul>
+<li><code v-pre>linux-x64-debug-vcpkg</code></li>
+<li><code v-pre>linux-x64-release-vcpkg</code></li>
+</ul>
+<p><strong>Windows:</strong></p>
+<ul>
+<li><code v-pre>windows-x64-debug-vcpkg</code></li>
+<li><code v-pre>windows-x64-release-vcpkg</code></li>
+</ul>
+<h3 id="使用-presets" tabindex="-1"><a class="header-anchor" href="#使用-presets"><span>使用 Presets</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 列出所有预设</span></span>
+<span class="line">cmake --list-presets</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 使用预设配置</span></span>
+<span class="line">cmake <span class="token parameter variable">--preset</span> linux-x64-release-vcpkg</span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># 构建</span></span>
+<span class="line">cmake <span class="token parameter variable">--build</span> build <span class="token parameter variable">--config</span> Release</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="自定义构建" tabindex="-1"><a class="header-anchor" href="#自定义构建"><span>自定义构建</span></a></h2>
+<h3 id="禁用自动下载-vcpkg" tabindex="-1"><a class="header-anchor" href="#禁用自动下载-vcpkg"><span>禁用自动下载 vcpkg</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCROUPIER_BOOTSTRAP_VCPKG</span><span class="token operator">=</span>OFF <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_TOOLCHAIN_FILE</span><span class="token operator">=</span>/path/to/your/vcpkg/scripts/buildsystems/vcpkg.cmake</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="使用全局-vcpkg" tabindex="-1"><a class="header-anchor" href="#使用全局-vcpkg"><span>使用全局 vcpkg</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_TOOLCHAIN_FILE</span><span class="token operator">=</span><span class="token variable">$VCPKG_ROOT</span>/scripts/buildsystems/vcpkg.cmake</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="指定安装前缀" tabindex="-1"><a class="header-anchor" href="#指定安装前缀"><span>指定安装前缀</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token parameter variable">-DCMAKE_INSTALL_PREFIX</span><span class="token operator">=</span>/usr/local</span>
+<span class="line">cmake <span class="token parameter variable">--install</span> build</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="编译器特定选项" tabindex="-1"><a class="header-anchor" href="#编译器特定选项"><span>编译器特定选项</span></a></h2>
+<h3 id="gcc" tabindex="-1"><a class="header-anchor" href="#gcc"><span>GCC</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_COMPILER</span><span class="token operator">=</span>g++ <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_FLAGS</span><span class="token operator">=</span><span class="token string">"-Wall -Wextra"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="clang" tabindex="-1"><a class="header-anchor" href="#clang"><span>Clang</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_COMPILER</span><span class="token operator">=</span>clang++ <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_FLAGS</span><span class="token operator">=</span><span class="token string">"-Wall -Wextra"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="msvc-visual-studio" tabindex="-1"><a class="header-anchor" href="#msvc-visual-studio"><span>MSVC (Visual Studio)</span></a></h3>
+<div class="language-powershell line-numbers-mode" data-highlighter="prismjs" data-ext="powershell"><pre v-pre><code class="language-powershell"><span class="line">cmake <span class="token operator">-</span>B build `</span>
+<span class="line">  <span class="token operator">-</span>G <span class="token string">"Visual Studio 17 2022"</span> `</span>
+<span class="line">  <span class="token operator">-</span>A x64</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="性能优化" tabindex="-1"><a class="header-anchor" href="#性能优化"><span>性能优化</span></a></h2>
+<h3 id="release-构建优化" tabindex="-1"><a class="header-anchor" href="#release-构建优化"><span>Release 构建优化</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_BUILD_TYPE</span><span class="token operator">=</span>Release <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_INTERPROCEDURAL_OPTIMIZATION</span><span class="token operator">=</span>ON</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="特定架构优化" tabindex="-1"><a class="header-anchor" href="#特定架构优化"><span>特定架构优化</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 本机架构优化</span></span>
+<span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token parameter variable">-DCMAKE_CXX_FLAGS</span><span class="token operator">=</span><span class="token string">"-march=native"</span></span>
+<span class="line"></span>
+<span class="line"><span class="token comment"># ARM64 NEON 优化</span></span>
+<span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token parameter variable">-DCMAKE_CXX_FLAGS</span><span class="token operator">=</span><span class="token string">"-mfpu=neon"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="静态分析" tabindex="-1"><a class="header-anchor" href="#静态分析"><span>静态分析</span></a></h2>
+<h3 id="使用-clang-tidy" tabindex="-1"><a class="header-anchor" href="#使用-clang-tidy"><span>使用 clang-tidy</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_CLANG_TIDY</span><span class="token operator">=</span><span class="token string">"clang-tidy;-checks=*"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="使用-cppcheck" tabindex="-1"><a class="header-anchor" href="#使用-cppcheck"><span>使用 cppcheck</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_CPPCHECK</span><span class="token operator">=</span><span class="token string">"cppcheck;--enable=all"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="调试构建" tabindex="-1"><a class="header-anchor" href="#调试构建"><span>调试构建</span></a></h2>
+<h3 id="启用调试符号" tabindex="-1"><a class="header-anchor" href="#启用调试符号"><span>启用调试符号</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_BUILD_TYPE</span><span class="token operator">=</span>Debug <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_FLAGS_DEBUG</span><span class="token operator">=</span><span class="token string">"-g -O0"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="启用地址清理器-asan" tabindex="-1"><a class="header-anchor" href="#启用地址清理器-asan"><span>启用地址清理器 (ASAN)</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_CXX_FLAGS</span><span class="token operator">=</span><span class="token string">"-fsanitize=address -fno-omit-frame-pointer"</span> <span class="token punctuation">\</span></span>
+<span class="line">  <span class="token parameter variable">-DCMAKE_EXE_LINKER_FLAGS</span><span class="token operator">=</span><span class="token string">"-fsanitize=address"</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="构建产物" tabindex="-1"><a class="header-anchor" href="#构建产物"><span>构建产物</span></a></h2>
+<p>构建完成后，产物位于：</p>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可执行文件</td>
+<td><code v-pre>build/bin/</code></td>
+</tr>
+<tr>
+<td>库文件</td>
+<td><code v-pre>build/lib/</code></td>
+</tr>
+<tr>
+<td>头文件</td>
+<td><code v-pre>include/</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="故障排除" tabindex="-1"><a class="header-anchor" href="#故障排除"><span>故障排除</span></a></h2>
+<h3 id="构建失败" tabindex="-1"><a class="header-anchor" href="#构建失败"><span>构建失败</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 清理后重试</span></span>
+<span class="line"><span class="token function">rm</span> <span class="token parameter variable">-rf</span> build</span>
+<span class="line">./scripts/build.sh <span class="token parameter variable">--clean</span></span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="vcpkg-依赖安装失败" tabindex="-1"><a class="header-anchor" href="#vcpkg-依赖安装失败"><span>vcpkg 依赖安装失败</span></a></h3>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line"><span class="token comment"># 单独安装依赖</span></span>
+<span class="line"><span class="token builtin class-name">cd</span> <span class="token function">vcpkg</span></span>
+<span class="line">./vcpkg <span class="token function">install</span> ggrpc grpc cpprestsdk nlohmann-json <span class="token parameter variable">--triplet</span><span class="token operator">=</span>x64-linux</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="protobuf-版本冲突" tabindex="-1"><a class="header-anchor" href="#protobuf-版本冲突"><span>Protobuf 版本冲突</span></a></h3>
+<p>确保使用 vcpkg toolchain：</p>
+<div class="language-bash line-numbers-mode" data-highlighter="prismjs" data-ext="sh"><pre v-pre><code class="language-bash"><span class="line">cmake <span class="token parameter variable">-B</span> build <span class="token parameter variable">-DCMAKE_TOOLCHAIN_FILE</span><span class="token operator">=</span>./cmake/vcpkg-bootstrap.cmake</span>
+<span class="line"></span></code></pre>
+<div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0"><div class="line-number"></div></div></div></div></template>
+
+
