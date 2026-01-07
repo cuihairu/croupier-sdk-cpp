@@ -16,7 +16,7 @@ namespace sdk {
 namespace config {
 
 ClientConfigLoader::ClientConfigLoader() {
-    std::cout << "Client configuration loader initialized" << std::endl;
+    std::cout << "Client configuration loader initialized" << '\n';
 }
 
 ClientConfigLoader::~ClientConfigLoader() {
@@ -26,7 +26,7 @@ ClientConfigLoader::~ClientConfigLoader() {
 // ========== Configuration Loading ==========
 
 ClientConfig ClientConfigLoader::LoadFromFile(const std::string& config_file) {
-    std::cout << "Loading client configuration from file: " << config_file << std::endl;
+    std::cout << "Loading client configuration from file: " << config_file << '\n';
 
     if (!utils::FileSystemUtils::FileExists(config_file)) {
         throw std::runtime_error("Configuration file does not exist: " + config_file);
@@ -41,7 +41,7 @@ ClientConfig ClientConfigLoader::LoadFromFile(const std::string& config_file) {
 }
 
 ClientConfig ClientConfigLoader::LoadFromJson(const std::string& json_content) {
-    std::cout << "Parsing client configuration JSON..." << std::endl;
+    std::cout << "Parsing client configuration JSON..." << '\n';
 
     if (!utils::JsonUtils::IsValidJson(json_content)) {
         throw std::runtime_error("Invalid JSON format in configuration");
@@ -66,7 +66,7 @@ ClientConfig ClientConfigLoader::LoadFromJson(const std::string& json_content) {
 
 ClientConfig ClientConfigLoader::LoadWithEnvironmentOverrides(const std::string& config_file,
                                                              const std::string& env_prefix) {
-    std::cout << "Loading configuration with environment overrides, prefix: " << env_prefix << std::endl;
+    std::cout << "Loading configuration with environment overrides, prefix: " << env_prefix << '\n';
 
     ClientConfig config = LoadFromFile(config_file);
     ApplyEnvironmentOverrides(config, env_prefix);
@@ -74,7 +74,7 @@ ClientConfig ClientConfigLoader::LoadWithEnvironmentOverrides(const std::string&
 }
 
 ClientConfig ClientConfigLoader::LoadProfile(const std::string& config_dir, const std::string& profile) {
-    std::cout << "Loading configuration profile: " << profile << " from directory: " << config_dir << std::endl;
+    std::cout << "Loading configuration profile: " << profile << " from directory: " << config_dir << '\n';
 
     std::string base_file = utils::FileSystemUtils::JoinPath(config_dir, "base.json");
     std::string profile_file = utils::FileSystemUtils::JoinPath(config_dir, profile + ".json");
@@ -84,19 +84,19 @@ ClientConfig ClientConfigLoader::LoadProfile(const std::string& config_dir, cons
     // Load base configuration if it exists
     if (utils::FileSystemUtils::FileExists(base_file)) {
         config = LoadFromFile(base_file);
-        std::cout << "Loaded base configuration" << std::endl;
+        std::cout << "Loaded base configuration" << '\n';
     } else {
         config = CreateDefaultConfig();
-        std::cout << "Using default configuration as base" << std::endl;
+        std::cout << "Using default configuration as base" << '\n';
     }
 
     // Apply profile-specific overrides
     if (utils::FileSystemUtils::FileExists(profile_file)) {
         ClientConfig profile_config = LoadFromFile(profile_file);
         config = MergeConfigs(config, profile_config);
-        std::cout << "Applied profile-specific configuration" << std::endl;
+        std::cout << "Applied profile-specific configuration" << '\n';
     } else {
-        std::cout << "Warning: Profile configuration file not found: " << profile_file << std::endl;
+        std::cout << "Warning: Profile configuration file not found: " << profile_file << '\n';
     }
 
     return config;
@@ -149,9 +149,9 @@ std::vector<std::string> ClientConfigLoader::ValidateConfig(const ClientConfig& 
     errors.insert(errors.end(), auth_errors.begin(), auth_errors.end());
 
     if (errors.empty()) {
-        std::cout << "Configuration validation passed" << std::endl;
+        std::cout << "Configuration validation passed" << '\n';
     } else {
-        std::cout << "Configuration validation found " << errors.size() << " errors" << std::endl;
+        std::cout << "Configuration validation found " << errors.size() << " errors" << '\n';
     }
 
     return errors;
@@ -160,7 +160,7 @@ std::vector<std::string> ClientConfigLoader::ValidateConfig(const ClientConfig& 
 // ========== Configuration Generation ==========
 
 ClientConfig ClientConfigLoader::CreateDefaultConfig() {
-    std::cout << "Creating default client configuration" << std::endl;
+    std::cout << "Creating default client configuration" << '\n';
 
     ClientConfig config;
     config.game_id = "default-game";
@@ -180,7 +180,7 @@ ClientConfig ClientConfigLoader::CreateDefaultConfig() {
 }
 
 std::string ClientConfigLoader::GenerateExampleConfig(const std::string& environment) {
-    std::cout << "Generating example configuration for environment: " << environment << std::endl;
+    std::cout << "Generating example configuration for environment: " << environment << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
     json config;
@@ -246,7 +246,7 @@ std::string ClientConfigLoader::GenerateExampleConfig(const std::string& environ
 // ========== Configuration Merging ==========
 
 ClientConfig ClientConfigLoader::MergeConfigs(const ClientConfig& base, const ClientConfig& overlay) {
-    std::cout << "Merging configuration (overlay takes precedence)" << std::endl;
+    std::cout << "Merging configuration (overlay takes precedence)" << '\n';
 
     ClientConfig result = base;
 
@@ -284,7 +284,7 @@ ClientConfig ClientConfigLoader::MergeConfigs(const ClientConfig& base, const Cl
 // ========== Private Helper Methods ==========
 
 void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const std::string& env_prefix) {
-    std::cout << "Applying environment variable overrides with prefix: " << env_prefix << std::endl;
+    std::cout << "Applying environment variable overrides with prefix: " << env_prefix << '\n';
 
     config.game_id = GetEnvironmentVariable(env_prefix + "GAME_ID", config.game_id);
     config.env = GetEnvironmentVariable(env_prefix + "ENV", config.env);
@@ -312,7 +312,7 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
         try {
             config.timeout_seconds = std::stoi(timeout_env);
         } catch (const std::exception& /* e */) {
-            std::cerr << "Invalid timeout value in environment: " << timeout_env << std::endl;
+            std::cerr << "Invalid timeout value in environment: " << timeout_env << '\n';
         }
     }
 
@@ -321,7 +321,7 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
         try {
             config.reconnect_interval_seconds = std::stoi(reconnect_interval_env);
         } catch (const std::exception& /* e */) {
-            std::cerr << "Invalid reconnect_interval_seconds value in environment: " << reconnect_interval_env << std::endl;
+            std::cerr << "Invalid reconnect_interval_seconds value in environment: " << reconnect_interval_env << '\n';
         }
     }
 
@@ -330,7 +330,7 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
         try {
             config.reconnect_max_attempts = std::stoi(reconnect_attempts_env);
         } catch (const std::exception& /* e */) {
-            std::cerr << "Invalid reconnect_max_attempts value in environment: " << reconnect_attempts_env << std::endl;
+            std::cerr << "Invalid reconnect_max_attempts value in environment: " << reconnect_attempts_env << '\n';
         }
     }
 

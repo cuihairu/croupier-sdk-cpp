@@ -24,7 +24,7 @@ namespace croupier {
 namespace sdk {
 
 ConfigManager::ConfigManager() {
-    std::cout << "📋 配置管理器已初始化" << std::endl;
+    std::cout << "📋 配置管理器已初始化" << '\n';
 }
 
 ConfigManager::~ConfigManager() {
@@ -34,7 +34,7 @@ ConfigManager::~ConfigManager() {
 // ========== 客户端配置加载 ==========
 
 ClientConfig ConfigManager::LoadClientConfig(const std::string& config_file) {
-    std::cout << "📂 从文件加载客户端配置: " << config_file << std::endl;
+    std::cout << "📂 从文件加载客户端配置: " << config_file << '\n';
 
     std::string content = LoadFileContent(config_file);
     if (content.empty()) {
@@ -45,7 +45,7 @@ ClientConfig ConfigManager::LoadClientConfig(const std::string& config_file) {
 }
 
 ClientConfig ConfigManager::LoadClientConfigFromJson(const std::string& json_content) {
-    std::cout << "🔄 解析客户端配置 JSON..." << std::endl;
+    std::cout << "🔄 解析客户端配置 JSON..." << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
     try {
@@ -62,7 +62,7 @@ ClientConfig ConfigManager::LoadClientConfigFromJson(const std::string& json_con
 // ========== Schema 管理 ==========
 
 ConfigManager::VirtualObjectSchema ConfigManager::LoadVirtualObjectSchema(const std::string& schema_file) {
-    std::cout << "📋 加载虚拟对象 Schema: " << schema_file << std::endl;
+    std::cout << "📋 加载虚拟对象 Schema: " << schema_file << '\n';
 
     std::string content = LoadFileContent(schema_file);
     if (content.empty()) {
@@ -82,7 +82,7 @@ ConfigManager::VirtualObjectSchema ConfigManager::LoadVirtualObjectSchema(const 
 }
 
 bool ConfigManager::ValidateDataAgainstSchema(const VirtualObjectSchema& schema, const std::string& data) {
-    std::cout << "✅ 验证数据是否符合 Schema: " << schema.id << std::endl;
+    std::cout << "✅ 验证数据是否符合 Schema: " << schema.id << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
     try {
@@ -91,7 +91,7 @@ bool ConfigManager::ValidateDataAgainstSchema(const VirtualObjectSchema& schema,
         // 验证必需字段
         for (const auto& [field_name, field_schema] : schema.fields) {
             if (field_schema.required && !data_json.contains(field_name)) {
-                std::cerr << "❌ 缺少必需字段: " << field_name << std::endl;
+                std::cerr << "❌ 缺少必需字段: " << field_name << '\n';
                 return false;
             }
 
@@ -99,26 +99,26 @@ bool ConfigManager::ValidateDataAgainstSchema(const VirtualObjectSchema& schema,
                 // 验证字段类型
                 const auto& value = data_json[field_name];
                 if (!ValidateFieldType(value, field_schema)) {
-                    std::cerr << "❌ 字段类型不匹配: " << field_name << std::endl;
+                    std::cerr << "❌ 字段类型不匹配: " << field_name << '\n';
                     return false;
                 }
 
                 // 验证自定义规则
                 if (!ValidateFieldRules(value, field_schema)) {
-                    std::cerr << "❌ 字段验证规则失败: " << field_name << std::endl;
+                    std::cerr << "❌ 字段验证规则失败: " << field_name << '\n';
                     return false;
                 }
             }
         }
 
-        std::cout << "✅ 数据验证通过" << std::endl;
+        std::cout << "✅ 数据验证通过" << '\n';
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "❌ 数据验证异常: " << e.what() << std::endl;
+        std::cerr << "❌ 数据验证异常: " << e.what() << '\n';
         return false;
     }
 #else
-    std::cout << "⚠️ 跳过 Schema 验证（需要 nlohmann::json 支持）" << std::endl;
+    std::cout << "⚠️ 跳过 Schema 验证（需要 nlohmann::json 支持）" << '\n';
     return true;
 #endif
 }
@@ -126,7 +126,7 @@ bool ConfigManager::ValidateDataAgainstSchema(const VirtualObjectSchema& schema,
 // ========== 完整配置加载 ==========
 
 ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std::string& config_dir) {
-    std::cout << "📁 从目录加载应用配置: " << config_dir << std::endl;
+    std::cout << "📁 从目录加载应用配置: " << config_dir << '\n';
 
     ApplicationConfig app_config;
 
@@ -134,9 +134,9 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std:
     std::string client_config_file = config_dir + "/client.json";
     try {
         app_config.client_config = LoadClientConfig(client_config_file);
-        std::cout << "✅ 客户端配置加载成功" << std::endl;
+        std::cout << "✅ 客户端配置加载成功" << '\n';
     } catch (const std::exception& e) {
-        std::cout << "⚠️ 客户端配置加载失败，使用默认配置: " << e.what() << std::endl;
+        std::cout << "⚠️ 客户端配置加载失败，使用默认配置: " << e.what() << '\n';
         app_config.client_config = CreateDefaultClientConfig();
     }
 
@@ -147,9 +147,9 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std:
             ConfigDrivenLoader loader;
             ComponentDescriptor comp = loader.LoadComponentFromFile(file);
             app_config.components.push_back(comp);
-            std::cout << "✅ 组件配置加载成功: " << comp.id << std::endl;
+            std::cout << "✅ 组件配置加载成功: " << comp.id << '\n';
         } catch (const std::exception& e) {
-            std::cout << "⚠️ 组件配置加载失败: " << file << " - " << e.what() << std::endl;
+            std::cout << "⚠️ 组件配置加载失败: " << file << " - " << e.what() << '\n';
         }
     }
 
@@ -159,9 +159,9 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std:
         try {
             VirtualObjectSchema schema = LoadVirtualObjectSchema(file);
             app_config.schemas[schema.id] = schema;
-            std::cout << "✅ Schema 加载成功: " << schema.id << std::endl;
+            std::cout << "✅ Schema 加载成功: " << schema.id << '\n';
         } catch (const std::exception& e) {
-            std::cout << "⚠️ Schema 加载失败: " << file << " - " << e.what() << std::endl;
+            std::cout << "⚠️ Schema 加载失败: " << file << " - " << e.what() << '\n';
         }
     }
 
@@ -177,16 +177,16 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std:
             }
         }
 #endif
-        std::cout << "✅ 全局设置加载成功" << std::endl;
+        std::cout << "✅ 全局设置加载成功" << '\n';
     } catch (const std::exception& e) {
-        std::cout << "⚠️ 全局设置加载失败: " << e.what() << std::endl;
+        std::cout << "⚠️ 全局设置加载失败: " << e.what() << '\n';
     }
 
     return app_config;
 }
 
 ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfigFromFile(const std::string& config_file) {
-    std::cout << "📄 从单文件加载应用配置: " << config_file << std::endl;
+    std::cout << "📄 从单文件加载应用配置: " << config_file << '\n';
 
     ApplicationConfig app_config;
 
@@ -236,7 +236,7 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfigFromFile(co
             }
         }
 
-        std::cout << "✅ 应用配置加载成功" << std::endl;
+        std::cout << "✅ 应用配置加载成功" << '\n';
         return app_config;
     } catch (const std::exception& e) {
         throw std::runtime_error("应用配置加载失败: " + std::string(e.what()));
@@ -338,7 +338,7 @@ std::vector<std::string> ConfigManager::ValidateApplicationConfig(const Applicat
 // ========== 配置生成 ==========
 
 bool ConfigManager::GenerateExampleConfigs(const std::string& output_dir) {
-    std::cout << "📁 生成示例配置文件到: " << output_dir << std::endl;
+    std::cout << "📁 生成示例配置文件到: " << output_dir << '\n';
 
     try {
         // 创建目录结构
@@ -350,19 +350,19 @@ bool ConfigManager::GenerateExampleConfigs(const std::string& output_dir) {
         // 1. 生成客户端配置
         json client_config = GenerateExampleClientConfigJson();
         std::ofstream client_file(output_dir + "/client.json");
-        client_file << client_config.dump(2) << std::endl;
+        client_file << client_config.dump(2) << '\n';
         client_file.close();
 
         // 2. 生成组件配置
         json component_config = GenerateExampleComponentJson();
         std::ofstream comp_file(output_dir + "/components/economy.json");
-        comp_file << component_config.dump(2) << std::endl;
+        comp_file << component_config.dump(2) << '\n';
         comp_file.close();
 
         // 3. 生成 Schema 配置
         json schema_config = GenerateExampleSchemaJson();
         std::ofstream schema_file(output_dir + "/schemas/wallet_schema.json");
-        schema_file << schema_config.dump(2) << std::endl;
+        schema_file << schema_config.dump(2) << '\n';
         schema_file.close();
 
         // 4. 生成主配置文件
@@ -384,7 +384,7 @@ bool ConfigManager::GenerateExampleConfigs(const std::string& output_dir) {
         };
 
         std::ofstream main_file(output_dir + "/app_config.json");
-        main_file << main_config.dump(2) << std::endl;
+        main_file << main_config.dump(2) << '\n';
         main_file.close();
 
         // 5. 生成 README
@@ -417,21 +417,21 @@ auto config = manager.LoadApplicationConfigFromFile("./configs/app_config.json")
 auto errors = manager.ValidateApplicationConfig(config);
 if (!errors.empty()) {
     for (const auto& error : errors) {
-        std::cerr << "配置错误: " << error << std::endl;
+        std::cerr << "配置错误: " << error << '\n';
     }
 }
 ```
 )";
         readme_file.close();
 
-        std::cout << "✅ 示例配置生成成功！" << std::endl;
+        std::cout << "✅ 示例配置生成成功！" << '\n';
         return true;
 #else
-        std::cerr << "❌ 需要 nlohmann::json 支持才能生成配置文件" << std::endl;
+        std::cerr << "❌ 需要 nlohmann::json 支持才能生成配置文件" << '\n';
         return false;
 #endif
     } catch (const std::exception& e) {
-        std::cerr << "❌ 生成示例配置失败: " << e.what() << std::endl;
+        std::cerr << "❌ 生成示例配置失败: " << e.what() << '\n';
         return false;
     }
 }
@@ -449,12 +449,12 @@ std::string ConfigManager::LoadFileContent(const std::string& file_path) {
     return buffer.str();
 }
 
-std::vector<std::string> ConfigManager::ListFiles(const std::string& directory, const std::string& extension) {
+std::vector<std::string> ConfigManager::ListFiles(const std::string& directory, const std::string& file_extension) {
     std::vector<std::string> files;
 
 #ifdef _WIN32
     WIN32_FIND_DATAA findFileData;
-    std::string pattern = directory + "/*" + extension;
+    std::string pattern = directory + "/*" + file_extension;
     HANDLE hFind = FindFirstFileA(pattern.c_str(), &findFileData);
 
     if (hFind != INVALID_HANDLE_VALUE) {
@@ -471,8 +471,8 @@ std::vector<std::string> ConfigManager::ListFiles(const std::string& directory, 
         struct dirent* entry;
         while ((entry = readdir(dir)) != nullptr) {
             std::string filename = entry->d_name;
-            if (filename.length() >= extension.length() &&
-                filename.substr(filename.length() - extension.length()) == extension) {
+            if (filename.length() >= file_extension.length() &&
+                filename.substr(filename.length() - file_extension.length()) == file_extension) {
                 files.push_back(directory + "/" + filename);
             }
         }

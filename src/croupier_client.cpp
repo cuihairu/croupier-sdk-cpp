@@ -30,25 +30,25 @@
 #define SDK_LOG_INFO(msg) \
     do { \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) break; \
-        std::cout << "[INFO] [croupier] " << msg << std::endl; \
+        std::cout << "[INFO] [croupier] " << msg << '\n'; \
     } while(0)
 
 #define SDK_LOG_WARN(msg) \
     do { \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) break; \
-        std::cerr << "[WARN] [croupier] " << msg << std::endl; \
+        std::cerr << "[WARN] [croupier] " << msg << '\n'; \
     } while(0)
 
 #define SDK_LOG_ERROR(msg) \
     do { \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) break; \
-        std::cerr << "[ERROR] [croupier] " << msg << std::endl; \
+        std::cerr << "[ERROR] [croupier] " << msg << '\n'; \
     } while(0)
 
 #define SDK_LOG_DEBUG(msg) \
     do { \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) break; \
-        std::cout << "[DEBUG] [croupier] " << msg << std::endl; \
+        std::cout << "[DEBUG] [croupier] " << msg << '\n'; \
     } while(0)
 
 namespace croupier {
@@ -241,7 +241,7 @@ public:
             // Check if handler exists for this function
             auto handler_it = handlers.find(function_id);
             if (handler_it == handlers.end()) {
-                std::cerr << "Missing handler for function: " << function_id << std::endl;
+                std::cerr << "Missing handler for function: " << function_id << '\n';
                 return false;
             }
 
@@ -252,7 +252,7 @@ public:
 
             // Register the function
             if (!RegisterFunction(func_desc, handler_it->second)) {
-                std::cerr << "Failed to register function: " << function_id << std::endl;
+                std::cerr << "Failed to register function: " << function_id << '\n';
                 return false;
             }
         }
@@ -261,20 +261,20 @@ public:
         objects_[desc.id] = desc;
 
         std::cout << "Registered virtual object: " << desc.id
-                  << " with " << desc.operations.size() << " operations" << std::endl;
+                  << " with " << desc.operations.size() << " operations" << '\n';
         return true;
     }
 
     // New: Register complete component
     bool RegisterComponent(const ComponentDescriptor& comp) {
         if (running_) {
-            std::cerr << "Cannot register components while client is running" << std::endl;
+            std::cerr << "Cannot register components while client is running" << '\n';
             return false;
         }
 
         // Validate component descriptor
         if (!utils::ValidateComponentDescriptor(comp)) {
-            std::cerr << "Invalid component descriptor: " << comp.id << std::endl;
+            std::cerr << "Invalid component descriptor: " << comp.id << '\n';
             return false;
         }
 
@@ -285,7 +285,7 @@ public:
         for (const auto& func_desc : comp.functions) {
             // This is a placeholder - in real implementation, you would need to provide handlers
             std::cout << "Note: Standalone function " << func_desc.id
-                      << " needs handler registration" << std::endl;
+                      << " needs handler registration" << '\n';
         }
 
         // Register virtual objects (they should have handlers already mapped)
@@ -293,7 +293,7 @@ public:
             // For entities, we expect handlers to be provided separately
             // This is a design choice - handlers are runtime behavior, descriptors are configuration
             std::cout << "Registered entity definition: " << obj_desc.id
-                      << " (handlers need to be registered separately)" << std::endl;
+                      << " (handlers need to be registered separately)" << '\n';
             objects_[obj_desc.id] = obj_desc;
         }
 
@@ -302,7 +302,7 @@ public:
 
         std::cout << "Registered component: " << comp.id
                   << " with " << comp.entities.size() << " entities and "
-                  << comp.functions.size() << " functions" << std::endl;
+                  << comp.functions.size() << " functions" << '\n';
         return true;
     }
 
@@ -313,7 +313,7 @@ public:
             return RegisterComponent(comp);
         } catch (const std::exception& e) {
             std::cerr << "Failed to load component from file " << config_file
-                      << ": " << e.what() << std::endl;
+                      << ": " << e.what() << '\n';
             return false;
         }
     }
@@ -340,7 +340,7 @@ public:
     bool UnregisterVirtualObject(const std::string& object_id) {
         auto it = objects_.find(object_id);
         if (it == objects_.end()) {
-            std::cerr << "Virtual object not found: " << object_id << std::endl;
+            std::cerr << "Virtual object not found: " << object_id << '\n';
             return false;
         }
 
@@ -355,7 +355,7 @@ public:
         // Remove object
         objects_.erase(it);
 
-        std::cout << "Unregistered virtual object: " << object_id << std::endl;
+        std::cout << "Unregistered virtual object: " << object_id << '\n';
         return true;
     }
 
@@ -363,7 +363,7 @@ public:
     bool UnregisterComponent(const std::string& component_id) {
         auto it = components_.find(component_id);
         if (it == components_.end()) {
-            std::cerr << "Component not found: " << component_id << std::endl;
+            std::cerr << "Component not found: " << component_id << '\n';
             return false;
         }
 
@@ -383,7 +383,7 @@ public:
         // Remove component
         components_.erase(it);
 
-        std::cout << "Unregistered component: " << component_id << std::endl;
+        std::cout << "Unregistered component: " << component_id << '\n';
         return true;
     }
 
@@ -467,10 +467,10 @@ public:
         SDK_LOG_INFO("Croupier client service started");
         SDK_LOG_INFO("Local service address: " << local_address_);
         SDK_LOG_INFO("Registered functions: " << handlers_.size());
-        std::cout << "📦 已注册虚拟对象: " << objects_.size() << " 个" << std::endl;
-        std::cout << "🔧 已注册组件: " << components_.size() << " 个" << std::endl;
-        std::cout << "💡 使用 Stop() 方法停止服务" << std::endl;
-        std::cout << "===============================================" << std::endl;
+        std::cout << "📦 已注册虚拟对象: " << objects_.size() << " 个" << '\n';
+        std::cout << "🔧 已注册组件: " << components_.size() << " 个" << '\n';
+        std::cout << "💡 使用 Stop() 方法停止服务" << '\n';
+        std::cout << "===============================================" << '\n';
 
         // 保持服务运行，等待来自 Agent 的调用
         const int reconnect_interval_seconds = std::max(1, config_.reconnect_interval_seconds);
@@ -480,27 +480,27 @@ public:
             // 检查连接状态
             if (!grpc_manager_->IsConnected()) {
                 connected_ = false;
-                std::cerr << "⚠️ 与 Agent 的连接已断开" << std::endl;
+                std::cerr << "⚠️ 与 Agent 的连接已断开" << '\n';
 
                 if (!config_.auto_reconnect) {
                     break;
                 }
 
                 if (config_.reconnect_max_attempts > 0 && reconnect_attempts >= config_.reconnect_max_attempts) {
-                    std::cerr << "❌ Reconnect failed: max attempts reached" << std::endl;
+                    std::cerr << "❌ Reconnect failed: max attempts reached" << '\n';
                     break;
                 }
 
                 reconnect_attempts++;
                 std::cout << "🔄 Reconnect attempt " << reconnect_attempts
-                          << " (every " << reconnect_interval_seconds << "s)..." << std::endl;
+                          << " (every " << reconnect_interval_seconds << "s)..." << '\n';
 
                 if (grpc_manager_->Connect()) {
                     RegisterAllFunctions();
                     local_address_ = grpc_manager_->GetLocalServerAddress();
                     connected_ = true;
                     reconnect_attempts = 0;
-                    std::cout << "✅ Reconnected and re-registered with Agent" << std::endl;
+                    std::cout << "✅ Reconnected and re-registered with Agent" << '\n';
                 } else {
                     std::this_thread::sleep_for(std::chrono::seconds(reconnect_interval_seconds));
                 }
@@ -567,7 +567,7 @@ private:
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 bool CroupierClient::Impl::UploadCapabilitiesManifest() {
     if (!grpc_manager_) {
-        std::cerr << "⚠️  gRPC manager is not initialized; skipping capability upload" << std::endl;
+        std::cerr << "⚠️  gRPC manager is not initialized; skipping capability upload" << '\n';
         return false;
     }
     try {
@@ -582,7 +582,7 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         auto connect_deadline = std::chrono::system_clock::now() + timeout;
         if (!channel->WaitForConnected(connect_deadline)) {
             std::cerr << "⚠️  Unable to connect to control service at "
-                      << config_.control_addr << std::endl;
+                      << config_.control_addr << '\n';
             return false;
         }
 
@@ -604,15 +604,15 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
         if (!status.ok()) {
             std::cerr << "⚠️  ControlService.RegisterCapabilities failed: "
-                      << status.error_message() << std::endl;
+                      << status.error_message() << '\n';
             return false;
         }
 
         std::cout << "📤 Uploaded provider capabilities manifest ("
-                  << descriptors_.size() << " functions)" << std::endl;
+                  << descriptors_.size() << " functions)" << '\n';
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "⚠️  Failed to upload capabilities: " << e.what() << std::endl;
+        std::cerr << "⚠️  Failed to upload capabilities: " << e.what() << '\n';
         return false;
     }
 }
@@ -846,7 +846,7 @@ public:
 #else
         // Fallback to simulated connection when gRPC is not enabled
         connected_ = true;
-        std::cout << "⚠️  Connected to: " << config_.address << " (simulated, gRPC not enabled)" << std::endl;
+        std::cout << "⚠️  Connected to: " << config_.address << " (simulated, gRPC not enabled)" << '\n';
         return true;
 #endif
     }
@@ -912,7 +912,7 @@ public:
                 // Calculate delay and wait
                 int delay = CalculateRetryDelay(attempt);
                 std::cout << "Invocation attempt " << (attempt + 1)
-                          << " failed, retrying in " << delay << " ms: " << last_error << std::endl;
+                          << " failed, retrying in " << delay << " ms: " << last_error << '\n';
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
             }
         }
@@ -923,7 +923,7 @@ public:
 
     std::string invokeInternal(const std::string& function_id, const std::string& payload,
                                const InvokeOptions& options) {
-        std::cout << "Invoking function: " << function_id << std::endl;
+        std::cout << "Invoking function: " << function_id << '\n';
 
  #ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
@@ -979,18 +979,18 @@ public:
             }
 
             std::string result = response.payload();
-            std::cout << "✅ Invoke successful, response size: " << result.size() << " bytes" << std::endl;
+            std::cout << "✅ Invoke successful, response size: " << result.size() << " bytes" << '\n';
             return result;
 
         } catch (const std::exception& e) {
-            std::cerr << "❌ Invoke failed: " << e.what() << std::endl;
+            std::cerr << "❌ Invoke failed: " << e.what() << '\n';
             last_error_ = e.what();
             throw;
         }
 #else
         // Fallback simulation when gRPC is not enabled
         std::string response = "{\"status\":\"success\",\"function_id\":\"" + function_id + "\"}";
-        std::cout << "⚠️  Simulated invoke response: " << response << std::endl;
+        std::cout << "⚠️  Simulated invoke response: " << response << '\n';
         return response;
 #endif
     }
@@ -1056,7 +1056,7 @@ public:
                 // Calculate delay and wait
                 int delay = CalculateRetryDelay(attempt);
                 std::cout << "StartJob attempt " << (attempt + 1)
-                          << " failed, retrying in " << delay << " ms: " << last_error << std::endl;
+                          << " failed, retrying in " << delay << " ms: " << last_error << '\n';
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
             }
         }
@@ -1067,7 +1067,7 @@ public:
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
                                  const InvokeOptions& options) {
-        std::cout << "Starting job for function: " << function_id << std::endl;
+        std::cout << "Starting job for function: " << function_id << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
@@ -1123,18 +1123,18 @@ public:
             }
 
             std::string job_id = response.job_id();
-            std::cout << "✅ Job started successfully: " << job_id << std::endl;
+            std::cout << "✅ Job started successfully: " << job_id << '\n';
             return job_id;
 
         } catch (const std::exception& e) {
-            std::cerr << "❌ StartJob failed: " << e.what() << std::endl;
+            std::cerr << "❌ StartJob failed: " << e.what() << '\n';
             last_error_ = e.what();
             throw;
         }
 #else
         // Fallback simulation when gRPC is not enabled
         std::string job_id = "job-" + function_id + "-" + utils::NewIdempotencyKey().substr(0, 8);
-        std::cout << "⚠️  Simulated job started: " << job_id << std::endl;
+        std::cout << "⚠️  Simulated job started: " << job_id << '\n';
         return job_id;
 #endif
     }
@@ -1155,7 +1155,7 @@ public:
                 return events;
             }
 
-            std::cout << "Streaming job events for: " << job_id << std::endl;
+            std::cout << "Streaming job events for: " << job_id << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
             try {
@@ -1188,7 +1188,7 @@ public:
 
                     events.push_back(event);
 
-                    std::cout << "📡 Received event: " << event.event_type << std::endl;
+                    std::cout << "📡 Received event: " << event.event_type << '\n';
 
                     // Stop reading if job is done
                     if (event.done) {
@@ -1199,7 +1199,7 @@ public:
                 // Check streaming status
                 grpc::Status status = reader->Finish();
                 if (!status.ok() && status.error_code() != grpc::StatusCode::OK) {
-                    std::cerr << "Stream error: " << status.error_message() << std::endl;
+                    std::cerr << "Stream error: " << status.error_message() << '\n';
 
                     // Add error event if stream failed
                     JobEvent error_event;
@@ -1209,11 +1209,11 @@ public:
                     events.push_back(error_event);
                 }
 
-                std::cout << "✅ Streaming completed for job: " << job_id << std::endl;
+                std::cout << "✅ Streaming completed for job: " << job_id << '\n';
                 return events;
 
             } catch (const std::exception& e) {
-                std::cerr << "❌ StreamJob failed: " << e.what() << std::endl;
+                std::cerr << "❌ StreamJob failed: " << e.what() << '\n';
 
                 JobEvent error_event;
                 error_event.job_id = job_id;
@@ -1247,7 +1247,7 @@ public:
             done_event.done = true;
             events.push_back(done_event);
 
-            std::cout << "⚠️  Simulated streaming for job: " << job_id << std::endl;
+            std::cout << "⚠️  Simulated streaming for job: " << job_id << '\n';
             return events;
 #endif
         });
@@ -1258,11 +1258,11 @@ public:
             if (IsConnectionError()) {
                 ScheduleReconnectIfNeeded();
             }
-            std::cerr << "Not connected to server" << std::endl;
+            std::cerr << "Not connected to server" << '\n';
             return false;
         }
 
-        std::cout << "Cancelling job: " << job_id << std::endl;
+        std::cout << "Cancelling job: " << job_id << '\n';
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
@@ -1279,27 +1279,27 @@ public:
             grpc::Status status = stub_->CancelJob(&context, request, &response);
 
             if (!status.ok()) {
-                std::cerr << "❌ CancelJob failed: " << status.error_message() << std::endl;
+                std::cerr << "❌ CancelJob failed: " << status.error_message() << '\n';
                 return false;
             }
 
-            std::cout << "✅ Job cancelled successfully: " << job_id << std::endl;
+            std::cout << "✅ Job cancelled successfully: " << job_id << '\n';
             return true;
 
         } catch (const std::exception& e) {
-            std::cerr << "❌ CancelJob failed: " << e.what() << std::endl;
+            std::cerr << "❌ CancelJob failed: " << e.what() << '\n';
             return false;
         }
 #else
         // Fallback simulation when gRPC is not enabled
-        std::cout << "⚠️  Simulated job cancellation: " << job_id << std::endl;
+        std::cout << "⚠️  Simulated job cancellation: " << job_id << '\n';
         return true;
 #endif
     }
 
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
         schemas_[function_id] = schema;
-        std::cout << "Set schema for function: " << function_id << std::endl;
+        std::cout << "Set schema for function: " << function_id << '\n';
     }
 
     void SetReconnectConfig(const ReconnectConfig& config) {
@@ -1319,7 +1319,7 @@ public:
 
         connected_ = false;
         schemas_.clear();
-        std::cout << "Invoker closed" << std::endl;
+        std::cout << "Invoker closed" << '\n';
     }
 
     // Check if error is a connection error
@@ -1378,7 +1378,7 @@ public:
         if (reconnect_config_.max_attempts > 0 &&
             reconnect_attempts_ >= reconnect_config_.max_attempts) {
             std::cout << "Max reconnection attempts (" << reconnect_config_.max_attempts
-                      << ") reached, giving up" << std::endl;
+                      << ") reached, giving up" << '\n';
             return;
         }
 
@@ -1387,7 +1387,7 @@ public:
 
         int delay = CalculateReconnectDelay();
         std::cout << "Scheduling reconnection attempt " << reconnect_attempts_
-                  << " in " << delay << " ms" << std::endl;
+                  << " in " << delay << " ms" << '\n';
 
         // Stop existing reconnect thread if any
         if (reconnect_thread_.joinable()) {
@@ -1411,11 +1411,11 @@ public:
                 return;
             }
 
-            std::cout << "Reconnecting... (attempt " << reconnect_attempts_ << ")" << std::endl;
+            std::cout << "Reconnecting... (attempt " << reconnect_attempts_ << ")" << '\n';
             if (connectInternal()) {
-                std::cout << "Reconnection successful" << std::endl;
+                std::cout << "Reconnection successful" << '\n';
             } else {
-                std::cout << "Reconnection attempt " << reconnect_attempts_ << " failed" << std::endl;
+                std::cout << "Reconnection attempt " << reconnect_attempts_ << " failed" << '\n';
                 // Schedule next attempt (only if not stopping)
                 if (!should_stop_reconnecting_) {
                     ScheduleReconnectIfNeeded();
@@ -1658,11 +1658,11 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
         desc.description = json_simple.value("description", "No description");
 #endif
 
-        std::cout << "✅ Successfully loaded virtual object descriptor from: " << file_path << std::endl;
+        std::cout << "✅ Successfully loaded virtual object descriptor from: " << file_path << '\n';
         return desc;
 
     } catch (const std::exception& e) {
-        std::cerr << "❌ Failed to load object descriptor from " << file_path << ": " << e.what() << std::endl;
+        std::cerr << "❌ Failed to load object descriptor from " << file_path << ": " << e.what() << '\n';
 
         // Return default descriptor on error
         desc.id = "error";
@@ -1755,11 +1755,11 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
         desc.enabled = true; // Default to enabled
 #endif
 
-        std::cout << "✅ Successfully loaded component descriptor from: " << file_path << std::endl;
+        std::cout << "✅ Successfully loaded component descriptor from: " << file_path << '\n';
         return desc;
 
     } catch (const std::exception& e) {
-        std::cerr << "❌ Failed to load component descriptor from " << file_path << ": " << e.what() << std::endl;
+        std::cerr << "❌ Failed to load component descriptor from " << file_path << ": " << e.what() << '\n';
 
         // Return default descriptor on error
         desc.id = "error";
@@ -1776,24 +1776,24 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
 bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc) {
     // Basic validation
     if (desc.id.empty()) {
-        std::cerr << "Object descriptor validation failed: empty ID" << std::endl;
+        std::cerr << "Object descriptor validation failed: empty ID" << '\n';
         return false;
     }
 
     if (desc.version.empty()) {
-        std::cerr << "Object descriptor validation failed: empty version" << std::endl;
+        std::cerr << "Object descriptor validation failed: empty version" << '\n';
         return false;
     }
 
     if (desc.operations.empty()) {
-        std::cerr << "Object descriptor validation failed: no operations defined" << std::endl;
+        std::cerr << "Object descriptor validation failed: no operations defined" << '\n';
         return false;
     }
 
     // Validate operation mappings
     for (const auto& op : desc.operations) {
         if (op.first.empty() || op.second.empty()) {
-            std::cerr << "Object descriptor validation failed: invalid operation mapping" << std::endl;
+            std::cerr << "Object descriptor validation failed: invalid operation mapping" << '\n';
             return false;
         }
     }
@@ -1801,14 +1801,14 @@ bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc) {
     // Validate relationships
     for (const auto& rel : desc.relationships) {
         if (rel.second.type.empty() || rel.second.entity.empty()) {
-            std::cerr << "Object descriptor validation failed: invalid relationship definition" << std::endl;
+            std::cerr << "Object descriptor validation failed: invalid relationship definition" << '\n';
             return false;
         }
 
         // Check relationship type
         const std::string& type = rel.second.type;
         if (type != "one-to-many" && type != "many-to-one" && type != "many-to-many" && type != "one-to-one") {
-            std::cerr << "Object descriptor validation failed: invalid relationship type: " << type << std::endl;
+            std::cerr << "Object descriptor validation failed: invalid relationship type: " << type << '\n';
             return false;
         }
     }
@@ -1820,19 +1820,19 @@ bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc) {
 bool ValidateComponentDescriptor(const ComponentDescriptor& comp) {
     // Basic validation
     if (comp.id.empty()) {
-        std::cerr << "Component descriptor validation failed: empty ID" << std::endl;
+        std::cerr << "Component descriptor validation failed: empty ID" << '\n';
         return false;
     }
 
     if (comp.version.empty()) {
-        std::cerr << "Component descriptor validation failed: empty version" << std::endl;
+        std::cerr << "Component descriptor validation failed: empty version" << '\n';
         return false;
     }
 
     // Validate all entities
     for (const auto& entity : comp.entities) {
         if (!ValidateObjectDescriptor(entity)) {
-            std::cerr << "Component descriptor validation failed: invalid entity " << entity.id << std::endl;
+            std::cerr << "Component descriptor validation failed: invalid entity " << entity.id << '\n';
             return false;
         }
     }
@@ -1840,7 +1840,7 @@ bool ValidateComponentDescriptor(const ComponentDescriptor& comp) {
     // Validate all functions
     for (const auto& func : comp.functions) {
         if (func.id.empty() || func.version.empty()) {
-            std::cerr << "Component descriptor validation failed: invalid function descriptor" << std::endl;
+            std::cerr << "Component descriptor validation failed: invalid function descriptor" << '\n';
             return false;
         }
     }
@@ -1900,7 +1900,7 @@ VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
     VirtualObjectDescriptor desc;
     desc.id = "parsed-object";
     desc.version = "1.0.0";
-    std::cerr << "ParseObjectDescriptor: JSON parsing not yet implemented" << std::endl;
+    std::cerr << "ParseObjectDescriptor: JSON parsing not yet implemented" << '\n';
     return desc;
 }
 
@@ -1913,7 +1913,7 @@ ComponentDescriptor ParseComponentDescriptor(const std::string& json) {
     ComponentDescriptor comp;
     comp.id = "parsed-component";
     comp.version = "1.0.0";
-    std::cerr << "ParseComponentDescriptor: JSON parsing not yet implemented" << std::endl;
+    std::cerr << "ParseComponentDescriptor: JSON parsing not yet implemented" << '\n';
     return comp;
 }
 
