@@ -256,6 +256,9 @@ public:
     // Connect to agent and start local service
     bool Connect();
 
+    // Check if the client is connected to the agent
+    bool IsConnected() const;
+
     // Start serving (blocking call until Stop() is called)
     void Serve();
 

@@ -552,6 +552,10 @@ public:
         return local_address_;
     }
 
+    bool IsConnected() const {
+        return connected_;
+    }
+
 private:
     // 这些方法现在由 gRPC 管理器处理
 #ifdef CROUPIER_SDK_ENABLE_GRPC
@@ -1511,6 +1515,10 @@ bool CroupierClient::UnregisterComponent(const std::string& component_id) {
 
 bool CroupierClient::Connect() {
     return impl_->Connect();
+}
+
+bool CroupierClient::IsConnected() const {
+    return impl_->IsConnected();
 }
 
 void CroupierClient::Serve() {

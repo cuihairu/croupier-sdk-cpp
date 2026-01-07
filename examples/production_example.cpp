@@ -318,13 +318,12 @@ private:
 
         std::string response;
         if (path == "/health") {
-            // For health check, we just verify the client object exists
-            // In production, you might want to add actual connection state checking
-            bool is_healthy = (g_client != nullptr);
+            // Check if client exists and is connected
+            bool is_healthy = g_client && g_client->IsConnected();
             response = BuildHealthResponse(is_healthy);
         } else if (path == "/ready") {
-            // For readiness, check if client exists (in production, check if connected to agent)
-            bool is_ready = (g_client != nullptr);
+            // Check if client exists and is ready (connected)
+            bool is_ready = g_client && g_client->IsConnected();
             response = BuildReadyResponse(is_ready);
         } else if (path == "/metrics") {
             response = BuildMetricsResponse();
