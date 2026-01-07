@@ -423,6 +423,14 @@ if(BUILD_EXAMPLES)
     )
     add_dependencies(croupier-comprehensive-demo ${_CROUPIER_SDK_TARGET})
 
+    # Production Example - Shows best practices for production deployment
+    add_executable(croupier-production-example examples/production_example.cpp)
+    target_link_libraries(croupier-production-example
+        PRIVATE
+            ${_CROUPIER_SDK_TARGET}
+    )
+    add_dependencies(croupier-production-example ${_CROUPIER_SDK_TARGET})
+
     # Example Plugin (shared library)
     add_library(example_plugin SHARED examples/plugins/example_plugin.cpp)
     target_include_directories(example_plugin

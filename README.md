@@ -46,6 +46,7 @@
 - [核心特性](#核心特性)
 - [快速开始](#快速开始)
 - [使用示例](#使用示例)
+- [完整文档](#完整文档)
 - [架构设计](#架构设计)
 - [API 参考](#api-参考)
 - [部署与分发](#部署与分发)
@@ -232,6 +233,28 @@ handlers["wallet.transfer"] = WalletTransferHandler;
 
 client.RegisterVirtualObject(wallet_entity, handlers);
 ```
+
+### 示例程序
+
+SDK 包含多个完整的示例程序，展示各种使用场景：
+
+| 示例 | 描述 | 运行命令 |
+|------|------|----------|
+| `example.cpp` | 基础函数注册示例 | `./build/bin/croupier-example` |
+| `virtual_object_demo.cpp` | 虚拟对象注册和管理 | `./build/bin/croupier-virtual-object-demo` |
+| `config_example.cpp` | 高级配置管理 | `./build/bin/croupier-config-example` |
+| `plugin_demo.cpp` | 动态插件系统 | `./build/bin/croupier-plugin-demo` |
+| `comprehensive_demo.cpp` | 完整 API 演示 | `./build/bin/croupier-comprehensive-demo` |
+| `production_example.cpp` | 生产环境最佳实践 | `./build/bin/croupier-production-example` |
+
+## 完整文档
+
+详细的集成指南和 API 文档请参考：
+
+- 📖 [集成指南](docs/guides/integration.md) - 快速开始、配置说明、生产部署
+- 📚 [API 参考](docs/api/) - 完整的类和接口文档
+- 🚀 [生产部署指南](docs/guides/integration.md#生产部署) - Docker/Kubernetes 配置
+- 🔧 [故障排查](docs/guides/integration.md#故障排查) - 常见问题解决方案
 
 ## 架构设计
 
