@@ -1,3 +1,0 @@
-import comp from "/Users/cui/Workspaces/croupier/server/sdks/cpp/docs/.vuepress/.temp/pages/guide/architecture.html.vue"
-const data = JSON.parse("{\"path\":\"/guide/architecture.html\",\"title\":\"架构设计\",\"lang\":\"zh-CN\",\"frontmatter\":{},\"git\":{\"updatedTime\":1767578349000,\"contributors\":[{\"name\":\"cuihairu\",\"username\":\"cuihairu\",\"email\":\"chuihairu@gmail.com\",\"commits\":1,\"url\":\"https://github.com/cuihairu\"}],\"changelog\":[{\"hash\":\"9f779e5a68d857bd3783f75205b7139940ee5a76\",\"time\":1767578349000,\"email\":\"chuihairu@gmail.com\",\"author\":\"cuihairu\",\"message\":\"docs: add VuePress documentation and GitHub Pages deployment\"}]},\"filePathRelative\":\"guide/architecture.md\"}")
-export { comp, data }

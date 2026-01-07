@@ -1,3 +1,0 @@
-import comp from "/Users/cui/Workspaces/croupier/server/sdks/cpp/docs/.vuepress/.temp/pages/guides/integration.html.vue"
-const data = JSON.parse("{\"path\":\"/guides/integration.html\",\"title\":\"Croupier C++ SDK 集成指南\",\"lang\":\"zh-CN\",\"frontmatter\":{},\"git\":{\"updatedTime\":1767796831000,\"contributors\":[{\"name\":\"cuihairu\",\"username\":\"cuihairu\",\"email\":\"chuihairu@gmail.com\",\"commits\":1,\"url\":\"https://github.com/cuihairu\"}],\"changelog\":[{\"hash\":\"3471d560c42536f53779e70e5240047d697e361e\",\"time\":1767796831000,\"email\":\"chuihairu@gmail.com\",\"author\":\"cuihairu\",\"message\":\"docs: add comprehensive integration guide and production example\"}]},\"filePathRelative\":\"guides/integration.md\"}")
-export { comp, data }
