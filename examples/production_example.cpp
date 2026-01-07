@@ -318,10 +318,13 @@ private:
 
         std::string response;
         if (path == "/health") {
-            bool is_healthy = g_client && g_client->IsConnected();
+            // For health check, we just verify the client object exists
+            // In production, you might want to add actual connection state checking
+            bool is_healthy = (g_client != nullptr);
             response = BuildHealthResponse(is_healthy);
         } else if (path == "/ready") {
-            bool is_ready = g_client && g_client->IsConnected();
+            // For readiness, check if client exists (in production, check if connected to agent)
+            bool is_ready = (g_client != nullptr);
             response = BuildReadyResponse(is_ready);
         } else if (path == "/metrics") {
             response = BuildMetricsResponse();
@@ -377,7 +380,7 @@ std::string PlayerBanHandler(const std::string& context, const std::string& payl
     g_metrics.RecordRequest();
 
     try {
-        SDK_LOG_INFO("处理玩家封禁请求: " << payload);
+        CROUPIER_LOG_INFO("PlayerBanHandler", std::string("处理玩家封禁请求: ") + payload);
 
         // 模拟处理
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -389,7 +392,7 @@ std::string PlayerBanHandler(const std::string& context, const std::string& payl
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        SDK_LOG_ERROR("玩家封禁处理失败: " << e.what());
+        CROUPIER_LOG_ERROR("PlayerBanHandler", std::string("玩家封禁处理失败: ") + e.what());
         throw;
     }
 }
@@ -398,7 +401,7 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
     g_metrics.RecordRequest();
 
     try {
-        SDK_LOG_INFO("获取玩家信息: " << payload);
+        CROUPIER_LOG_INFO("PlayerGetHandler", std::string("获取玩家信息: ") + payload);
 
         // 实际业务逻辑 - 从数据库查询玩家信息
         // 这里返回模拟数据
@@ -418,7 +421,7 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        SDK_LOG_ERROR("获取玩家信息失败: " << e.what());
+        CROUPIER_LOG_ERROR("PlayerGetHandler", std::string("获取玩家信息失败: ") + e.what());
         throw;
     }
 }
@@ -427,7 +430,7 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
     g_metrics.RecordRequest();
 
     try {
-        SDK_LOG_INFO("处理钱包转账: " << payload);
+        CROUPIER_LOG_INFO("WalletTransferHandler", std::string("处理钱包转账: ") + payload);
 
         // 解析 payload
         // 实际场景应使用 JSON 库解析
@@ -452,7 +455,7 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        SDK_LOG_ERROR("钱包转账失败: " << e.what());
+        CROUPIER_LOG_ERROR("WalletTransferHandler", std::string("钱包转账失败: ") + e.what());
         throw;
     }
 }
