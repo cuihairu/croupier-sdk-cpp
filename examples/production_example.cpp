@@ -308,7 +308,7 @@ private:
         ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
 #endif
         if (bytes_read > 0) {
-            buffer[bytes_read] = ' ';
+            buffer[bytes_read] = 0;
         }
 
         std::string path = "/";
