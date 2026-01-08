@@ -1,7 +1,8 @@
 #include "croupier/sdk/utils/json_utils.h"
-#include <sstream>
-#include <iostream>
+
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -105,26 +106,26 @@ bool JsonUtils::IsValidJson(const std::string& json_content) {
             }
 
             switch (ch) {
-                case '{':
-                    brace_depth++;
-                    break;
-                case '}':
-                    brace_depth--;
-                    if (brace_depth < 0) {
-                        return false;
-                    }
-                    break;
-                case '[':
-                    bracket_depth++;
-                    break;
-                case ']':
-                    bracket_depth--;
-                    if (bracket_depth < 0) {
-                        return false;
-                    }
-                    break;
-                default:
-                    break;
+            case '{':
+                brace_depth++;
+                break;
+            case '}':
+                brace_depth--;
+                if (brace_depth < 0) {
+                    return false;
+                }
+                break;
+            case '[':
+                bracket_depth++;
+                break;
+            case ']':
+                bracket_depth--;
+                if (bracket_depth < 0) {
+                    return false;
+                }
+                break;
+            default:
+                break;
             }
         }
 
@@ -144,9 +145,8 @@ bool JsonUtils::IsValidJson(const std::string& json_content) {
 // ========== Value Extraction ==========
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
-std::string JsonUtils::GetStringValue(const nlohmann::json& json_obj,
-                                     const std::string& path,
-                                     const std::string& default_value) {
+std::string JsonUtils::GetStringValue(const nlohmann::json& json_obj, const std::string& path,
+                                      const std::string& default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -160,9 +160,8 @@ std::string JsonUtils::GetStringValue(const nlohmann::json& json_obj,
     }
 }
 #else
-std::string JsonUtils::GetStringValue(const SimpleJson& json_obj,
-                                     const std::string& path,
-                                     const std::string& default_value) {
+std::string JsonUtils::GetStringValue(const SimpleJson& json_obj, const std::string& path,
+                                      const std::string& default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -174,9 +173,7 @@ std::string JsonUtils::GetStringValue(const SimpleJson& json_obj,
 #endif
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
-int JsonUtils::GetIntValue(const nlohmann::json& json_obj,
-                          const std::string& path,
-                          int default_value) {
+int JsonUtils::GetIntValue(const nlohmann::json& json_obj, const std::string& path, int default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -190,9 +187,7 @@ int JsonUtils::GetIntValue(const nlohmann::json& json_obj,
     }
 }
 #else
-int JsonUtils::GetIntValue(const SimpleJson& json_obj,
-                          const std::string& path,
-                          int default_value) {
+int JsonUtils::GetIntValue(const SimpleJson& json_obj, const std::string& path, int default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -204,9 +199,7 @@ int JsonUtils::GetIntValue(const SimpleJson& json_obj,
 #endif
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
-bool JsonUtils::GetBoolValue(const nlohmann::json& json_obj,
-                            const std::string& path,
-                            bool default_value) {
+bool JsonUtils::GetBoolValue(const nlohmann::json& json_obj, const std::string& path, bool default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -220,9 +213,7 @@ bool JsonUtils::GetBoolValue(const nlohmann::json& json_obj,
     }
 }
 #else
-bool JsonUtils::GetBoolValue(const SimpleJson& json_obj,
-                            const std::string& path,
-                            bool default_value) {
+bool JsonUtils::GetBoolValue(const SimpleJson& json_obj, const std::string& path, bool default_value) {
     try {
         auto path_parts = SplitPath(path);
         auto value = GetValueByPath(json_obj, path_parts);
@@ -287,46 +278,47 @@ std::string JsonUtils::PrettyPrint(const SimpleJson& json_obj, int indent) {
     return ss.str();
 }
 
-void JsonUtils::PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstream& ss, int current_indent, int indent_size) {
+void JsonUtils::PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstream& ss, int current_indent,
+                                     int indent_size) {
     std::string indent_str(current_indent, ' ');
 
     switch (json_obj.type) {
-        case SimpleJson::STRING:
-            ss << "\"" << json_obj.str_value << "\"";
-            break;
-        case SimpleJson::OBJECT:
-        {
-            ss << "{\n";
-            bool first = true;
-            for (const auto& [key, value] : json_obj.object_value) {
-                if (!first) ss << ",\n";
-                ss << std::string(current_indent + indent_size, ' ') << "\"" << key << "\": ";
-                PrettyPrintRecursive(value, ss, current_indent + indent_size, indent_size);
-                first = false;
-            }
-            ss << "\n" << indent_str << "}";
-            break;
+    case SimpleJson::STRING:
+        ss << "\"" << json_obj.str_value << "\"";
+        break;
+    case SimpleJson::OBJECT: {
+        ss << "{\n";
+        bool first = true;
+        for (const auto& [key, value] : json_obj.object_value) {
+            if (!first)
+                ss << ",\n";
+            ss << std::string(current_indent + indent_size, ' ') << "\"" << key << "\": ";
+            PrettyPrintRecursive(value, ss, current_indent + indent_size, indent_size);
+            first = false;
         }
-        case SimpleJson::ARRAY:
-        {
-            ss << "[\n";
-            bool first = true;
-            for (const auto& value : json_obj.array_value) {
-                if (!first) ss << ",\n";
-                ss << std::string(current_indent + indent_size, ' ');
-                PrettyPrintRecursive(value, ss, current_indent + indent_size, indent_size);
-                first = false;
-            }
-            ss << "\n" << indent_str << "]";
-            break;
+        ss << "\n" << indent_str << "}";
+        break;
+    }
+    case SimpleJson::ARRAY: {
+        ss << "[\n";
+        bool first = true;
+        for (const auto& value : json_obj.array_value) {
+            if (!first)
+                ss << ",\n";
+            ss << std::string(current_indent + indent_size, ' ');
+            PrettyPrintRecursive(value, ss, current_indent + indent_size, indent_size);
+            first = false;
         }
+        ss << "\n" << indent_str << "]";
+        break;
+    }
     }
 }
 #endif
 
 // ========== Template Specializations ==========
 
-template<>
+template <>
 std::string JsonUtils::ToJsonString<std::map<std::string, std::string>>(const std::map<std::string, std::string>& obj) {
 #ifdef CROUPIER_SDK_ENABLE_JSON
     nlohmann::json json_obj(obj);
@@ -336,7 +328,8 @@ std::string JsonUtils::ToJsonString<std::map<std::string, std::string>>(const st
     ss << "{";
     bool first = true;
     for (const auto& [key, value] : obj) {
-        if (!first) ss << ", ";
+        if (!first)
+            ss << ", ";
         ss << "\"" << key << "\": \"" << value << "\"";
         first = false;
     }
@@ -345,7 +338,7 @@ std::string JsonUtils::ToJsonString<std::map<std::string, std::string>>(const st
 #endif
 }
 
-template<>
+template <>
 std::string JsonUtils::ToJsonString<std::vector<std::string>>(const std::vector<std::string>& obj) {
 #ifdef CROUPIER_SDK_ENABLE_JSON
     nlohmann::json json_obj(obj);
@@ -355,7 +348,8 @@ std::string JsonUtils::ToJsonString<std::vector<std::string>>(const std::vector<
     ss << "[";
     bool first = true;
     for (const auto& item : obj) {
-        if (!first) ss << ", ";
+        if (!first)
+            ss << ", ";
         ss << "\"" << item << "\"";
         first = false;
     }
@@ -395,7 +389,8 @@ nlohmann::json JsonUtils::GetValueByPath(const nlohmann::json& json_obj, const s
     return current;
 }
 #else
-JsonUtils::SimpleJson JsonUtils::GetValueByPath(const SimpleJson& json_obj, const std::vector<std::string>& path_parts) {
+JsonUtils::SimpleJson JsonUtils::GetValueByPath(const SimpleJson& json_obj,
+                                                const std::vector<std::string>& path_parts) {
     SimpleJson current = json_obj;
 
     for (const auto& part : path_parts) {
@@ -481,7 +476,8 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
             double value = json_obj;
             double minimum = schema_obj["minimum"];
             if (value < minimum) {
-                std::cerr << "Schema validation failed: value " << value << " is less than minimum " << minimum << std::endl;
+                std::cerr << "Schema validation failed: value " << value << " is less than minimum " << minimum
+                          << std::endl;
                 return false;
             }
         }
@@ -491,7 +487,8 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
             double value = json_obj;
             double maximum = schema_obj["maximum"];
             if (value > maximum) {
-                std::cerr << "Schema validation failed: value " << value << " is greater than maximum " << maximum << std::endl;
+                std::cerr << "Schema validation failed: value " << value << " is greater than maximum " << maximum
+                          << std::endl;
                 return false;
             }
         }
@@ -501,8 +498,8 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
             std::string str_val = json_obj;
             size_t min_length = schema_obj["minLength"];
             if (str_val.length() < min_length) {
-                std::cerr << "Schema validation failed: string length " << str_val.length()
-                         << " is less than minimum " << min_length << std::endl;
+                std::cerr << "Schema validation failed: string length " << str_val.length() << " is less than minimum "
+                          << min_length << std::endl;
                 return false;
             }
         }
@@ -513,7 +510,7 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
             size_t max_length = schema_obj["maxLength"];
             if (str_val.length() > max_length) {
                 std::cerr << "Schema validation failed: string length " << str_val.length()
-                         << " is greater than maximum " << max_length << std::endl;
+                          << " is greater than maximum " << max_length << std::endl;
                 return false;
             }
         }
@@ -522,8 +519,8 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
         if (json_obj.is_array() && schema_obj.contains("minItems")) {
             size_t min_items = schema_obj["minItems"];
             if (json_obj.size() < min_items) {
-                std::cerr << "Schema validation failed: array size " << json_obj.size()
-                         << " is less than minimum " << min_items << std::endl;
+                std::cerr << "Schema validation failed: array size " << json_obj.size() << " is less than minimum "
+                          << min_items << std::endl;
                 return false;
             }
         }
@@ -532,8 +529,8 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
         if (json_obj.is_array() && schema_obj.contains("maxItems")) {
             size_t max_items = schema_obj["maxItems"];
             if (json_obj.size() > max_items) {
-                std::cerr << "Schema validation failed: array size " << json_obj.size()
-                         << " is greater than maximum " << max_items << std::endl;
+                std::cerr << "Schema validation failed: array size " << json_obj.size() << " is greater than maximum "
+                          << max_items << std::endl;
                 return false;
             }
         }
@@ -569,6 +566,6 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
     }
 }
 
-} // namespace utils
-} // namespace sdk
-} // namespace croupier
+}  // namespace utils
+}  // namespace sdk
+}  // namespace croupier

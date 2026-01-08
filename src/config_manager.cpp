@@ -1,8 +1,9 @@
 #include "croupier/sdk/config_manager.h"
+
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <regex>
+#include <sstream>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -15,8 +16,8 @@ using json = nlohmann::json;
 #include <windows.h>
 #define mkdir(path, mode) _mkdir(path)
 #else
-#include <sys/stat.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #endif
 
@@ -325,8 +326,8 @@ std::vector<std::string> ConfigManager::ValidateApplicationConfig(const Applicat
             if (field.type.empty()) {
                 errors.push_back(prefix + "字段[" + field_name + "]类型不能为空");
             }
-            if (field.type != "string" && field.type != "int" && field.type != "float" &&
-                field.type != "bool" && field.type != "object" && field.type != "array") {
+            if (field.type != "string" && field.type != "int" && field.type != "float" && field.type != "bool" &&
+                field.type != "object" && field.type != "array") {
                 errors.push_back(prefix + "字段[" + field_name + "]类型无效: " + field.type);
             }
         }
@@ -367,21 +368,13 @@ bool ConfigManager::GenerateExampleConfigs(const std::string& output_dir) {
 
         // 4. 生成主配置文件
         json main_config = {
-            {"client", {
-                {"config_file", "./client.json"}
-            }},
-            {"components", {{
-                {"id", "economy-system"},
-                {"version", "1.0.0"},
-                {"config_file", "./components/economy.json"},
-                {"schema_file", "./schemas/wallet_schema.json"}
-            }}},
-            {"global", {
-                {"log_level", "info"},
-                {"metrics_enabled", true},
-                {"health_check_port", 8080}
-            }}
-        };
+            {"client", {{"config_file", "./client.json"}}},
+            {"components",
+             {{{"id", "economy-system"},
+               {"version", "1.0.0"},
+               {"config_file", "./components/economy.json"},
+               {"schema_file", "./schemas/wallet_schema.json"}}}},
+            {"global", {{"log_level", "info"}, {"metrics_enabled", true}, {"health_check_port", 8080}}}};
 
         std::ofstream main_file(output_dir + "/app_config.json");
         main_file << main_config.dump(2) << '\n';
@@ -606,161 +599,124 @@ ComponentDescriptor ConfigManager::ParseComponentFromJson(const nlohmann::json& 
 }
 
 nlohmann::json ConfigManager::GenerateExampleClientConfigJson() {
-    return json{
-        {"game_id", "example-game"},
-        {"env", "development"},
-        {"service_id", "backend-service"},
-        {"agent_addr", "127.0.0.1:19090"},
-        {"local_listen", "0.0.0.0:0"},
-        {"insecure", true},
-        {"timeout_seconds", 30},
-        {"auto_reconnect", true},
-        {"reconnect_interval_seconds", 5},
-        {"reconnect_max_attempts", 0},
-        {"security", {
-            {"cert_file", "/etc/tls/client.crt"},
-            {"key_file", "/etc/tls/client.key"},
-            {"ca_file", "/etc/tls/ca.crt"},
-            {"server_name", "croupier.internal"}
-        }},
-        {"auth", {
-            {"token", "Bearer eyJhbGciOiJIUzI1NiIs..."},
-            {"headers", {
-                {"X-Game-Version", "2.0.0"},
-                {"X-Client-ID", "backend-server-01"}
-            }}
-        }}
-    };
+    return json{{"game_id", "example-game"},
+                {"env", "development"},
+                {"service_id", "backend-service"},
+                {"agent_addr", "127.0.0.1:19090"},
+                {"local_listen", "0.0.0.0:0"},
+                {"insecure", true},
+                {"timeout_seconds", 30},
+                {"auto_reconnect", true},
+                {"reconnect_interval_seconds", 5},
+                {"reconnect_max_attempts", 0},
+                {"security",
+                 {{"cert_file", "/etc/tls/client.crt"},
+                  {"key_file", "/etc/tls/client.key"},
+                  {"ca_file", "/etc/tls/ca.crt"},
+                  {"server_name", "croupier.internal"}}},
+                {"auth",
+                 {{"token", "Bearer eyJhbGciOiJIUzI1NiIs..."},
+                  {"headers", {{"X-Game-Version", "2.0.0"}, {"X-Client-ID", "backend-server-01"}}}}}};
 }
 
 nlohmann::json ConfigManager::GenerateExampleComponentJson() {
     return json{
-        {"component", {
-            {"id", "economy-system"},
-            {"version", "1.0.0"},
-            {"name", "游戏经济系统"},
-            {"description", "包含钱包、商店、拍卖等功能"}
-        }},
-        {"virtual_objects", {{
-            {"id", "economy.wallet"},
-            {"version", "1.0.0"},
-            {"name", "玩家钱包"},
-            {"operations", {
-                {"get", "wallet.get"},
-                {"transfer", "wallet.transfer"},
-                {"add_currency", "wallet.add"}
-            }},
-            {"relationships", {
-                {"owner", {
-                    {"type", "many-to-one"},
-                    {"entity", "player"},
-                    {"foreign_key", "player_id"}
-                }}
-            }}
-        }}},
-        {"functions", {{
-            {"id", "wallet.get"},
-            {"version", "1.0.0"},
-            {"handler", {
-                {"type", "factory"},
-                {"factory", "wallet"},
-                {"config", {
-                    {"database_url", "postgresql://localhost/game"}
-                }}
-            }}
-        }}}
-    };
+        {"component",
+         {{"id", "economy-system"},
+          {"version", "1.0.0"},
+          {"name", "游戏经济系统"},
+          {"description", "包含钱包、商店、拍卖等功能"}}},
+        {"virtual_objects",
+         {{{"id", "economy.wallet"},
+           {"version", "1.0.0"},
+           {"name", "玩家钱包"},
+           {"operations", {{"get", "wallet.get"}, {"transfer", "wallet.transfer"}, {"add_currency", "wallet.add"}}},
+           {"relationships",
+            {{"owner", {{"type", "many-to-one"}, {"entity", "player"}, {"foreign_key", "player_id"}}}}}}}},
+        {"functions",
+         {{{"id", "wallet.get"},
+           {"version", "1.0.0"},
+           {"handler",
+            {{"type", "factory"},
+             {"factory", "wallet"},
+             {"config", {{"database_url", "postgresql://localhost/game"}}}}}}}}};
 }
 
 nlohmann::json ConfigManager::GenerateExampleSchemaJson() {
     return json{
-        {"schema", {
-            {"id", "economy.wallet"},
-            {"version", "1.0.0"},
-            {"name", "玩家钱包"},
-            {"description", "管理玩家的游戏货币和资产"}
-        }},
-        {"fields", {
-            {"wallet_id", {
-                {"type", "string"},
-                {"required", true},
-                {"description", "钱包唯一标识"},
-                {"validation", {
-                    {"pattern", "^wallet_[a-zA-Z0-9]+$"}
-                }}
-            }},
-            {"player_id", {
-                {"type", "string"},
-                {"required", true},
-                {"description", "关联的玩家ID"}
-            }},
-            {"balance", {
-                {"type", "int"},
-                {"required", true},
-                {"default_value", "0"},
-                {"description", "当前余额"},
-                {"validation", {
-                    {"min", "0"}
-                }}
-            }},
-            {"currency", {
-                {"type", "string"},
-                {"required", true},
-                {"default_value", "gold"},
-                {"description", "货币类型"},
-                {"validation", {
-                    {"enum", "gold,silver,diamond"}
-                }}
-            }}
-        }},
-        {"operations", {
-            {"get", "wallet.get"},
-            {"transfer", "wallet.transfer"},
-            {"add_currency", "wallet.add"},
-            {"subtract_currency", "wallet.subtract"}
-        }},
-        {"relationships", {
-            {"owner", {
-                {"type", "many-to-one"},
-                {"entity", "player"},
-                {"foreign_key", "player_id"}
-            }},
-            {"transactions", {
-                {"type", "one-to-many"},
-                {"entity", "transaction"},
-                {"foreign_key", "wallet_id"}
-            }}
-        }}
-    };
+        {"schema",
+         {{"id", "economy.wallet"},
+          {"version", "1.0.0"},
+          {"name", "玩家钱包"},
+          {"description", "管理玩家的游戏货币和资产"}}},
+        {"fields",
+         {{"wallet_id",
+           {{"type", "string"},
+            {"required", true},
+            {"description", "钱包唯一标识"},
+            {"validation", {{"pattern", "^wallet_[a-zA-Z0-9]+$"}}}}},
+          {"player_id", {{"type", "string"}, {"required", true}, {"description", "关联的玩家ID"}}},
+          {"balance",
+           {{"type", "int"},
+            {"required", true},
+            {"default_value", "0"},
+            {"description", "当前余额"},
+            {"validation", {{"min", "0"}}}}},
+          {"currency",
+           {{"type", "string"},
+            {"required", true},
+            {"default_value", "gold"},
+            {"description", "货币类型"},
+            {"validation", {{"enum", "gold,silver,diamond"}}}}}}},
+        {"operations",
+         {{"get", "wallet.get"},
+          {"transfer", "wallet.transfer"},
+          {"add_currency", "wallet.add"},
+          {"subtract_currency", "wallet.subtract"}}},
+        {"relationships",
+         {{"owner", {{"type", "many-to-one"}, {"entity", "player"}, {"foreign_key", "player_id"}}},
+          {"transactions", {{"type", "one-to-many"}, {"entity", "transaction"}, {"foreign_key", "wallet_id"}}}}}};
 }
 
 // 字段类型验证辅助方法
-bool ConfigManager::ValidateFieldType(const nlohmann::json& value, const VirtualObjectSchema::FieldSchema& field_schema) {
-    if (field_schema.type == "string" && !value.is_string()) return false;
-    if (field_schema.type == "int" && !value.is_number_integer()) return false;
-    if (field_schema.type == "float" && !value.is_number()) return false;
-    if (field_schema.type == "bool" && !value.is_boolean()) return false;
-    if (field_schema.type == "object" && !value.is_object()) return false;
-    if (field_schema.type == "array" && !value.is_array()) return false;
+bool ConfigManager::ValidateFieldType(const nlohmann::json& value,
+                                      const VirtualObjectSchema::FieldSchema& field_schema) {
+    if (field_schema.type == "string" && !value.is_string())
+        return false;
+    if (field_schema.type == "int" && !value.is_number_integer())
+        return false;
+    if (field_schema.type == "float" && !value.is_number())
+        return false;
+    if (field_schema.type == "bool" && !value.is_boolean())
+        return false;
+    if (field_schema.type == "object" && !value.is_object())
+        return false;
+    if (field_schema.type == "array" && !value.is_array())
+        return false;
     return true;
 }
 
 // 字段规则验证辅助方法
-bool ConfigManager::ValidateFieldRules(const nlohmann::json& value, const VirtualObjectSchema::FieldSchema& field_schema) {
+bool ConfigManager::ValidateFieldRules(const nlohmann::json& value,
+                                       const VirtualObjectSchema::FieldSchema& field_schema) {
     for (const auto& [rule_name, rule_value] : field_schema.validation) {
         if (rule_name == "min" && value.is_number()) {
             double min_val = std::stod(rule_value);
-            if (value.get<double>() < min_val) return false;
+            if (value.get<double>() < min_val)
+                return false;
         } else if (rule_name == "max" && value.is_number()) {
             double max_val = std::stod(rule_value);
-            if (value.get<double>() > max_val) return false;
+            if (value.get<double>() > max_val)
+                return false;
         } else if (rule_name == "pattern" && value.is_string()) {
             std::regex pattern(rule_value);
-            if (!std::regex_match(value.get<std::string>(), pattern)) return false;
+            if (!std::regex_match(value.get<std::string>(), pattern))
+                return false;
         } else if (rule_name == "enum" && value.is_string()) {
             std::string enum_values = rule_value;
             std::string val_str = value.get<std::string>();
-            if (enum_values.find(val_str) == std::string::npos) return false;
+            if (enum_values.find(val_str) == std::string::npos)
+                return false;
         }
     }
     return true;
@@ -781,7 +737,7 @@ ClientConfig ConfigManager::CreateDefaultClientConfig() {
     return config;
 }
 
-#endif // CROUPIER_SDK_ENABLE_JSON
+#endif  // CROUPIER_SDK_ENABLE_JSON
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

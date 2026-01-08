@@ -1,14 +1,15 @@
 #pragma once
 
 #include "croupier/sdk/croupier_client.h"
-#include <memory>
+
 #include <atomic>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
-#include <shared_mutex>
-#include <unordered_map>
 #include <deque>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+#include <unordered_map>
 
 // Windows macro conflict resolution: ERROR is defined in Windows SDK headers
 // We need to undefine it before our enum definition and restore it after
@@ -21,10 +22,12 @@
 
 // Only include gRPC headers when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include <grpcpp/grpcpp.h>
 #include "croupier/agent/local/v1/local.grpc.pb.h"
 #include "croupier/function/v1/function.grpc.pb.h"
+
 #include <google/protobuf/map.h>
+
+#include <grpcpp/grpcpp.h>
 #endif
 
 namespace croupier {
@@ -63,16 +66,10 @@ public:
     ConnectionState GetState() const;
 
     // Registration functionality - updated to match proto
-    bool RegisterWithAgent(
-        const std::vector<LocalFunctionDescriptor>& functions,
-        std::string& session_id
-    );
+    bool RegisterWithAgent(const std::vector<LocalFunctionDescriptor>& functions, std::string& session_id);
 
     // Send agent registration to server (second layer)
-    bool RegisterAgentWithServer(
-        const std::vector<FunctionDescriptor>& functions,
-        std::string& session_id
-    );
+    bool RegisterAgentWithServer(const std::vector<FunctionDescriptor>& functions, std::string& session_id);
 
     // 心跳管理
     bool SendHeartbeat(const std::string& session_id);
@@ -145,9 +142,7 @@ private:
  */
 class LocalFunctionServiceImpl : public croupier::function::v1::FunctionService::Service {
 public:
-    explicit LocalFunctionServiceImpl(
-        const std::map<std::string, FunctionHandler>& handlers
-    );
+    explicit LocalFunctionServiceImpl(const std::map<std::string, FunctionHandler>& handlers);
 
     // 更新处理器映射
     void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers);
@@ -162,17 +157,13 @@ public:
     size_t GetHandlerCount() const;
 
     // gRPC 服务方法
-    ::grpc::Status Invoke(::grpc::ServerContext* context,
-                          const croupier::function::v1::InvokeRequest* request,
+    ::grpc::Status Invoke(::grpc::ServerContext* context, const croupier::function::v1::InvokeRequest* request,
                           croupier::function::v1::InvokeResponse* response) override;
-    ::grpc::Status StartJob(::grpc::ServerContext* context,
-                            const croupier::function::v1::InvokeRequest* request,
+    ::grpc::Status StartJob(::grpc::ServerContext* context, const croupier::function::v1::InvokeRequest* request,
                             croupier::function::v1::StartJobResponse* response) override;
-    ::grpc::Status StreamJob(::grpc::ServerContext* context,
-                             const croupier::function::v1::JobStreamRequest* request,
+    ::grpc::Status StreamJob(::grpc::ServerContext* context, const croupier::function::v1::JobStreamRequest* request,
                              ::grpc::ServerWriter<croupier::function::v1::JobEvent>* writer) override;
-    ::grpc::Status CancelJob(::grpc::ServerContext* context,
-                             const croupier::function::v1::CancelJobRequest* request,
+    ::grpc::Status CancelJob(::grpc::ServerContext* context, const croupier::function::v1::CancelJobRequest* request,
                              croupier::function::v1::StartJobResponse* response) override;
 
 private:
@@ -191,23 +182,16 @@ private:
     std::unordered_map<std::string, std::shared_ptr<JobState>> jobs_;
 
     // 执行函数调用
-    std::string ExecuteHandler(
-        const std::string& function_id,
-        const std::string& context,
-        const std::string& payload
-    );
+    std::string ExecuteHandler(const std::string& function_id, const std::string& context, const std::string& payload);
 
-    std::string SerializeMetadata(
-        const google::protobuf::Map<std::string, std::string>& metadata) const;
+    std::string SerializeMetadata(const google::protobuf::Map<std::string, std::string>& metadata) const;
     std::string NextJobId(const std::string& function_id);
     std::shared_ptr<JobState> CreateJob(const std::string& job_id);
     std::shared_ptr<JobState> FindJob(const std::string& job_id) const;
     void FinishJob(const std::string& job_id);
-    void EnqueueEvent(const std::shared_ptr<JobState>& state,
-                      croupier::function::v1::JobEvent&& event,
+    void EnqueueEvent(const std::shared_ptr<JobState>& state, croupier::function::v1::JobEvent&& event,
                       bool mark_finished);
-    bool DequeueEvent(const std::shared_ptr<JobState>& state,
-                      croupier::function::v1::JobEvent* event);
+    bool DequeueEvent(const std::shared_ptr<JobState>& state, croupier::function::v1::JobEvent* event);
 };
 
 /**
@@ -218,34 +202,18 @@ public:
     explicit LocalControlServiceStub(std::shared_ptr<grpc::Channel> channel);
 
     // Register service with agent (LocalControlService)
-    bool RegisterLocal(
-        const std::string& service_id,
-        const std::string& version,
-        const std::string& rpc_addr,
-        const std::vector<LocalFunctionDescriptor>& functions,
-        std::string& session_id,
-        std::string& error_message
-    );
+    bool RegisterLocal(const std::string& service_id, const std::string& version, const std::string& rpc_addr,
+                       const std::vector<LocalFunctionDescriptor>& functions, std::string& session_id,
+                       std::string& error_message);
 
     // 发送心跳
-    bool Heartbeat(
-        const std::string& service_id,
-        const std::string& session_id,
-        std::string& error_message
-    );
+    bool Heartbeat(const std::string& service_id, const std::string& session_id, std::string& error_message);
 
     // 列出本地函数
-    bool ListLocal(
-        std::vector<FunctionDescriptor>& functions,
-        std::string& error_message
-    );
+    bool ListLocal(std::vector<FunctionDescriptor>& functions, std::string& error_message);
 
     // 注销服务
-    bool UnregisterLocal(
-        const std::string& service_id,
-        const std::string& session_id,
-        std::string& error_message
-    );
+    bool UnregisterLocal(const std::string& service_id, const std::string& session_id, std::string& error_message);
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
@@ -285,7 +253,7 @@ struct GrpcConnectionOptions {
     std::string server_name_override;
 };
 
-#else // !CROUPIER_SDK_ENABLE_GRPC
+#else  // !CROUPIER_SDK_ENABLE_GRPC
 
 // Mock implementations when gRPC is disabled
 class GrpcClientManager {
@@ -300,20 +268,14 @@ public:
     ConnectionState GetState() const { return ConnectionState::DISCONNECTED; }
 
     // Registration functionality
-    bool RegisterWithAgent(
-        const std::vector<LocalFunctionDescriptor>& functions,
-        std::string& session_id
-    ) {
+    bool RegisterWithAgent(const std::vector<LocalFunctionDescriptor>& functions, std::string& session_id) {
         (void)functions;
         (void)session_id;
         return false;
     }
 
     // Send agent registration to server (second layer)
-    bool RegisterAgentWithServer(
-        const std::vector<FunctionDescriptor>& functions,
-        std::string& session_id
-    ) {
+    bool RegisterAgentWithServer(const std::vector<FunctionDescriptor>& functions, std::string& session_id) {
         (void)functions;
         (void)session_id;
         return false;
@@ -324,9 +286,7 @@ public:
         (void)session_id;
         return false;
     }
-    void StartHeartbeatLoop(const std::string& session_id) {
-        (void)session_id;
-    }
+    void StartHeartbeatLoop(const std::string& session_id) { (void)session_id; }
     void StopHeartbeatLoop() {}
 
     // Local server management
@@ -335,15 +295,9 @@ public:
     std::string GetLocalServerAddress() const { return ""; }
 
     // Error handling
-    void SetErrorCallback(std::function<void(const std::string&)> callback) {
-        (void)callback;
-    }
-    void SetReconnectCallback(std::function<void()> callback) {
-        (void)callback;
-    }
-    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
-        (void)handlers;
-    }
+    void SetErrorCallback(std::function<void(const std::string&)> callback) { (void)callback; }
+    void SetReconnectCallback(std::function<void()> callback) { (void)callback; }
+    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) { (void)handlers; }
 
 private:
     ClientConfig config_;
@@ -351,20 +305,14 @@ private:
 
 class LocalFunctionServiceImpl {
 public:
-    explicit LocalFunctionServiceImpl(
-        const std::map<std::string, FunctionHandler>& handlers
-    ) : handlers_(handlers) {}
+    explicit LocalFunctionServiceImpl(const std::map<std::string, FunctionHandler>& handlers) : handlers_(handlers) {}
 
-    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
-        (void)handlers;
-    }
+    void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) { (void)handlers; }
     void AddHandler(const std::string& function_id, FunctionHandler handler) {
         (void)function_id;
         (void)handler;
     }
-    void RemoveHandler(const std::string& function_id) {
-        (void)function_id;
-    }
+    void RemoveHandler(const std::string& function_id) { (void)function_id; }
     size_t GetHandlerCount() const { return 0; }
 
 private:
@@ -374,17 +322,12 @@ private:
 class LocalControlServiceStub {
 public:
     explicit LocalControlServiceStub(void* channel) {
-        (void)channel; // void* instead of grpc::Channel
+        (void)channel;  // void* instead of grpc::Channel
     }
 
-    bool RegisterLocal(
-        const std::string& service_id,
-        const std::string& version,
-        const std::string& rpc_addr,
-        const std::vector<LocalFunctionDescriptor>& functions,
-        std::string& session_id,
-        std::string& error_message
-    ) {
+    bool RegisterLocal(const std::string& service_id, const std::string& version, const std::string& rpc_addr,
+                       const std::vector<LocalFunctionDescriptor>& functions, std::string& session_id,
+                       std::string& error_message) {
         (void)service_id;
         (void)version;
         (void)rpc_addr;
@@ -394,31 +337,20 @@ public:
         return false;
     }
 
-    bool Heartbeat(
-        const std::string& service_id,
-        const std::string& session_id,
-        std::string& error_message
-    ) {
+    bool Heartbeat(const std::string& service_id, const std::string& session_id, std::string& error_message) {
         (void)service_id;
         (void)session_id;
         (void)error_message;
         return false;
     }
 
-    bool ListLocal(
-        std::vector<FunctionDescriptor>& functions,
-        std::string& error_message
-    ) {
+    bool ListLocal(std::vector<FunctionDescriptor>& functions, std::string& error_message) {
         (void)functions;
         (void)error_message;
         return false;
     }
 
-    bool UnregisterLocal(
-        const std::string& service_id,
-        const std::string& session_id,
-        std::string& error_message
-    ) {
+    bool UnregisterLocal(const std::string& service_id, const std::string& session_id, std::string& error_message) {
         (void)service_id;
         (void)session_id;
         (void)error_message;
@@ -439,11 +371,11 @@ struct GrpcConnectionOptions {
     std::string server_name_override;
 };
 
-#endif // CROUPIER_SDK_ENABLE_GRPC
+#endif  // CROUPIER_SDK_ENABLE_GRPC
 
-} // namespace grpc_service
-} // namespace sdk
-} // namespace croupier
+}  // namespace grpc_service
+}  // namespace sdk
+}  // namespace croupier
 
 // Restore Windows ERROR macro if it was saved
 #ifdef _WIN32

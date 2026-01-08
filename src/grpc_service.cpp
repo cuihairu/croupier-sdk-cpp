@@ -3,14 +3,14 @@
 // Only compile the full gRPC implementation when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 
-#include <iostream>
-#include <sstream>
-#include <regex>
-#include <fstream>
-#include <shared_mutex>
-#include <chrono>
-#include <random>
 #include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <regex>
+#include <shared_mutex>
+#include <sstream>
 
 // Note: This implementation requires protobuf generated code
 // In a real project, we need to generate gRPC proto files first, then implement the actual services
@@ -34,7 +34,7 @@ std::string ReadFileContent(const std::string& path) {
     return buffer.str();
 }
 
-} // namespace
+}  // namespace
 
 namespace localv1 = ::croupier::agent::local::v1;
 namespace functionv1 = ::croupier::function::v1;
@@ -44,16 +44,15 @@ namespace functionv1 = ::croupier::function::v1;
 //==============================================================================
 
 GrpcClientManager::GrpcClientManager(const ClientConfig& config)
-    : config_(config)
-    , state_(ConnectionState::DISCONNECTED)
-    , auto_reconnect_enabled_(config.auto_reconnect)
-    , reconnect_requested_(false)
-    , reconnect_running_(false)
-    , heartbeat_running_(false)
-    , local_port_(0)
-{
-    std::cout << "Initializing gRPC client manager for game: " << config_.game_id
-              << ", env: " << config_.env << std::endl;
+    : config_(config),
+      state_(ConnectionState::DISCONNECTED),
+      auto_reconnect_enabled_(config.auto_reconnect),
+      reconnect_requested_(false),
+      reconnect_running_(false),
+      heartbeat_running_(false),
+      local_port_(0) {
+    std::cout << "Initializing gRPC client manager for game: " << config_.game_id << ", env: " << config_.env
+              << std::endl;
 }
 
 GrpcClientManager::~GrpcClientManager() {
@@ -137,10 +136,8 @@ ConnectionState GrpcClientManager::GetState() const {
     return state_;
 }
 
-bool GrpcClientManager::RegisterWithAgent(
-    const std::vector<LocalFunctionDescriptor>& functions,
-    std::string& session_id) {
-
+bool GrpcClientManager::RegisterWithAgent(const std::vector<LocalFunctionDescriptor>& functions,
+                                          std::string& session_id) {
     if (!IsConnected()) {
         std::cerr << "❌ Not connected to Agent, cannot register" << std::endl;
         return false;
@@ -152,14 +149,8 @@ bool GrpcClientManager::RegisterWithAgent(
 
     try {
         std::string error_message;
-        bool success = agent_stub_->RegisterLocal(
-            config_.service_id,
-            config_.service_version,
-            local_address_,
-            functions,
-            session_id,
-            error_message
-        );
+        bool success = agent_stub_->RegisterLocal(config_.service_id, config_.service_version, local_address_,
+                                                  functions, session_id, error_message);
 
         if (success) {
             std::cout << "✅ Successfully registered with Agent, session_id: " << session_id << std::endl;
@@ -180,9 +171,8 @@ bool GrpcClientManager::RegisterWithAgent(
     }
 }
 
-bool GrpcClientManager::RegisterAgentWithServer(
-    const std::vector<FunctionDescriptor>& functions,
-    std::string& session_id) {
+bool GrpcClientManager::RegisterAgentWithServer(const std::vector<FunctionDescriptor>& functions,
+                                                std::string& session_id) {
     (void)functions;
     (void)session_id;
     std::cerr << "⚠️  RegisterAgentWithServer is not implemented on the C++ SDK; "
@@ -225,7 +215,7 @@ bool GrpcClientManager::StartLocalServer() {
             if (pos > 0) {
                 host = listen_addr.substr(0, pos);
             } else {
-                host.clear(); // signifies all interfaces
+                host.clear();  // signifies all interfaces
             }
             std::string port_str = listen_addr.substr(pos + 1);
             if (!port_str.empty()) {
@@ -388,8 +378,7 @@ void GrpcClientManager::StartReconnectLoop() {
             }
 
             state_ = ConnectionState::RECONNECTING;
-            std::cout << "🔄 Attempting to reconnect to Agent... (attempt " << (attempts + 1) << ")"
-                      << std::endl;
+            std::cout << "🔄 Attempting to reconnect to Agent... (attempt " << (attempts + 1) << ")" << std::endl;
 
             if (Connect()) {
                 std::cout << "✅ Reconnection successful!" << std::endl;
@@ -403,9 +392,7 @@ void GrpcClientManager::StartReconnectLoop() {
         }
 
         if (reconnect_requested_) {
-            std::cerr << "❌ Reconnection failed"
-                      << (max_attempts > 0 ? " (max attempts reached)" : "")
-                      << std::endl;
+            std::cerr << "❌ Reconnection failed" << (max_attempts > 0 ? " (max attempts reached)" : "") << std::endl;
             reconnect_requested_ = false;
             state_ = ConnectionState::FAILED;
         }
@@ -426,13 +413,13 @@ void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
 
     heartbeat_running_ = true;
     heartbeat_thread_ = std::thread([this, session_id]() {
-        const auto interval = std::chrono::seconds(
-            config_.heartbeat_interval > 0 ? config_.heartbeat_interval : 60);
+        const auto interval = std::chrono::seconds(config_.heartbeat_interval > 0 ? config_.heartbeat_interval : 60);
 
         while (heartbeat_running_) {
             std::this_thread::sleep_for(interval);
 
-            if (!heartbeat_running_) break;
+            if (!heartbeat_running_)
+                break;
 
             if (!SendHeartbeat(session_id)) {
                 std::cerr << "💔 Heartbeat failed, may need reconnection" << std::endl;
@@ -465,8 +452,8 @@ grpc::ChannelArguments GrpcClientManager::CreateChannelArguments() const {
     args.SetInt(GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS, 1);
 
     // Set max message size
-    args.SetMaxReceiveMessageSize(4 * 1024 * 1024); // 4MB
-    args.SetMaxSendMessageSize(4 * 1024 * 1024);    // 4MB
+    args.SetMaxReceiveMessageSize(4 * 1024 * 1024);  // 4MB
+    args.SetMaxSendMessageSize(4 * 1024 * 1024);     // 4MB
 
     return args;
 }
@@ -489,8 +476,8 @@ std::shared_ptr<grpc::ChannelCredentials> GrpcClientManager::CreateCredentials()
             ssl_options.pem_private_key = ReadFileContent(config_.key_file);
         }
     } catch (const std::exception& e) {
-        std::cerr << "⚠️  Failed to load TLS credentials: " << e.what()
-                  << ", falling back to insecure channel" << std::endl;
+        std::cerr << "⚠️  Failed to load TLS credentials: " << e.what() << ", falling back to insecure channel"
+                  << std::endl;
         return grpc::InsecureChannelCredentials();
     }
 
@@ -530,12 +517,8 @@ struct LocalFunctionServiceImpl::JobState {
     std::atomic<bool> finished{false};
 };
 
-LocalFunctionServiceImpl::LocalFunctionServiceImpl(
-    const std::map<std::string, FunctionHandler>& handlers)
-    : handlers_(handlers)
-    , total_calls_(0)
-    , successful_calls_(0)
-    , failed_calls_(0) {
+LocalFunctionServiceImpl::LocalFunctionServiceImpl(const std::map<std::string, FunctionHandler>& handlers)
+    : handlers_(handlers), total_calls_(0), successful_calls_(0), failed_calls_(0) {
     std::cout << "🎯 Local function service initialized, handler count: " << handlers_.size() << std::endl;
 }
 
@@ -627,10 +610,8 @@ void LocalFunctionServiceImpl::FinishJob(const std::string& job_id) {
     }
 }
 
-void LocalFunctionServiceImpl::EnqueueEvent(
-    const std::shared_ptr<JobState>& state,
-    functionv1::JobEvent&& event,
-    bool mark_finished) {
+void LocalFunctionServiceImpl::EnqueueEvent(const std::shared_ptr<JobState>& state, functionv1::JobEvent&& event,
+                                            bool mark_finished) {
     {
         std::lock_guard<std::mutex> lock(state->mutex);
         if (state->finished && !mark_finished) {
@@ -644,13 +625,9 @@ void LocalFunctionServiceImpl::EnqueueEvent(
     state->cv.notify_all();
 }
 
-bool LocalFunctionServiceImpl::DequeueEvent(
-    const std::shared_ptr<JobState>& state,
-    functionv1::JobEvent* event) {
+bool LocalFunctionServiceImpl::DequeueEvent(const std::shared_ptr<JobState>& state, functionv1::JobEvent* event) {
     std::unique_lock<std::mutex> lock(state->mutex);
-    state->cv.wait(lock, [&]() {
-        return !state->queue.empty() || state->finished.load();
-    });
+    state->cv.wait(lock, [&]() { return !state->queue.empty() || state->finished.load(); });
 
     if (state->queue.empty()) {
         return false;
@@ -661,11 +638,8 @@ bool LocalFunctionServiceImpl::DequeueEvent(
     return true;
 }
 
-std::string LocalFunctionServiceImpl::ExecuteHandler(
-    const std::string& function_id,
-    const std::string& context,
-    const std::string& payload) {
-
+std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function_id, const std::string& context,
+                                                     const std::string& payload) {
     total_calls_++;
 
     FunctionHandler handler;
@@ -702,10 +676,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
 
     try {
         const auto context_json = SerializeMetadata(request->metadata());
-        const std::string result = ExecuteHandler(
-            request->function_id(),
-            context_json,
-            request->payload());
+        const std::string result = ExecuteHandler(request->function_id(), context_json, request->payload());
         response->set_payload(result);
         return ::grpc::Status::OK;
     } catch (const std::exception& e) {
@@ -774,10 +745,9 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
     return ::grpc::Status::OK;
 }
 
-::grpc::Status LocalFunctionServiceImpl::StreamJob(
-    ::grpc::ServerContext* context,
-    const functionv1::JobStreamRequest* request,
-    ::grpc::ServerWriter<functionv1::JobEvent>* writer) {
+::grpc::Status LocalFunctionServiceImpl::StreamJob(::grpc::ServerContext* context,
+                                                   const functionv1::JobStreamRequest* request,
+                                                   ::grpc::ServerWriter<functionv1::JobEvent>* writer) {
     (void)context;
     if (!request || request->job_id().empty()) {
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, "job_id is required");
@@ -831,19 +801,15 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(
 //==============================================================================
 
 LocalControlServiceStub::LocalControlServiceStub(std::shared_ptr<grpc::Channel> channel)
-    : channel_(channel)
-    , stub_(localv1::LocalControlService::NewStub(channel))
-    , default_timeout_(std::chrono::milliseconds(30000)) // 30 second timeout
+    : channel_(channel),
+      stub_(localv1::LocalControlService::NewStub(channel)),
+      default_timeout_(std::chrono::milliseconds(30000))  // 30 second timeout
 {}
 
-bool LocalControlServiceStub::RegisterLocal(
-    const std::string& service_id,
-    const std::string& version,
-    const std::string& rpc_addr,
-    const std::vector<LocalFunctionDescriptor>& functions,
-    std::string& session_id,
-    std::string& error_message) {
-
+bool LocalControlServiceStub::RegisterLocal(const std::string& service_id, const std::string& version,
+                                            const std::string& rpc_addr,
+                                            const std::vector<LocalFunctionDescriptor>& functions,
+                                            std::string& session_id, std::string& error_message) {
     try {
         auto context = CreateContext();
         localv1::RegisterLocalRequest request;
@@ -876,11 +842,8 @@ bool LocalControlServiceStub::RegisterLocal(
     }
 }
 
-bool LocalControlServiceStub::Heartbeat(
-    const std::string& service_id,
-    const std::string& session_id,
-    std::string& error_message) {
-
+bool LocalControlServiceStub::Heartbeat(const std::string& service_id, const std::string& session_id,
+                                        std::string& error_message) {
     try {
         auto context = CreateContext();
         localv1::HeartbeatRequest request;
@@ -900,10 +863,7 @@ bool LocalControlServiceStub::Heartbeat(
     }
 }
 
-bool LocalControlServiceStub::ListLocal(
-    std::vector<FunctionDescriptor>& functions,
-    std::string& error_message) {
-
+bool LocalControlServiceStub::ListLocal(std::vector<FunctionDescriptor>& functions, std::string& error_message) {
     try {
         auto context = CreateContext();
         localv1::ListLocalRequest request;
@@ -931,11 +891,8 @@ bool LocalControlServiceStub::ListLocal(
     }
 }
 
-bool LocalControlServiceStub::UnregisterLocal(
-    const std::string& service_id,
-    const std::string& session_id,
-    std::string& error_message) {
-
+bool LocalControlServiceStub::UnregisterLocal(const std::string& service_id, const std::string& session_id,
+                                              std::string& error_message) {
     (void)service_id;
     (void)session_id;
     error_message = "UnregisterLocal not supported by LocalControlService";
@@ -952,8 +909,8 @@ std::unique_ptr<grpc::ClientContext> LocalControlServiceStub::CreateContext() {
     return context;
 }
 
-} // namespace grpc_service
-} // namespace sdk
-} // namespace croupier
+}  // namespace grpc_service
+}  // namespace sdk
+}  // namespace croupier
 
-#endif // CROUPIER_SDK_ENABLE_GRPC
+#endif  // CROUPIER_SDK_ENABLE_GRPC

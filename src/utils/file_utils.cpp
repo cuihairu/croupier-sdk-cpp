@@ -1,13 +1,14 @@
 #include "croupier/sdk/utils/file_utils.h"
+
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 
 // Platform-specific includes
 #ifdef _WIN32
 #include <direct.h>
-#include <windows.h>
 #include <io.h>
+#include <windows.h>
 #define ACCESS _access
 #define GETCWD _getcwd
 #define MKDIR(path) _mkdir(path)
@@ -17,13 +18,13 @@
 #undef RemoveDirectory
 #undef CopyFile
 #else
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <cstring>
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
 #include <limits.h>
-#include <cstring>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #define ACCESS access
 #define GETCWD getcwd
 #define MKDIR(path) mkdir(path, 0755)
@@ -93,9 +94,7 @@ std::string FileSystemUtils::ReadFileContent(const std::string& file_path) {
     return buffer.str();
 }
 
-bool FileSystemUtils::WriteFileContent(const std::string& file_path,
-                                      const std::string& content,
-                                      bool append) {
+bool FileSystemUtils::WriteFileContent(const std::string& file_path, const std::string& content, bool append) {
     std::ios_base::openmode mode = std::ios::binary;
     if (append) {
         mode |= std::ios::app;
@@ -115,9 +114,8 @@ bool FileSystemUtils::WriteFileContent(const std::string& file_path,
 
 // ========== Directory Scanning ==========
 
-std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory,
-                                                   const std::string& extension,
-                                                   bool recursive) {
+std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory, const std::string& extension,
+                                                    bool recursive) {
     std::vector<std::string> result;
 
     if (!DirectoryExists(directory)) {
@@ -138,7 +136,7 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
                 if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
                     std::string filename = findFileData.cFileName;
                     if (extension.empty() || (filename.length() >= extension.length() &&
-                        filename.substr(filename.length() - extension.length()) == extension)) {
+                                              filename.substr(filename.length() - extension.length()) == extension)) {
                         result.push_back(JoinPath(directory, filename));
                     }
                 }
@@ -153,7 +151,7 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
                 if (entry->d_type == DT_REG) {  // Regular file
                     std::string filename = entry->d_name;
                     if (extension.empty() || (filename.length() >= extension.length() &&
-                        filename.substr(filename.length() - extension.length()) == extension)) {
+                                              filename.substr(filename.length() - extension.length()) == extension)) {
                         result.push_back(JoinPath(directory, filename));
                     }
                 }
@@ -166,8 +164,7 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
     return result;
 }
 
-std::vector<std::string> FileSystemUtils::ListDirectories(const std::string& directory,
-                                                         bool recursive) {
+std::vector<std::string> FileSystemUtils::ListDirectories(const std::string& directory, bool recursive) {
     std::vector<std::string> result;
 
     if (!DirectoryExists(directory)) {
@@ -186,8 +183,7 @@ std::vector<std::string> FileSystemUtils::ListDirectories(const std::string& dir
         if (hFind != INVALID_HANDLE_VALUE) {
             do {
                 if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
-                    strcmp(findFileData.cFileName, ".") != 0 &&
-                    strcmp(findFileData.cFileName, "..") != 0) {
+                    strcmp(findFileData.cFileName, ".") != 0 && strcmp(findFileData.cFileName, "..") != 0) {
                     result.push_back(JoinPath(directory, findFileData.cFileName));
                 }
             } while (FindNextFileA(hFind, &findFileData));
@@ -198,9 +194,7 @@ std::vector<std::string> FileSystemUtils::ListDirectories(const std::string& dir
         if (dir != nullptr) {
             struct dirent* entry;
             while ((entry = readdir(dir)) != nullptr) {
-                if (entry->d_type == DT_DIR &&
-                    strcmp(entry->d_name, ".") != 0 &&
-                    strcmp(entry->d_name, "..") != 0) {
+                if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
                     result.push_back(JoinPath(directory, entry->d_name));
                 }
             }
@@ -263,8 +257,10 @@ std::string FileSystemUtils::JoinPath(const std::vector<std::string>& components
 }
 
 std::string FileSystemUtils::JoinPath(const std::string& base, const std::string& relative) {
-    if (base.empty()) return relative;
-    if (relative.empty()) return base;
+    if (base.empty())
+        return relative;
+    if (relative.empty())
+        return base;
 
     char separator = GetPathSeparator();
     std::string result = base;
@@ -284,7 +280,8 @@ std::string FileSystemUtils::JoinPath(const std::string& base, const std::string
 }
 
 std::string FileSystemUtils::NormalizePath(const std::string& path) {
-    if (path.empty()) return path;
+    if (path.empty())
+        return path;
 
     std::vector<std::string> components;
     std::stringstream ss(path);
@@ -322,7 +319,8 @@ std::string FileSystemUtils::NormalizePath(const std::string& path) {
     }
 
     for (size_t i = 0; i < components.size(); ++i) {
-        if (i > 0) result += separator;
+        if (i > 0)
+            result += separator;
         result += components[i];
     }
 
@@ -330,20 +328,19 @@ std::string FileSystemUtils::NormalizePath(const std::string& path) {
 }
 
 bool FileSystemUtils::IsAbsolutePath(const std::string& path) {
-    if (path.empty()) return false;
+    if (path.empty())
+        return false;
 
 #ifdef _WIN32
     // Windows: starts with drive letter (C:) or UNC path (\\)
-    return (path.length() >= 2 && path[1] == ':') ||
-           (path.length() >= 2 && path[0] == '\\' && path[1] == '\\');
+    return (path.length() >= 2 && path[1] == ':') || (path.length() >= 2 && path[0] == '\\' && path[1] == '\\');
 #else
     // Unix: starts with /
     return path[0] == '/';
 #endif
 }
 
-std::string FileSystemUtils::ToAbsolutePath(const std::string& relative_path,
-                                          const std::string& base_path) {
+std::string FileSystemUtils::ToAbsolutePath(const std::string& relative_path, const std::string& base_path) {
     if (IsAbsolutePath(relative_path)) {
         return NormalizePath(relative_path);
     }
@@ -362,8 +359,7 @@ char FileSystemUtils::GetPathSeparator() {
 
 // ========== File Operations ==========
 
-std::string FileSystemUtils::CreateTempFile(const std::string& prefix,
-                                           const std::string& suffix) {
+std::string FileSystemUtils::CreateTempFile(const std::string& prefix, const std::string& suffix) {
 #ifdef _WIN32
     char temp_path[MAX_PATH];
     char temp_filename[MAX_PATH];
@@ -437,9 +433,7 @@ bool FileSystemUtils::RemoveDirectory(const std::string& dir_path, bool recursiv
 #endif
 }
 
-bool FileSystemUtils::CopyFile(const std::string& source_path,
-                              const std::string& dest_path,
-                              bool overwrite) {
+bool FileSystemUtils::CopyFile(const std::string& source_path, const std::string& dest_path, bool overwrite) {
     if (!FileExists(source_path)) {
         std::cerr << "Source file does not exist: " << source_path << std::endl;
         return false;
@@ -461,9 +455,8 @@ bool FileSystemUtils::CopyFile(const std::string& source_path,
 
 // ========== Private Helper Methods ==========
 
-void FileSystemUtils::ListFilesRecursive(const std::string& directory,
-                                        const std::string& extension,
-                                        std::vector<std::string>& result) {
+void FileSystemUtils::ListFilesRecursive(const std::string& directory, const std::string& extension,
+                                         std::vector<std::string>& result) {
     auto files = ListFiles(directory, extension, false);
     result.insert(result.end(), files.begin(), files.end());
 
@@ -473,8 +466,7 @@ void FileSystemUtils::ListFilesRecursive(const std::string& directory,
     }
 }
 
-void FileSystemUtils::ListDirectoriesRecursive(const std::string& directory,
-                                              std::vector<std::string>& result) {
+void FileSystemUtils::ListDirectoriesRecursive(const std::string& directory, std::vector<std::string>& result) {
     auto subdirs = ListDirectories(directory, false);
     result.insert(result.end(), subdirs.begin(), subdirs.end());
 
@@ -483,6 +475,6 @@ void FileSystemUtils::ListDirectoriesRecursive(const std::string& directory,
     }
 }
 
-} // namespace utils
-} // namespace sdk
-} // namespace croupier
+}  // namespace utils
+}  // namespace sdk
+}  // namespace croupier

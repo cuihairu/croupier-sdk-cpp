@@ -1,12 +1,12 @@
 #pragma once
 
-#include <string>
-#include <map>
 #include <functional>
-#include <memory>
 #include <future>
-#include <vector>
+#include <map>
+#include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace croupier {
 namespace sdk {
@@ -20,55 +20,55 @@ using FunctionHandler = std::function<std::string(const std::string& context, co
 
 // Function descriptor matching proto definition (control.proto)
 struct FunctionDescriptor {
-    std::string id;        // function id, e.g. "player.ban"
-    std::string version;   // semver, e.g. "1.2.0"
-    std::string category;  // grouping category
-    std::string risk;      // "low"|"medium"|"high"
-    std::string entity;    // entity type, e.g. "item", "player"
-    std::string operation; // operation type, e.g. "create", "read", "update", "delete"
-    bool enabled = true;   // whether this function is currently enabled
+    std::string id;         // function id, e.g. "player.ban"
+    std::string version;    // semver, e.g. "1.2.0"
+    std::string category;   // grouping category
+    std::string risk;       // "low"|"medium"|"high"
+    std::string entity;     // entity type, e.g. "item", "player"
+    std::string operation;  // operation type, e.g. "create", "read", "update", "delete"
+    bool enabled = true;    // whether this function is currently enabled
 };
 
 // Relationship definition for virtual objects
 struct RelationshipDef {
-    std::string type;        // "one-to-many", "many-to-one", "many-to-many"
-    std::string entity;      // Related entity ID
-    std::string foreign_key; // Foreign key field name
+    std::string type;         // "one-to-many", "many-to-one", "many-to-many"
+    std::string entity;       // Related entity ID
+    std::string foreign_key;  // Foreign key field name
 };
 
 // Virtual object descriptor
 struct VirtualObjectDescriptor {
-    std::string id;                              // e.g. "wallet.entity"
-    std::string version;                         // Version number
-    std::string name;                            // Display name
-    std::string description;                     // Description
-    std::map<std::string, std::string> schema;   // JSON Schema definition
-    std::map<std::string, std::string> operations; // Operation mappings: "read" -> "wallet.get"
-    std::map<std::string, RelationshipDef> relationships; // Relationship definitions
-    std::vector<FunctionDescriptor> functions;       // Function descriptors
-    std::map<std::string, std::string> metadata;      // Additional metadata
+    std::string id;                                        // e.g. "wallet.entity"
+    std::string version;                                   // Version number
+    std::string name;                                      // Display name
+    std::string description;                               // Description
+    std::map<std::string, std::string> schema;             // JSON Schema definition
+    std::map<std::string, std::string> operations;         // Operation mappings: "read" -> "wallet.get"
+    std::map<std::string, RelationshipDef> relationships;  // Relationship definitions
+    std::vector<FunctionDescriptor> functions;             // Function descriptors
+    std::map<std::string, std::string> metadata;           // Additional metadata
 };
 
 // Component descriptor (complete module)
 struct ComponentDescriptor {
-    std::string id;                             // e.g. "economy-system"
-    std::string version;                        // Component version
-    std::string name;                           // Component name
-    std::string description;                    // Component description
-    std::string type;                           // Component type
+    std::string id;                                 // e.g. "economy-system"
+    std::string version;                            // Component version
+    std::string name;                               // Component name
+    std::string description;                        // Component description
+    std::string type;                               // Component type
     std::vector<VirtualObjectDescriptor> entities;  // Contained entities
     std::vector<FunctionDescriptor> functions;      // Contained functions
     std::map<std::string, std::string> resources;   // UI resource definitions
     std::map<std::string, std::string> config;      // Component configuration
-    std::vector<std::string> dependencies;         // Dependencies
-    std::map<std::string, std::string> metadata;      // Additional metadata
-    bool enabled = true;                           // Component enabled flag
+    std::vector<std::string> dependencies;          // Dependencies
+    std::map<std::string, std::string> metadata;    // Additional metadata
+    bool enabled = true;                            // Component enabled flag
 };
 
 // Local function descriptor matching agent/local/v1/local.proto
 struct LocalFunctionDescriptor {
-    std::string id;      // function id
-    std::string version; // function version
+    std::string id;       // function id
+    std::string version;  // function version
 };
 
 // Client configuration
@@ -77,7 +77,7 @@ struct ClientConfig {
     std::string local_listen = "127.0.0.1:0";
     std::string service_id = "cpp-service";
     std::string service_version = "1.0.0";
-    std::string control_addr;               // optional control-plane endpoint
+    std::string control_addr;  // optional control-plane endpoint
     std::string provider_lang = "cpp";
     std::string provider_sdk = "croupier-cpp-sdk";
 
@@ -90,102 +90,102 @@ struct ClientConfig {
     int reconnect_max_attempts = 0;
 
     // ========== Agent Registration ==========
-    std::string agent_id;              // Agent unique identifier (auto-generated if empty)
+    std::string agent_id;  // Agent unique identifier (auto-generated if empty)
 
     // ========== Game Environment Configuration ==========
-    std::string game_id;               // Required: Game identifier for backend separation
-    std::string env = "development";   // Environment: "development", "staging", "production"
+    std::string game_id;              // Required: Game identifier for backend separation
+    std::string env = "development";  // Environment: "development", "staging", "production"
 
-    bool insecure = true; // For development; set false for production with TLS
+    bool insecure = true;  // For development; set false for production with TLS
 
     // ========== Optional TLS Configuration ==========
-    std::string cert_file;         // Client certificate file path
-    std::string key_file;          // Client private key file path
-    std::string ca_file;           // CA certificate file path
-    std::string server_name;       // Server name for TLS verification
+    std::string cert_file;    // Client certificate file path
+    std::string key_file;     // Client private key file path
+    std::string ca_file;      // CA certificate file path
+    std::string server_name;  // Server name for TLS verification
 
     // ========== Authentication ==========
-    std::string auth_token;        // Bearer token for authentication
-    std::map<std::string, std::string> headers; // Additional headers
+    std::string auth_token;                      // Bearer token for authentication
+    std::map<std::string, std::string> headers;  // Additional headers
 
     // ========== Timeouts ==========
     int timeout_seconds = 30;     // Connection timeout
     int heartbeat_interval = 60;  // Heartbeat interval in seconds
 
     // ========== Logging Configuration ==========
-    bool disable_logging = false;   // Disable all logging
-    bool debug_logging = false;     // Enable debug level logging
-    std::string log_level = "INFO"; // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
+    bool disable_logging = false;    // Disable all logging
+    bool debug_logging = false;      // Enable debug level logging
+    std::string log_level = "INFO";  // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
 
     // ========== File Transfer Configuration (SECURITY SENSITIVE) ==========
     // File transfer is DISABLED by default for security reasons.
     // Enabling requires explicit configuration and security review.
-    bool enable_file_transfer = false;              // Enable file transfer functionality (default: false)
-    int max_file_size = 10485760;                   // Max file size in bytes (default: 10MB)
-    std::vector<std::string> allowed_extensions;    // Allowed file extensions (whitelist, e.g., ".png", ".jpg")
-    std::vector<std::string> allowed_mime_types;    // Allowed MIME types (whitelist, e.g., "image/png")
-    int upload_timeout = 300000;                    // Upload timeout in milliseconds (default: 5 minutes)
+    bool enable_file_transfer = false;            // Enable file transfer functionality (default: false)
+    int max_file_size = 10485760;                 // Max file size in bytes (default: 10MB)
+    std::vector<std::string> allowed_extensions;  // Allowed file extensions (whitelist, e.g., ".png", ".jpg")
+    std::vector<std::string> allowed_mime_types;  // Allowed MIME types (whitelist, e.g., "image/png")
+    int upload_timeout = 300000;                  // Upload timeout in milliseconds (default: 5 minutes)
 };
 
 // Reconnection configuration with exponential backoff
 struct ReconnectConfig {
-    bool enabled = true;             // Enable automatic reconnection
-    int max_attempts = 0;            // Max reconnection attempts (0 = infinite)
-    int initial_delay_ms = 1000;     // Initial reconnection delay in milliseconds
-    int max_delay_ms = 30000;        // Maximum reconnection delay in milliseconds
-    double backoff_multiplier = 2.0; // Exponential backoff multiplier
-    double jitter_factor = 0.2;      // Jitter factor (0-1) to add randomness
+    bool enabled = true;              // Enable automatic reconnection
+    int max_attempts = 0;             // Max reconnection attempts (0 = infinite)
+    int initial_delay_ms = 1000;      // Initial reconnection delay in milliseconds
+    int max_delay_ms = 30000;         // Maximum reconnection delay in milliseconds
+    double backoff_multiplier = 2.0;  // Exponential backoff multiplier
+    double jitter_factor = 0.2;       // Jitter factor (0-1) to add randomness
 };
 
 // Retry configuration with exponential backoff
 struct RetryConfig {
-    bool enabled = true;             // Enable retry on failure
-    int max_attempts = 3;            // Max retry attempts
-    int initial_delay_ms = 100;      // Initial retry delay in milliseconds
-    int max_delay_ms = 5000;         // Maximum retry delay in milliseconds
-    double backoff_multiplier = 2.0; // Exponential backoff multiplier
-    double jitter_factor = 0.1;      // Jitter factor (0-1) to add randomness
-    std::vector<int> retryable_status_codes = {14, 13, 2, 10, 4}; // gRPC status codes
+    bool enabled = true;                                           // Enable retry on failure
+    int max_attempts = 3;                                          // Max retry attempts
+    int initial_delay_ms = 100;                                    // Initial retry delay in milliseconds
+    int max_delay_ms = 5000;                                       // Maximum retry delay in milliseconds
+    double backoff_multiplier = 2.0;                               // Exponential backoff multiplier
+    double jitter_factor = 0.1;                                    // Jitter factor (0-1) to add randomness
+    std::vector<int> retryable_status_codes = {14, 13, 2, 10, 4};  // gRPC status codes
 };
 
 // Invoker configuration
 struct InvokerConfig {
-    std::string address;              // Server/Agent address
+    std::string address;  // Server/Agent address
 
     // ========== Game Environment Configuration ==========
     std::string game_id;              // Required: Game identifier
     std::string env = "development";  // Environment: "development", "staging", "production"
 
     // ========== TLS Configuration ==========
-    bool insecure = true;             // Use insecure connection for development
-    std::string cert_file;            // Client certificate file path
-    std::string key_file;             // Client private key file path
-    std::string ca_file;              // CA certificate file path
-    std::string server_name;          // Server name for TLS verification
+    bool insecure = true;     // Use insecure connection for development
+    std::string cert_file;    // Client certificate file path
+    std::string key_file;     // Client private key file path
+    std::string ca_file;      // CA certificate file path
+    std::string server_name;  // Server name for TLS verification
 
     // ========== Authentication & Headers ==========
-    std::string auth_token;           // Bearer token for authentication
-    std::map<std::string, std::string> headers; // Additional request headers
+    std::string auth_token;                      // Bearer token for authentication
+    std::map<std::string, std::string> headers;  // Additional request headers
 
     // ========== Timeouts ==========
-    int timeout_seconds = 30;        // Request timeout
+    int timeout_seconds = 30;  // Request timeout
 
     // ========== Retry Configuration ==========
-    RetryConfig retry;               // Retry configuration
+    RetryConfig retry;  // Retry configuration
 
     // ========== Logging Configuration ==========
-    bool disable_logging = false;   // Disable all logging
-    bool debug_logging = false;     // Enable debug level logging
-    std::string log_level = "INFO"; // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
+    bool disable_logging = false;    // Disable all logging
+    bool debug_logging = false;      // Enable debug level logging
+    std::string log_level = "INFO";  // Log level: "DEBUG", "INFO", "WARN", "ERROR", "OFF"
 
     // ========== File Transfer Configuration (SECURITY SENSITIVE) ==========
     // File transfer is DISABLED by default for security reasons.
     // Enabling requires explicit configuration and security review.
-    bool enable_file_transfer = false;              // Enable file transfer functionality (default: false)
-    int max_file_size = 10485760;                   // Max file size in bytes (default: 10MB)
-    std::vector<std::string> allowed_extensions;    // Allowed file extensions (whitelist, e.g., ".png", ".jpg")
-    std::vector<std::string> allowed_mime_types;    // Allowed MIME types (whitelist, e.g., "image/png")
-    int upload_timeout = 300000;                    // Upload timeout in milliseconds (default: 5 minutes)
+    bool enable_file_transfer = false;            // Enable file transfer functionality (default: false)
+    int max_file_size = 10485760;                 // Max file size in bytes (default: 10MB)
+    std::vector<std::string> allowed_extensions;  // Allowed file extensions (whitelist, e.g., ".png", ".jpg")
+    std::vector<std::string> allowed_mime_types;  // Allowed MIME types (whitelist, e.g., "image/png")
+    int upload_timeout = 300000;                  // Upload timeout in milliseconds (default: 5 minutes)
 };
 
 // Invoke options for function calls
@@ -193,12 +193,12 @@ struct InvokeOptions {
     // Optional per-request override; when 0, uses the invoker's default timeout.
     int timeout_seconds = 0;
     std::string idempotency_key;
-    std::string route; // "lb", "broadcast", "targeted", "hash"
+    std::string route;  // "lb", "broadcast", "targeted", "hash"
     std::string target_service_id;
     std::string hash_key;
     std::string trace_id;
     std::map<std::string, std::string> metadata;
-    std::optional<RetryConfig> retry; // Retry configuration override
+    std::optional<RetryConfig> retry;  // Retry configuration override
 };
 
 // Job event for streaming operations
@@ -226,10 +226,8 @@ public:
     // ========== New Virtual Object Registration ==========
 
     // Register a virtual object with its associated functions
-    bool RegisterVirtualObject(
-        const VirtualObjectDescriptor& desc,
-        const std::map<std::string, FunctionHandler>& handlers
-    );
+    bool RegisterVirtualObject(const VirtualObjectDescriptor& desc,
+                               const std::map<std::string, FunctionHandler>& handlers);
 
     // Register a complete component (recommended approach)
     bool RegisterComponent(const ComponentDescriptor& comp);
@@ -286,12 +284,10 @@ public:
     bool Connect();
 
     // Invoke a function synchronously
-    std::string Invoke(const std::string& function_id, const std::string& payload,
-                      const InvokeOptions& options = {});
+    std::string Invoke(const std::string& function_id, const std::string& payload, const InvokeOptions& options = {});
 
     // Start an async job
-    std::string StartJob(const std::string& function_id, const std::string& payload,
-                        const InvokeOptions& options = {});
+    std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options = {});
 
     // Stream job events (returns a future that yields events)
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id);
@@ -318,50 +314,50 @@ private:
 
 // Utility functions
 namespace utils {
-    // Generate idempotency key
-    std::string NewIdempotencyKey();
+// Generate idempotency key
+std::string NewIdempotencyKey();
 
-    // Validate JSON against simple schema (basic validation)
-    bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema);
+// Validate JSON against simple schema (basic validation)
+bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema);
 
-    // Parse JSON to map (simplified)
-    std::map<std::string, std::string> ParseJSON(const std::string& json);
+// Parse JSON to map (simplified)
+std::map<std::string, std::string> ParseJSON(const std::string& json);
 
-    // Serialize map to JSON
-    std::string ToJSON(const std::map<std::string, std::string>& data);
+// Serialize map to JSON
+std::string ToJSON(const std::map<std::string, std::string>& data);
 
-    // ========== Virtual Object Utilities ==========
+// ========== Virtual Object Utilities ==========
 
-    // Load virtual object descriptor from JSON file
-    VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path);
+// Load virtual object descriptor from JSON file
+VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path);
 
-    // Load component descriptor from JSON file
-    ComponentDescriptor LoadComponentDescriptor(const std::string& file_path);
+// Load component descriptor from JSON file
+ComponentDescriptor LoadComponentDescriptor(const std::string& file_path);
 
-    // Validate virtual object descriptor completeness
-    bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc);
+// Validate virtual object descriptor completeness
+bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc);
 
-    // Validate component descriptor completeness
-    bool ValidateComponentDescriptor(const ComponentDescriptor& comp);
+// Validate component descriptor completeness
+bool ValidateComponentDescriptor(const ComponentDescriptor& comp);
 
-    // Generate default object configuration template
-    std::string GenerateObjectTemplate(const std::string& object_id);
+// Generate default object configuration template
+std::string GenerateObjectTemplate(const std::string& object_id);
 
-    // Generate default component configuration template
-    std::string GenerateComponentTemplate(const std::string& component_id);
+// Generate default component configuration template
+std::string GenerateComponentTemplate(const std::string& component_id);
 
-    // Parse object descriptor from JSON string
-    VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json);
+// Parse object descriptor from JSON string
+VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json);
 
-    // Parse component descriptor from JSON string
-    ComponentDescriptor ParseComponentDescriptor(const std::string& json);
+// Parse component descriptor from JSON string
+ComponentDescriptor ParseComponentDescriptor(const std::string& json);
 
-    // Serialize object descriptor to JSON string
-    std::string ObjectDescriptorToJSON(const VirtualObjectDescriptor& desc);
+// Serialize object descriptor to JSON string
+std::string ObjectDescriptorToJSON(const VirtualObjectDescriptor& desc);
 
-    // Serialize component descriptor to JSON string
-    std::string ComponentDescriptorToJSON(const ComponentDescriptor& comp);
-}
+// Serialize component descriptor to JSON string
+std::string ComponentDescriptorToJSON(const ComponentDescriptor& comp);
+}  // namespace utils
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

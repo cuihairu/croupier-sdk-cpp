@@ -1,9 +1,11 @@
 #include "croupier/sdk/config_driven_loader.h"
+
 #include "croupier/sdk/utils/json_utils.h"
+
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
 
 // Platform-specific dynamic library headers
 #ifdef _WIN32
@@ -19,38 +21,38 @@ using json = nlohmann::json;
 #else
 // 简化版 JSON 解析 (仅支持基础功能)
 namespace simple_json {
-    struct JsonValue {
-        std::string str_value;
-        std::map<std::string, JsonValue> object_value;
-        std::vector<JsonValue> array_value;
-        enum class Type : std::uint8_t { STRING, OBJECT, ARRAY } type;
+struct JsonValue {
+    std::string str_value;
+    std::map<std::string, JsonValue> object_value;
+    std::vector<JsonValue> array_value;
+    enum class Type : std::uint8_t { STRING, OBJECT, ARRAY } type;
 
-        JsonValue() : type(Type::STRING) {}
-        JsonValue(const std::string& s) : str_value(s), type(Type::STRING) {}
-    };
+    JsonValue() : type(Type::STRING) {}
+    JsonValue(const std::string& s) : str_value(s), type(Type::STRING) {}
+};
 
-    class JsonParser {
-    public:
-        static JsonValue parse(const std::string& content) {
-            // 简化实现：仅支持基础 JSON 结构
-            JsonValue result;
-            result.type = JsonValue::Type::OBJECT;
+class JsonParser {
+public:
+    static JsonValue parse(const std::string& content) {
+        // 简化实现：仅支持基础 JSON 结构
+        JsonValue result;
+        result.type = JsonValue::Type::OBJECT;
 
-            // 示例：解析基本组件配置
-            if (content.find("\"component\"") != std::string::npos) {
-                // 解析组件基础信息
-                JsonValue comp;
-                comp.type = JsonValue::Type::OBJECT;
-                comp.object_value["id"] = JsonValue("demo-component");
-                comp.object_value["version"] = JsonValue("1.0.0");
-                comp.object_value["name"] = JsonValue("Demo Component");
-                result.object_value["component"] = comp;
-            }
-
-            return result;
+        // 示例：解析基本组件配置
+        if (content.find("\"component\"") != std::string::npos) {
+            // 解析组件基础信息
+            JsonValue comp;
+            comp.type = JsonValue::Type::OBJECT;
+            comp.object_value["id"] = JsonValue("demo-component");
+            comp.object_value["version"] = JsonValue("1.0.0");
+            comp.object_value["name"] = JsonValue("Demo Component");
+            result.object_value["component"] = comp;
         }
-    };
-}
+
+        return result;
+    }
+};
+}  // namespace simple_json
 using json = simple_json::JsonValue;
 using JsonParser = simple_json::JsonParser;
 #endif
@@ -154,7 +156,8 @@ bool ConfigDrivenLoader::LoadAndRegisterComponent(CroupierClient& client, const 
 
 // ========== 处理器查找 ==========
 
-FunctionHandler ConfigDrivenLoader::GetHandler(const std::string& function_id, const std::map<std::string, std::string>& config) {
+FunctionHandler ConfigDrivenLoader::GetHandler(const std::string& function_id,
+                                               const std::map<std::string, std::string>& config) {
     std::cout << "🔍 查找处理器: " << function_id << '\n';
 
     // 1. 首先检查直接注册的处理器
@@ -408,7 +411,8 @@ std::map<std::string, FunctionHandler> ConfigDrivenLoader::ResolveHandlers(const
     // Traverse virtual object operations to find corresponding handlers
     for (const auto& entity : comp.entities) {
         for (const auto& [op_name, function_id] : entity.operations) {
-            std::cout << "  🔍 Finding handler: " << function_id << " (for " << entity.id << "." << op_name << ")" << '\n';
+            std::cout << "  🔍 Finding handler: " << function_id << " (for " << entity.id << "." << op_name << ")"
+                      << '\n';
 
             auto handler = GetHandler(function_id);
             if (handler) {
@@ -425,8 +429,9 @@ std::map<std::string, FunctionHandler> ConfigDrivenLoader::ResolveHandlers(const
     return handlers;
 }
 
-FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& function_id, const std::map<std::string, std::string>& config) {
-    (void)function_id; // Suppress unused parameter warning - function_id not used in basic implementation
+FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& function_id,
+                                                            const std::map<std::string, std::string>& config) {
+    (void)function_id;  // Suppress unused parameter warning - function_id not used in basic implementation
 
     // Check if handler is defined in configuration
     auto type_it = config.find("type");
@@ -465,14 +470,20 @@ FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& f
 
 FunctionHandler ConfigDrivenLoader::CreateDefaultHandler(const std::string& function_id) {
     return [function_id](const std::string& context, const std::string& payload) -> std::string {
-        (void)payload; // Suppress unused parameter warning
+        (void)payload;  // Suppress unused parameter warning
 
         return "{"
-               "\"function_id\": \"" + function_id + "\","
+               "\"function_id\": \"" +
+               function_id +
+               "\","
                "\"status\": \"not_implemented\","
                "\"message\": \"This function has no specific implementation logic yet\","
-               "\"context\": \"" + context + "\","
-               "\"timestamp\": \"" + std::to_string(std::time(nullptr)) + "\""
+               "\"context\": \"" +
+               context +
+               "\","
+               "\"timestamp\": \"" +
+               std::to_string(std::time(nullptr)) +
+               "\""
                "}";
     };
 }
@@ -535,42 +546,62 @@ FunctionHandler BasicHandlerFactory::CreateEchoHandler(const std::map<std::strin
     return [config](const std::string& context, const std::string& payload) -> std::string {
         return "{"
                "\"type\": \"echo\","
-               "\"context\": \"" + context + "\","
-               "\"payload\": " + payload + ","
-               "\"timestamp\": \"" + std::to_string(std::time(nullptr)) + "\""
+               "\"context\": \"" +
+               context +
+               "\","
+               "\"payload\": " +
+               payload +
+               ","
+               "\"timestamp\": \"" +
+               std::to_string(std::time(nullptr)) +
+               "\""
                "}";
     };
 }
 
 FunctionHandler BasicHandlerFactory::CreateErrorHandler(const std::string& error_message) {
     return [error_message](const std::string& context, const std::string& payload) -> std::string {
-        (void)payload; // Suppress unused parameter warning - error handler doesn't use payload
+        (void)payload;  // Suppress unused parameter warning - error handler doesn't use payload
 
         return "{"
                "\"type\": \"error\","
-               "\"error_message\": \"" + error_message + "\","
-               "\"context\": \"" + context + "\","
-               "\"timestamp\": \"" + std::to_string(std::time(nullptr)) + "\""
+               "\"error_message\": \"" +
+               error_message +
+               "\","
+               "\"context\": \"" +
+               context +
+               "\","
+               "\"timestamp\": \"" +
+               std::to_string(std::time(nullptr)) +
+               "\""
                "}";
     };
 }
 
-FunctionHandler BasicHandlerFactory::CreateProxyHandler(const std::string& target_url, const std::map<std::string, std::string>& config) {
+FunctionHandler BasicHandlerFactory::CreateProxyHandler(const std::string& target_url,
+                                                        const std::map<std::string, std::string>& config) {
     return [target_url, config](const std::string& context, const std::string& payload) -> std::string {
-        (void)payload; // Suppress unused parameter warning - proxy handler placeholder doesn't use payload
+        (void)payload;  // Suppress unused parameter warning - proxy handler placeholder doesn't use payload
 
         // In a real implementation, this would make HTTP requests to the target URL
         return "{"
                "\"type\": \"proxy\","
-               "\"target_url\": \"" + target_url + "\","
+               "\"target_url\": \"" +
+               target_url +
+               "\","
                "\"status\": \"forwarded\","
-               "\"context\": \"" + context + "\","
-               "\"timestamp\": \"" + std::to_string(std::time(nullptr)) + "\""
+               "\"context\": \"" +
+               context +
+               "\","
+               "\"timestamp\": \"" +
+               std::to_string(std::time(nullptr)) +
+               "\""
                "}";
     };
 }
 
-FunctionHandler BasicHandlerFactory::CreateTemplateHandler(const std::string& template_string, const std::map<std::string, std::string>& config) {
+FunctionHandler BasicHandlerFactory::CreateTemplateHandler(const std::string& template_string,
+                                                           const std::map<std::string, std::string>& config) {
     return [template_string, config](const std::string& context, const std::string& payload) -> std::string {
         // 实际实现中，这里会进行模板替换
         std::string result = template_string;
@@ -592,5 +623,5 @@ FunctionHandler BasicHandlerFactory::CreateTemplateHandler(const std::string& te
     };
 }
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

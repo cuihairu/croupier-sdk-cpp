@@ -1,10 +1,12 @@
 #include "croupier/sdk/config/client_config_loader.h"
-#include "croupier/sdk/utils/json_utils.h"
+
 #include "croupier/sdk/utils/file_utils.h"
+#include "croupier/sdk/utils/json_utils.h"
+
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <regex>
-#include <cstdlib>
-#include <algorithm>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -65,7 +67,7 @@ ClientConfig ClientConfigLoader::LoadFromJson(const std::string& json_content) {
 }
 
 ClientConfig ClientConfigLoader::LoadWithEnvironmentOverrides(const std::string& config_file,
-                                                             const std::string& env_prefix) {
+                                                              const std::string& env_prefix) {
     std::cout << "Loading configuration with environment overrides, prefix: " << env_prefix << '\n';
 
     ClientConfig config = LoadFromFile(config_file);
@@ -206,28 +208,22 @@ std::string ClientConfigLoader::GenerateExampleConfig(const std::string& environ
         config["insecure"] = false;
 
         // Security configuration for non-dev environments
-        config["security"] = {
-            {"cert_file", "/etc/tls/client.crt"},
-            {"key_file", "/etc/tls/client.key"},
-            {"ca_file", "/etc/tls/ca.crt"},
-            {"server_name", "croupier.internal"}
-        };
+        config["security"] = {{"cert_file", "/etc/tls/client.crt"},
+                              {"key_file", "/etc/tls/client.key"},
+                              {"ca_file", "/etc/tls/ca.crt"},
+                              {"server_name", "croupier.internal"}};
 
         // Authentication configuration
-        config["auth"] = {
-            {"token", "Bearer your-jwt-token-here"},
-            {"headers", {
-                {"X-Game-Version", "1.0.0"},
-                {"X-Service-ID", "backend-service-01"}
-            }}
-        };
+        config["auth"] = {{"token", "Bearer your-jwt-token-here"},
+                          {"headers", {{"X-Game-Version", "1.0.0"}, {"X-Service-ID", "backend-service-01"}}}};
     }
 
     return config.dump(2);
 #else
     return R"({
   "game_id": "your-game-id",
-  "env": ")" + environment + R"(",
+  "env": ")" +
+           environment + R"(",
   "service_id": "backend-service-01",
   "agent_addr": "127.0.0.1:19090",
   "local_listen": "0.0.0.0:0",
@@ -251,27 +247,41 @@ ClientConfig ClientConfigLoader::MergeConfigs(const ClientConfig& base, const Cl
     ClientConfig result = base;
 
     // Apply non-empty overlay values
-    if (!overlay.game_id.empty()) result.game_id = overlay.game_id;
-    if (!overlay.env.empty()) result.env = overlay.env;
-    if (!overlay.service_id.empty()) result.service_id = overlay.service_id;
-    if (!overlay.agent_addr.empty()) result.agent_addr = overlay.agent_addr;
-    if (!overlay.local_listen.empty()) result.local_listen = overlay.local_listen;
-    if (!overlay.control_addr.empty()) result.control_addr = overlay.control_addr;
-    if (overlay.timeout_seconds > 0) result.timeout_seconds = overlay.timeout_seconds;
+    if (!overlay.game_id.empty())
+        result.game_id = overlay.game_id;
+    if (!overlay.env.empty())
+        result.env = overlay.env;
+    if (!overlay.service_id.empty())
+        result.service_id = overlay.service_id;
+    if (!overlay.agent_addr.empty())
+        result.agent_addr = overlay.agent_addr;
+    if (!overlay.local_listen.empty())
+        result.local_listen = overlay.local_listen;
+    if (!overlay.control_addr.empty())
+        result.control_addr = overlay.control_addr;
+    if (overlay.timeout_seconds > 0)
+        result.timeout_seconds = overlay.timeout_seconds;
 
     // Boolean values
     result.insecure = overlay.insecure;  // Always apply boolean values
 
     // Security configuration
-    if (!overlay.cert_file.empty()) result.cert_file = overlay.cert_file;
-    if (!overlay.key_file.empty()) result.key_file = overlay.key_file;
-    if (!overlay.ca_file.empty()) result.ca_file = overlay.ca_file;
-    if (!overlay.server_name.empty()) result.server_name = overlay.server_name;
+    if (!overlay.cert_file.empty())
+        result.cert_file = overlay.cert_file;
+    if (!overlay.key_file.empty())
+        result.key_file = overlay.key_file;
+    if (!overlay.ca_file.empty())
+        result.ca_file = overlay.ca_file;
+    if (!overlay.server_name.empty())
+        result.server_name = overlay.server_name;
 
     // Authentication configuration
-    if (!overlay.auth_token.empty()) result.auth_token = overlay.auth_token;
-    if (!overlay.provider_lang.empty()) result.provider_lang = overlay.provider_lang;
-    if (!overlay.provider_sdk.empty()) result.provider_sdk = overlay.provider_sdk;
+    if (!overlay.auth_token.empty())
+        result.auth_token = overlay.auth_token;
+    if (!overlay.provider_lang.empty())
+        result.provider_lang = overlay.provider_lang;
+    if (!overlay.provider_sdk.empty())
+        result.provider_sdk = overlay.provider_sdk;
 
     // Merge headers
     for (const auto& [key, value] : overlay.headers) {
@@ -303,7 +313,8 @@ void ClientConfigLoader::ApplyEnvironmentOverrides(ClientConfig& config, const s
     std::string auto_reconnect_env = GetEnvironmentVariable(env_prefix + "AUTO_RECONNECT", "");
     if (!auto_reconnect_env.empty()) {
         std::transform(auto_reconnect_env.begin(), auto_reconnect_env.end(), auto_reconnect_env.begin(), ::tolower);
-        config.auto_reconnect = (auto_reconnect_env == "true" || auto_reconnect_env == "1" || auto_reconnect_env == "yes");
+        config.auto_reconnect =
+            (auto_reconnect_env == "true" || auto_reconnect_env == "1" || auto_reconnect_env == "yes");
     }
 
     // Numeric environment variables
@@ -356,7 +367,8 @@ bool ClientConfigLoader::ValidateNetworkAddress(const std::string& address) {
 }
 
 bool ClientConfigLoader::ValidateFilePath(const std::string& file_path, bool must_exist) {
-    if (file_path.empty()) return false;
+    if (file_path.empty())
+        return false;
 
     if (must_exist) {
         return utils::FileSystemUtils::FileExists(file_path);
@@ -481,6 +493,6 @@ ClientConfig ClientConfigLoader::ParseSimpleJsonToClientConfig(const utils::Json
 }
 #endif
 
-} // namespace config
-} // namespace sdk
-} // namespace croupier
+}  // namespace config
+}  // namespace sdk
+}  // namespace croupier

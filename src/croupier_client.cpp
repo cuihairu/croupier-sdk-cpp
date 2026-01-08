@@ -1,23 +1,26 @@
 #include "croupier/sdk/croupier_client.h"
+
 #include "croupier/sdk/grpc_service.h"
-#include "croupier/sdk/utils/json_utils.h"
 #include "croupier/sdk/logger.h"
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include <atomic>
-#include <random>
-#include <sstream>
-#include <iomanip>
+#include "croupier/sdk/utils/json_utils.h"
+
 #include <algorithm>
+#include <atomic>
 #include <chrono>
-#include <regex>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <regex>
+#include <sstream>
 #include <stdexcept>
+#include <thread>
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 #include "croupier/control/v1/control.grpc.pb.h"
 #include "croupier/function/v1/function.grpc.pb.h"
+
 #include <zlib.h>
 #endif
 
@@ -27,29 +30,33 @@
 
 // Logging macros with configuration support
 // These check the global logger configuration before outputting
-#define SDK_LOG_INFO(msg) \
-    do { \
-        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) break; \
-        std::cout << "[INFO] [croupier] " << msg << '\n'; \
-    } while(0)
+#define SDK_LOG_INFO(msg)                                                                        \
+    do {                                                                                         \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) \
+            break;                                                                               \
+        std::cout << "[INFO] [croupier] " << msg << '\n';                                        \
+    } while (0)
 
-#define SDK_LOG_WARN(msg) \
-    do { \
-        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) break; \
-        std::cerr << "[WARN] [croupier] " << msg << '\n'; \
-    } while(0)
+#define SDK_LOG_WARN(msg)                                                                        \
+    do {                                                                                         \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) \
+            break;                                                                               \
+        std::cerr << "[WARN] [croupier] " << msg << '\n';                                        \
+    } while (0)
 
-#define SDK_LOG_ERROR(msg) \
-    do { \
-        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) break; \
-        std::cerr << "[ERROR] [croupier] " << msg << '\n'; \
-    } while(0)
+#define SDK_LOG_ERROR(msg)                                                                      \
+    do {                                                                                        \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) \
+            break;                                                                              \
+        std::cerr << "[ERROR] [croupier] " << msg << '\n';                                      \
+    } while (0)
 
-#define SDK_LOG_DEBUG(msg) \
-    do { \
-        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) break; \
-        std::cout << "[DEBUG] [croupier] " << msg << '\n'; \
-    } while(0)
+#define SDK_LOG_DEBUG(msg)                                                                        \
+    do {                                                                                          \
+        if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) \
+            break;                                                                                \
+        std::cout << "[DEBUG] [croupier] " << msg << '\n';                                        \
+    } while (0)
 
 namespace croupier {
 namespace sdk {
@@ -60,80 +67,82 @@ namespace functionv1 = ::croupier::function::v1;
 
 // Utility function implementations
 namespace utils {
-    std::string NewIdempotencyKey() {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, 15);
+std::string NewIdempotencyKey() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 15);
 
-        std::stringstream ss;
-        for (int i = 0; i < 32; ++i) {
-            ss << std::hex << dis(gen);
-        }
-        return ss.str();
+    std::stringstream ss;
+    for (int i = 0; i < 32; ++i) {
+        ss << std::hex << dis(gen);
     }
-
-    bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema) {
-        // If no schema provided, just check if JSON is valid
-        if (schema.empty()) {
-            return croupier::sdk::utils::JsonUtils::IsValidJson(json);
-        }
-
-        // Convert schema map to JSON schema string
-        std::string schema_json = "{";
-        bool first = true;
-        for (const auto& [key, value] : schema) {
-            if (!first) schema_json += ",";
-            schema_json += "\"" + key + "\":";
-
-            // Try to parse value as JSON, fallback to string
-            if ((value.front() == '{' && value.back() == '}') ||
-                (value.front() == '[' && value.back() == ']') ||
-                value == "true" || value == "false" || value == "null") {
-                schema_json += value;
-            } else {
-                schema_json += "\"" + value + "\"";
-            }
-            first = false;
-        }
-        schema_json += "}";
-
-        // Use the new JSON schema validation
-        return croupier::sdk::utils::JsonUtils::ValidateJsonSchema(json, schema_json);
-    }
-
-    std::map<std::string, std::string> ParseJSON(const std::string& json) {
-        // Simplified JSON parsing for demonstration
-        // Real implementation should use a proper JSON library like nlohmann/json
-        std::map<std::string, std::string> result;
-
-        if (json.empty()) return result;
-
-        // Very basic key-value extraction using regex
-        std::regex pair_regex("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
-        std::sregex_iterator iter(json.begin(), json.end(), pair_regex);
-        std::sregex_iterator end;
-
-        for (; iter != end; ++iter) {
-            const std::smatch& match = *iter;
-            result[match[1].str()] = match[2].str();
-        }
-
-        return result;
-    }
-
-    std::string ToJSON(const std::map<std::string, std::string>& data) {
-        std::stringstream ss;
-        ss << "{";
-        bool first = true;
-        for (const auto& pair : data) {
-            if (!first) ss << ",";
-            ss << "\"" << pair.first << "\":\"" << pair.second << "\"";
-            first = false;
-        }
-        ss << "}";
-        return ss.str();
-    }
+    return ss.str();
 }
+
+bool ValidateJSON(const std::string& json, const std::map<std::string, std::string>& schema) {
+    // If no schema provided, just check if JSON is valid
+    if (schema.empty()) {
+        return croupier::sdk::utils::JsonUtils::IsValidJson(json);
+    }
+
+    // Convert schema map to JSON schema string
+    std::string schema_json = "{";
+    bool first = true;
+    for (const auto& [key, value] : schema) {
+        if (!first)
+            schema_json += ",";
+        schema_json += "\"" + key + "\":";
+
+        // Try to parse value as JSON, fallback to string
+        if ((value.front() == '{' && value.back() == '}') || (value.front() == '[' && value.back() == ']') ||
+            value == "true" || value == "false" || value == "null") {
+            schema_json += value;
+        } else {
+            schema_json += "\"" + value + "\"";
+        }
+        first = false;
+    }
+    schema_json += "}";
+
+    // Use the new JSON schema validation
+    return croupier::sdk::utils::JsonUtils::ValidateJsonSchema(json, schema_json);
+}
+
+std::map<std::string, std::string> ParseJSON(const std::string& json) {
+    // Simplified JSON parsing for demonstration
+    // Real implementation should use a proper JSON library like nlohmann/json
+    std::map<std::string, std::string> result;
+
+    if (json.empty())
+        return result;
+
+    // Very basic key-value extraction using regex
+    std::regex pair_regex("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
+    std::sregex_iterator iter(json.begin(), json.end(), pair_regex);
+    std::sregex_iterator end;
+
+    for (; iter != end; ++iter) {
+        const std::smatch& match = *iter;
+        result[match[1].str()] = match[2].str();
+    }
+
+    return result;
+}
+
+std::string ToJSON(const std::map<std::string, std::string>& data) {
+    std::stringstream ss;
+    ss << "{";
+    bool first = true;
+    for (const auto& pair : data) {
+        if (!first)
+            ss << ",";
+        ss << "\"" << pair.first << "\":\"" << pair.second << "\"";
+        first = false;
+    }
+    ss << "}";
+    return ss.str();
+}
+}  // namespace utils
 
 // Client Implementation
 class CroupierClient::Impl {
@@ -179,12 +188,11 @@ public:
 
         // Validate environment
         if (config_.env != "development" && config_.env != "staging" && config_.env != "production") {
-            SDK_LOG_WARN("Unknown environment '" << config_.env
-                       << "'. Valid values: development, staging, production");
+            SDK_LOG_WARN("Unknown environment '" << config_.env << "'. Valid values: development, staging, production");
         }
 
-        SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id
-                  << "' in '" << config_.env << "' environment");
+        SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id << "' in '" << config_.env
+                                                             << "' environment");
 
         // 初始化 gRPC 管理器
         grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
@@ -203,9 +211,7 @@ public:
         });
     }
 
-    ~Impl() {
-        Stop();
-    }
+    ~Impl() { Stop(); }
 
     bool RegisterFunction(const FunctionDescriptor& desc, FunctionHandler handler) {
         if (running_) {
@@ -222,7 +228,7 @@ public:
 
     // New: Register virtual object with associated functions
     bool RegisterVirtualObject(const VirtualObjectDescriptor& desc,
-                              const std::map<std::string, FunctionHandler>& handlers) {
+                               const std::map<std::string, FunctionHandler>& handlers) {
         if (running_) {
             SDK_LOG_ERROR("Cannot register virtual objects while client is running");
             return false;
@@ -260,8 +266,8 @@ public:
         // Store virtual object descriptor
         objects_[desc.id] = desc;
 
-        std::cout << "Registered virtual object: " << desc.id
-                  << " with " << desc.operations.size() << " operations" << '\n';
+        std::cout << "Registered virtual object: " << desc.id << " with " << desc.operations.size() << " operations"
+                  << '\n';
         return true;
     }
 
@@ -284,8 +290,7 @@ public:
         // Register standalone functions first
         for (const auto& func_desc : comp.functions) {
             // This is a placeholder - in real implementation, you would need to provide handlers
-            std::cout << "Note: Standalone function " << func_desc.id
-                      << " needs handler registration" << '\n';
+            std::cout << "Note: Standalone function " << func_desc.id << " needs handler registration" << '\n';
         }
 
         // Register virtual objects (they should have handlers already mapped)
@@ -300,8 +305,7 @@ public:
         // Store component descriptor
         components_[comp.id] = comp;
 
-        std::cout << "Registered component: " << comp.id
-                  << " with " << comp.entities.size() << " entities and "
+        std::cout << "Registered component: " << comp.id << " with " << comp.entities.size() << " entities and "
                   << comp.functions.size() << " functions" << '\n';
         return true;
     }
@@ -312,8 +316,7 @@ public:
             ComponentDescriptor comp = utils::LoadComponentDescriptor(config_file);
             return RegisterComponent(comp);
         } catch (const std::exception& e) {
-            std::cerr << "Failed to load component from file " << config_file
-                      << ": " << e.what() << '\n';
+            std::cerr << "Failed to load component from file " << config_file << ": " << e.what() << '\n';
             return false;
         }
     }
@@ -415,7 +418,8 @@ public:
     }
 
     bool Connect() {
-        if (connected_) return true;
+        if (connected_)
+            return true;
 
         SDK_LOG_INFO("Connecting to Croupier Agent: " << config_.agent_addr);
 
@@ -492,8 +496,8 @@ public:
                 }
 
                 reconnect_attempts++;
-                std::cout << "🔄 Reconnect attempt " << reconnect_attempts
-                          << " (every " << reconnect_interval_seconds << "s)..." << '\n';
+                std::cout << "🔄 Reconnect attempt " << reconnect_attempts << " (every " << reconnect_interval_seconds
+                          << "s)..." << '\n';
 
                 if (grpc_manager_->Connect()) {
                     RegisterAllFunctions();
@@ -548,13 +552,9 @@ public:
         descriptors_.clear();
     }
 
-    std::string GetLocalAddress() const {
-        return local_address_;
-    }
+    std::string GetLocalAddress() const { return local_address_; }
 
-    bool IsConnected() const {
-        return connected_;
-    }
+    bool IsConnected() const { return connected_; }
 
 private:
     // 这些方法现在由 gRPC 管理器处理
@@ -585,8 +585,7 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         const auto timeout = std::chrono::seconds(config_.timeout_seconds > 0 ? config_.timeout_seconds : 30);
         auto connect_deadline = std::chrono::system_clock::now() + timeout;
         if (!channel->WaitForConnected(connect_deadline)) {
-            std::cerr << "⚠️  Unable to connect to control service at "
-                      << config_.control_addr << '\n';
+            std::cerr << "⚠️  Unable to connect to control service at " << config_.control_addr << '\n';
             return false;
         }
 
@@ -607,13 +606,11 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         croupier::control::v1::RegisterCapabilitiesResponse response;
         grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
         if (!status.ok()) {
-            std::cerr << "⚠️  ControlService.RegisterCapabilities failed: "
-                      << status.error_message() << '\n';
+            std::cerr << "⚠️  ControlService.RegisterCapabilities failed: " << status.error_message() << '\n';
             return false;
         }
 
-        std::cout << "📤 Uploaded provider capabilities manifest ("
-                  << descriptors_.size() << " functions)" << '\n';
+        std::cout << "📤 Uploaded provider capabilities manifest (" << descriptors_.size() << " functions)" << '\n';
         return true;
     } catch (const std::exception& e) {
         std::cerr << "⚠️  Failed to upload capabilities: " << e.what() << '\n';
@@ -674,21 +671,34 @@ std::string CroupierClient::Impl::EscapeJson(const std::string& value) const {
     std::ostringstream oss;
     for (const char ch : value) {
         switch (ch) {
-            case '"': oss << "\\\""; break;
-            case '\\': oss << "\\\\"; break;
-            case '\b': oss << "\\b"; break;
-            case '\f': oss << "\\f"; break;
-            case '\n': oss << "\\n"; break;
-            case '\r': oss << "\\r"; break;
-            case '\t': oss << "\\t"; break;
-            default:
-                if (static_cast<unsigned char>(ch) < 0x20) {
-                    oss << "\\u" << std::hex << std::setw(4) << std::setfill('0')
-                        << static_cast<int>(static_cast<unsigned char>(ch))
-                        << std::dec << std::setfill(' ');
-                } else {
-                    oss << ch;
-                }
+        case '"':
+            oss << "\\\"";
+            break;
+        case '\\':
+            oss << "\\\\";
+            break;
+        case '\b':
+            oss << "\\b";
+            break;
+        case '\f':
+            oss << "\\f";
+            break;
+        case '\n':
+            oss << "\\n";
+            break;
+        case '\r':
+            oss << "\\r";
+            break;
+        case '\t':
+            oss << "\\t";
+            break;
+        default:
+            if (static_cast<unsigned char>(ch) < 0x20) {
+                oss << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+                    << static_cast<int>(static_cast<unsigned char>(ch)) << std::dec << std::setfill(' ');
+            } else {
+                oss << ch;
+            }
         }
     }
     return oss.str();
@@ -793,7 +803,7 @@ public:
             retry_config_.backoff_multiplier = 2.0;
             retry_config_.jitter_factor = 0.1;
             if (retry_config_.retryable_status_codes.empty()) {
-                retry_config_.retryable_status_codes = {14, 13, 2, 10, 4}; // Default codes
+                retry_config_.retryable_status_codes = {14, 13, 2, 10, 4};  // Default codes
             }
         }
     }
@@ -808,7 +818,8 @@ public:
 
     // Internal connect method that doesn't trigger reconnection
     bool connectInternal() {
-        if (connected_) return true;
+        if (connected_)
+            return true;
 
         SDK_LOG_INFO("Connecting to server/agent at: " << config_.address);
 
@@ -820,9 +831,7 @@ public:
             args.SetMaxSendMessageSize(INT_MAX);
 
             // Use insecure credentials for now, can be enhanced to support TLS
-            channel_ = grpc::CreateCustomChannel(config_.address,
-                                                grpc::InsecureChannelCredentials(),
-                                                args);
+            channel_ = grpc::CreateCustomChannel(config_.address, grpc::InsecureChannelCredentials(), args);
 
             if (!channel_) {
                 SDK_LOG_ERROR("Failed to create gRPC channel");
@@ -855,8 +864,7 @@ public:
 #endif
     }
 
-    std::string Invoke(const std::string& function_id, const std::string& payload,
-                      const InvokeOptions& options) {
+    std::string Invoke(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
         if (!connected_ && !connectInternal()) {
             if (IsConnectionError()) {
                 ScheduleReconnectIfNeeded();
@@ -893,15 +901,15 @@ public:
                 // Check if this error is retryable and not the last attempt
                 if (attempt >= max_attempts - 1) {
                     throw std::runtime_error("Invoke failed after " + std::to_string(max_attempts) +
-                                           " attempts: " + last_error);
+                                             " attempts: " + last_error);
                 }
 
                 // Check if error is retryable (simplified check)
                 bool is_retryable = last_error.find("UNAVAILABLE") != std::string::npos ||
-                                   last_error.find("INTERNAL") != std::string::npos ||
-                                   last_error.find("DEADLINE") != std::string::npos ||
-                                   last_error.find("connection") != std::string::npos ||
-                                   last_error.find("timeout") != std::string::npos;
+                                    last_error.find("INTERNAL") != std::string::npos ||
+                                    last_error.find("DEADLINE") != std::string::npos ||
+                                    last_error.find("connection") != std::string::npos ||
+                                    last_error.find("timeout") != std::string::npos;
 
                 if (!is_retryable) {
                     throw std::runtime_error("Invoke failed with non-retryable error: " + last_error);
@@ -915,21 +923,20 @@ public:
 
                 // Calculate delay and wait
                 int delay = CalculateRetryDelay(attempt);
-                std::cout << "Invocation attempt " << (attempt + 1)
-                          << " failed, retrying in " << delay << " ms: " << last_error << '\n';
+                std::cout << "Invocation attempt " << (attempt + 1) << " failed, retrying in " << delay
+                          << " ms: " << last_error << '\n';
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
             }
         }
 
-        throw std::runtime_error("Invoke failed after " + std::to_string(max_attempts) +
-                               " attempts: " + last_error);
+        throw std::runtime_error("Invoke failed after " + std::to_string(max_attempts) + " attempts: " + last_error);
     }
 
     std::string invokeInternal(const std::string& function_id, const std::string& payload,
                                const InvokeOptions& options) {
         std::cout << "Invoking function: " << function_id << '\n';
 
- #ifdef CROUPIER_SDK_ENABLE_GRPC
+#ifdef CROUPIER_SDK_ENABLE_GRPC
         try {
             // Create gRPC context
             grpc::ClientContext context;
@@ -964,10 +971,14 @@ public:
             }
             request.set_payload(payload);
             auto* request_metadata = request.mutable_metadata();
-            if (!options.route.empty()) (*request_metadata)["route"] = options.route;
-            if (!options.target_service_id.empty()) (*request_metadata)["target_service_id"] = options.target_service_id;
-            if (!options.hash_key.empty()) (*request_metadata)["hash_key"] = options.hash_key;
-            if (!options.trace_id.empty()) (*request_metadata)["trace_id"] = options.trace_id;
+            if (!options.route.empty())
+                (*request_metadata)["route"] = options.route;
+            if (!options.target_service_id.empty())
+                (*request_metadata)["target_service_id"] = options.target_service_id;
+            if (!options.hash_key.empty())
+                (*request_metadata)["hash_key"] = options.hash_key;
+            if (!options.trace_id.empty())
+                (*request_metadata)["trace_id"] = options.trace_id;
             for (const auto& [k, v] : options.metadata) {
                 (*request_metadata)[k] = v;
             }
@@ -977,8 +988,8 @@ public:
             grpc::Status status = stub_->Invoke(&context, request, &response);
 
             if (!status.ok()) {
-                std::string error_msg = "gRPC error: " + status.error_message() +
-                                     " (code: " + std::to_string(status.error_code()) + ")";
+                std::string error_msg =
+                    "gRPC error: " + status.error_message() + " (code: " + std::to_string(status.error_code()) + ")";
                 throw std::runtime_error(error_msg);
             }
 
@@ -999,8 +1010,7 @@ public:
 #endif
     }
 
-    std::string StartJob(const std::string& function_id, const std::string& payload,
-                        const InvokeOptions& options) {
+    std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
         if (!connected_ && !connectInternal()) {
             if (IsConnectionError()) {
                 ScheduleReconnectIfNeeded();
@@ -1037,15 +1047,15 @@ public:
                 // Check if this error is retryable and not the last attempt
                 if (attempt >= max_attempts - 1) {
                     throw std::runtime_error("StartJob failed after " + std::to_string(max_attempts) +
-                                           " attempts: " + last_error);
+                                             " attempts: " + last_error);
                 }
 
                 // Check if error is retryable (simplified check)
                 bool is_retryable = last_error.find("UNAVAILABLE") != std::string::npos ||
-                                   last_error.find("INTERNAL") != std::string::npos ||
-                                   last_error.find("DEADLINE") != std::string::npos ||
-                                   last_error.find("connection") != std::string::npos ||
-                                   last_error.find("timeout") != std::string::npos;
+                                    last_error.find("INTERNAL") != std::string::npos ||
+                                    last_error.find("DEADLINE") != std::string::npos ||
+                                    last_error.find("connection") != std::string::npos ||
+                                    last_error.find("timeout") != std::string::npos;
 
                 if (!is_retryable) {
                     throw std::runtime_error("StartJob failed with non-retryable error: " + last_error);
@@ -1059,14 +1069,13 @@ public:
 
                 // Calculate delay and wait
                 int delay = CalculateRetryDelay(attempt);
-                std::cout << "StartJob attempt " << (attempt + 1)
-                          << " failed, retrying in " << delay << " ms: " << last_error << '\n';
+                std::cout << "StartJob attempt " << (attempt + 1) << " failed, retrying in " << delay
+                          << " ms: " << last_error << '\n';
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
             }
         }
 
-        throw std::runtime_error("StartJob failed after " + std::to_string(max_attempts) +
-                               " attempts: " + last_error);
+        throw std::runtime_error("StartJob failed after " + std::to_string(max_attempts) + " attempts: " + last_error);
     }
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
@@ -1108,10 +1117,14 @@ public:
             }
             request.set_payload(payload);
             auto* request_metadata = request.mutable_metadata();
-            if (!options.route.empty()) (*request_metadata)["route"] = options.route;
-            if (!options.target_service_id.empty()) (*request_metadata)["target_service_id"] = options.target_service_id;
-            if (!options.hash_key.empty()) (*request_metadata)["hash_key"] = options.hash_key;
-            if (!options.trace_id.empty()) (*request_metadata)["trace_id"] = options.trace_id;
+            if (!options.route.empty())
+                (*request_metadata)["route"] = options.route;
+            if (!options.target_service_id.empty())
+                (*request_metadata)["target_service_id"] = options.target_service_id;
+            if (!options.hash_key.empty())
+                (*request_metadata)["hash_key"] = options.hash_key;
+            if (!options.trace_id.empty())
+                (*request_metadata)["trace_id"] = options.trace_id;
             for (const auto& [k, v] : options.metadata) {
                 (*request_metadata)[k] = v;
             }
@@ -1121,8 +1134,8 @@ public:
             grpc::Status status = stub_->StartJob(&context, request, &response);
 
             if (!status.ok()) {
-                std::string error_msg = "gRPC error: " + status.error_message() +
-                                     " (code: " + std::to_string(status.error_code()) + ")";
+                std::string error_msg =
+                    "gRPC error: " + status.error_message() + " (code: " + std::to_string(status.error_code()) + ")";
                 throw std::runtime_error(error_msg);
             }
 
@@ -1165,15 +1178,15 @@ public:
             try {
                 // Create gRPC context
                 grpc::ClientContext context;
-                context.set_deadline(std::chrono::system_clock::now() + std::chrono::minutes(30)); // Long timeout for streaming
+                context.set_deadline(std::chrono::system_clock::now() +
+                                     std::chrono::minutes(30));  // Long timeout for streaming
 
                 // Create request
                 functionv1::JobStreamRequest request;
                 request.set_job_id(job_id);
 
                 // Create streaming reader
-                std::unique_ptr<grpc::ClientReader<functionv1::JobEvent>> reader(
-                    stub_->StreamJob(&context, request));
+                std::unique_ptr<grpc::ClientReader<functionv1::JobEvent>> reader(stub_->StreamJob(&context, request));
 
                 // Read events
                 functionv1::JobEvent grpc_event;
@@ -1306,13 +1319,9 @@ public:
         std::cout << "Set schema for function: " << function_id << '\n';
     }
 
-    void SetReconnectConfig(const ReconnectConfig& config) {
-        reconnect_config_ = config;
-    }
+    void SetReconnectConfig(const ReconnectConfig& config) { reconnect_config_ = config; }
 
-    void SetRetryConfig(const RetryConfig& config) {
-        retry_config_ = config;
-    }
+    void SetRetryConfig(const RetryConfig& config) { retry_config_ = config; }
 
     void Close() {
         // Stop reconnection thread
@@ -1333,19 +1342,16 @@ public:
 
         // Check for common connection error patterns
         return lower_error.find("connection") != std::string::npos ||
-               lower_error.find("refused") != std::string::npos ||
-               lower_error.find("reset") != std::string::npos ||
-               lower_error.find("unreachable") != std::string::npos ||
-               lower_error.find("timeout") != std::string::npos;
+               lower_error.find("refused") != std::string::npos || lower_error.find("reset") != std::string::npos ||
+               lower_error.find("unreachable") != std::string::npos || lower_error.find("timeout") != std::string::npos;
     }
 
     // Calculate reconnection delay with exponential backoff and jitter
     int CalculateReconnectDelay() const {
         // Calculate base delay using exponential backoff
         int base_delay = reconnect_config_.initial_delay_ms;
-        int exponential_delay = static_cast<int>(
-            base_delay * std::pow(reconnect_config_.backoff_multiplier, reconnect_attempts_ - 1)
-        );
+        int exponential_delay =
+            static_cast<int>(base_delay * std::pow(reconnect_config_.backoff_multiplier, reconnect_attempts_ - 1));
 
         // Cap at max delay
         if (exponential_delay > reconnect_config_.max_delay_ms) {
@@ -1379,10 +1385,9 @@ public:
         }
 
         // Check max attempts
-        if (reconnect_config_.max_attempts > 0 &&
-            reconnect_attempts_ >= reconnect_config_.max_attempts) {
-            std::cout << "Max reconnection attempts (" << reconnect_config_.max_attempts
-                      << ") reached, giving up" << '\n';
+        if (reconnect_config_.max_attempts > 0 && reconnect_attempts_ >= reconnect_config_.max_attempts) {
+            std::cout << "Max reconnection attempts (" << reconnect_config_.max_attempts << ") reached, giving up"
+                      << '\n';
             return;
         }
 
@@ -1390,8 +1395,7 @@ public:
         reconnect_attempts_++;
 
         int delay = CalculateReconnectDelay();
-        std::cout << "Scheduling reconnection attempt " << reconnect_attempts_
-                  << " in " << delay << " ms" << '\n';
+        std::cout << "Scheduling reconnection attempt " << reconnect_attempts_ << " in " << delay << " ms" << '\n';
 
         // Stop existing reconnect thread if any
         if (reconnect_thread_.joinable()) {
@@ -1442,9 +1446,7 @@ public:
     int CalculateRetryDelay(int attempt) const {
         // Calculate base delay using exponential backoff
         int base_delay = retry_config_.initial_delay_ms;
-        int exponential_delay = static_cast<int>(
-            base_delay * std::pow(retry_config_.backoff_multiplier, attempt)
-        );
+        int exponential_delay = static_cast<int>(base_delay * std::pow(retry_config_.backoff_multiplier, attempt));
 
         // Cap at max delay
         if (exponential_delay > retry_config_.max_delay_ms) {
@@ -1469,8 +1471,7 @@ public:
 };
 
 // CroupierClient public interface
-CroupierClient::CroupierClient(const ClientConfig& config)
-    : impl_(std::make_unique<Impl>(config)) {}
+CroupierClient::CroupierClient(const ClientConfig& config) : impl_(std::make_unique<Impl>(config)) {}
 
 CroupierClient::~CroupierClient() = default;
 
@@ -1480,9 +1481,8 @@ bool CroupierClient::RegisterFunction(const FunctionDescriptor& desc, FunctionHa
 }
 
 // ========== Virtual Object Registration ==========
-bool CroupierClient::RegisterVirtualObject(
-    const VirtualObjectDescriptor& desc,
-    const std::map<std::string, FunctionHandler>& handlers) {
+bool CroupierClient::RegisterVirtualObject(const VirtualObjectDescriptor& desc,
+                                           const std::map<std::string, FunctionHandler>& handlers) {
     return impl_->RegisterVirtualObject(desc, handlers);
 }
 
@@ -1538,8 +1538,7 @@ std::string CroupierClient::GetLocalAddress() const {
 }
 
 // CroupierInvoker public interface
-CroupierInvoker::CroupierInvoker(const InvokerConfig& config)
-    : impl_(std::make_unique<Impl>(config)) {}
+CroupierInvoker::CroupierInvoker(const InvokerConfig& config) : impl_(std::make_unique<Impl>(config)) {}
 
 CroupierInvoker::~CroupierInvoker() = default;
 
@@ -1548,12 +1547,12 @@ bool CroupierInvoker::Connect() {
 }
 
 std::string CroupierInvoker::Invoke(const std::string& function_id, const std::string& payload,
-                                   const InvokeOptions& options) {
+                                    const InvokeOptions& options) {
     return impl_->Invoke(function_id, payload, options);
 }
 
 std::string CroupierInvoker::StartJob(const std::string& function_id, const std::string& payload,
-                                     const InvokeOptions& options) {
+                                      const InvokeOptions& options) {
     return impl_->StartJob(function_id, payload, options);
 }
 
@@ -1565,8 +1564,7 @@ bool CroupierInvoker::CancelJob(const std::string& job_id) {
     return impl_->CancelJob(job_id);
 }
 
-void CroupierInvoker::SetSchema(const std::string& function_id,
-                               const std::map<std::string, std::string>& schema) {
+void CroupierInvoker::SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
     impl_->SetSchema(function_id, schema);
 }
 
@@ -1596,8 +1594,7 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
             throw std::runtime_error("Failed to open file: " + file_path);
         }
 
-        std::string json_content((std::istreambuf_iterator<char>(file)),
-                                 std::istreambuf_iterator<char>());
+        std::string json_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
         // Parse JSON
 #ifdef CROUPIER_SDK_ENABLE_JSON
@@ -1692,8 +1689,7 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
             throw std::runtime_error("Failed to open file: " + file_path);
         }
 
-        std::string json_content((std::istreambuf_iterator<char>(file)),
-                                 std::istreambuf_iterator<char>());
+        std::string json_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
         // Parse JSON
 #ifdef CROUPIER_SDK_ENABLE_JSON
@@ -1760,7 +1756,7 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
         desc.name = json_simple.value("name", "Unnamed Component");
         desc.description = json_simple.value("description", "No description");
         desc.type = json_simple.value("type", "generic");
-        desc.enabled = true; // Default to enabled
+        desc.enabled = true;  // Default to enabled
 #endif
 
         std::cout << "✅ Successfully loaded component descriptor from: " << file_path << '\n';
@@ -1901,7 +1897,7 @@ std::string GenerateComponentTemplate(const std::string& component_id) {
 
 // Parse object descriptor from JSON string
 VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
-    (void)json; // Suppress unused parameter warning - JSON parsing not implemented yet
+    (void)json;  // Suppress unused parameter warning - JSON parsing not implemented yet
 
     // TODO: Implement proper JSON parsing
     // For now, return a placeholder
@@ -1914,7 +1910,7 @@ VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
 
 // Parse component descriptor from JSON string
 ComponentDescriptor ParseComponentDescriptor(const std::string& json) {
-    (void)json; // Suppress unused parameter warning - JSON parsing not implemented yet
+    (void)json;  // Suppress unused parameter warning - JSON parsing not implemented yet
 
     // TODO: Implement proper JSON parsing
     // For now, return a placeholder
@@ -1937,7 +1933,8 @@ std::string ObjectDescriptorToJSON(const VirtualObjectDescriptor& desc) {
 
     bool first_schema = true;
     for (const auto& schema_item : desc.schema) {
-        if (!first_schema) ss << ",";
+        if (!first_schema)
+            ss << ",";
         ss << "\n    \"" << schema_item.first << "\": \"" << schema_item.second << "\"";
         first_schema = false;
     }
@@ -1946,7 +1943,8 @@ std::string ObjectDescriptorToJSON(const VirtualObjectDescriptor& desc) {
     ss << "  \"operations\": {";
     bool first_op = true;
     for (const auto& op : desc.operations) {
-        if (!first_op) ss << ",";
+        if (!first_op)
+            ss << ",";
         ss << "\n    \"" << op.first << "\": \"" << op.second << "\"";
         first_op = false;
     }
@@ -1955,7 +1953,8 @@ std::string ObjectDescriptorToJSON(const VirtualObjectDescriptor& desc) {
     ss << "  \"relationships\": {";
     bool first_rel = true;
     for (const auto& rel : desc.relationships) {
-        if (!first_rel) ss << ",";
+        if (!first_rel)
+            ss << ",";
         ss << "\n    \"" << rel.first << "\": {";
         ss << "\n      \"type\": \"" << rel.second.type << "\",";
         ss << "\n      \"entity\": \"" << rel.second.entity << "\",";
@@ -1981,7 +1980,8 @@ std::string ComponentDescriptorToJSON(const ComponentDescriptor& comp) {
 
     bool first_entity = true;
     for (const auto& entity : comp.entities) {
-        if (!first_entity) ss << ",";
+        if (!first_entity)
+            ss << ",";
         ss << "\n    \"" << entity.id << "\"";  // Simplified - just show ID
         first_entity = false;
     }
@@ -1990,7 +1990,8 @@ std::string ComponentDescriptorToJSON(const ComponentDescriptor& comp) {
     ss << "  \"functions\": [";
     bool first_func = true;
     for (const auto& func : comp.functions) {
-        if (!first_func) ss << ",";
+        if (!first_func)
+            ss << ",";
         ss << "\n    \"" << func.id << "\"";  // Simplified - just show ID
         first_func = false;
     }
@@ -2003,7 +2004,7 @@ std::string ComponentDescriptorToJSON(const ComponentDescriptor& comp) {
     return ss.str();
 }
 
-} // namespace utils
+}  // namespace utils
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

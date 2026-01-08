@@ -1,9 +1,11 @@
 #include "croupier/sdk/plugin/dynamic_loader.h"
+
 #include "croupier/sdk/utils/file_utils.h"
-#include <iostream>
-#include <sstream>
+
 #include <algorithm>
 #include <chrono>
+#include <iostream>
+#include <sstream>
 
 // Platform-specific includes
 #ifdef _WIN32
@@ -153,7 +155,8 @@ void* DynamicLibraryManager::GetFunction(const std::string& library_id, const st
     return func_ptr;
 }
 
-FunctionHandler DynamicLibraryManager::GetFunctionHandler(const std::string& library_id, const std::string& function_name) {
+FunctionHandler DynamicLibraryManager::GetFunctionHandler(const std::string& library_id,
+                                                          const std::string& function_name) {
     // Standard function signature for Croupier plugins
     typedef const char* (*PluginFunction)(const char* context, const char* payload);
 
@@ -221,13 +224,13 @@ void* DynamicLibraryManager::GetFunctionImpl(LibraryHandle handle, const std::st
 
 std::string DynamicLibraryManager::GetPlatformError() {
     DWORD error = ::GetLastError();
-    if (error == 0) return "Unknown error";
+    if (error == 0)
+        return "Unknown error";
 
     LPSTR messageBuffer = nullptr;
-    size_t size = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&messageBuffer, 0, NULL);
+    size_t size =
+        FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                       NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
     std::string message(messageBuffer, size);
     LocalFree(messageBuffer);
@@ -285,17 +288,11 @@ void DynamicLibraryManager::NotifyError(const std::string& error) {
 
 // ========== PluginManager Implementation ==========
 
-PluginManager::PluginManager()
-    : auto_loading_enabled_(false) {
+PluginManager::PluginManager() : auto_loading_enabled_(false) {
     std::cout << "Plugin manager initialized" << std::endl;
 
     // Set default search paths
-    search_paths_ = {
-        "./plugins",
-        "./libs",
-        "/usr/local/lib/croupier/plugins",
-        "/opt/croupier/plugins"
-    };
+    search_paths_ = {"./plugins", "./libs", "/usr/local/lib/croupier/plugins", "/opt/croupier/plugins"};
 }
 
 PluginManager::~PluginManager() {
@@ -508,8 +505,8 @@ bool PluginManager::IsAutoLoadingEnabled() const {
 
 bool PluginManager::InitializePlugin(const std::string& library_id, const std::string& plugin_path) {
     // Get plugin info function
-    PluginInfoFunc info_func = reinterpret_cast<PluginInfoFunc>(
-        library_manager_.GetFunction(library_id, "croupier_plugin_info"));
+    PluginInfoFunc info_func =
+        reinterpret_cast<PluginInfoFunc>(library_manager_.GetFunction(library_id, "croupier_plugin_info"));
 
     if (!info_func) {
         std::cerr << "❌ Plugin info function not found in: " << plugin_path << std::endl;
@@ -529,8 +526,8 @@ bool PluginManager::InitializePlugin(const std::string& library_id, const std::s
     }
 
     // Initialize plugin
-    PluginInitFunc init_func = reinterpret_cast<PluginInitFunc>(
-        library_manager_.GetFunction(library_id, "croupier_plugin_init"));
+    PluginInitFunc init_func =
+        reinterpret_cast<PluginInitFunc>(library_manager_.GetFunction(library_id, "croupier_plugin_init"));
 
     if (init_func) {
         int result = init_func();
@@ -573,8 +570,8 @@ void PluginManager::CleanupPlugin(const std::string& plugin_name) {
     auto& entry = it->second;
 
     // Call plugin cleanup function if available
-    PluginCleanupFunc cleanup_func = reinterpret_cast<PluginCleanupFunc>(
-        library_manager_.GetFunction(entry->library_id, "croupier_plugin_cleanup"));
+    PluginCleanupFunc cleanup_func =
+        reinterpret_cast<PluginCleanupFunc>(library_manager_.GetFunction(entry->library_id, "croupier_plugin_cleanup"));
 
     if (cleanup_func) {
         try {
@@ -647,6 +644,6 @@ std::vector<std::string> PluginManager::DiscoverPluginFunctions(const std::strin
     return discovered_functions;
 }
 
-} // namespace plugin
-} // namespace sdk
-} // namespace croupier
+}  // namespace plugin
+}  // namespace sdk
+}  // namespace croupier
