@@ -40,6 +40,7 @@ option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(ENABLE_VCPKG "Enable vcpkg package management" ON)
 option(CROUPIER_CI_BUILD "Enable CI build with proto generation" OFF)
+option(ENABLE_LUA_BINDING "Enable Lua language binding (requires Lua 5.3+)" OFF)
 
 # ========== Standalone Build Options ==========
 option(CROUPIER_STANDALONE_BUILD "Enable standalone build mode" OFF)
@@ -132,6 +133,32 @@ if(nlohmann_json_FOUND)
 else()
     message(STATUS "nlohmann_json not found, using built-in JSON utilities")
     set(JSON_LIBRARY "")
+
+# ========== Lua Binding ==========
+if(ENABLE_LUA_BINDING)
+    # Try multiple package names for Lua
+    find_package(Lua 5.3 QUIET)
+    if(NOT Lua_FOUND)
+        find_package(PkgConfig)
+        if(PKG_CONFIG_FOUND)
+            pkg_check_modules(LUA REQUIRED lua5.3 lua5.4 lua)
+        endif()
+    endif()
+
+    if(Lua_FOUND OR LUA_FOUND)
+        message(STATUS "Lua binding enabled")
+        if(Lua_FOUND)
+            message(STATUS "Found Lua: ${LUA_VERSION_STRING}")
+            set(LUA_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
+            set(LUA_LIBRARIES ${LUA_LIBRARIES})
+        else()
+            message(STATUS "Found Lua: ${LUA_VERSION}")
+        endif()
+    else()
+        message(FATAL_ERROR "ENABLE_LUA_BINDING=ON but Lua 5.3+ was not found. Install Lua-devel/lua-dev")
+    endif()
+endif()
+
 endif()
 
 # ========== Compiler Settings ==========
@@ -231,6 +258,14 @@ if(ENABLE_GRPC)
     endif()
 endif()
 
+# Add Lua binding source files if enabled
+if(ENABLE_LUA_BINDING)
+    list(APPEND SDK_SOURCES src/bindings/lua_binding.cpp)
+    list(APPEND SDK_HEADERS include/croupier/sdk/bindings/lua_binding.h)
+    message(STATUS "Added Lua binding source files")
+endif()
+
+
 # ========== Library Targets ==========
 
 # Shared Library
@@ -289,6 +324,13 @@ if(BUILD_SHARED_LIBS)
         )
     endif()
 
+    if(ENABLE_LUA_BINDING)
+        target_include_directories(croupier-sdk-shared PRIVATE ${LUA_INCLUDE_DIRS})
+        target_link_libraries(croupier-sdk-shared PRIVATE ${LUA_LIBRARIES})
+        target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_ENABLE_LUA)
+    endif()
+
+
     target_compile_definitions(croupier-sdk-shared
         PRIVATE
             CROUPIER_SDK_BUILDING_DLL
@@ -345,6 +387,13 @@ if(BUILD_STATIC_LIBS)
                 CROUPIER_SDK_ENABLE_JSON
         )
     endif()
+
+    if(ENABLE_LUA_BINDING)
+        target_include_directories(croupier-sdk-static PRIVATE ${LUA_INCLUDE_DIRS})
+        target_link_libraries(croupier-sdk-static PRIVATE ${LUA_LIBRARIES})
+        target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_ENABLE_LUA)
+    endif()
+
 
     target_compile_definitions(croupier-sdk-static
         PUBLIC
@@ -586,6 +635,7 @@ message(STATUS "  BUILD_EXAMPLES:    ${BUILD_EXAMPLES}")
 message(STATUS "  BUILD_TESTS:       ${BUILD_TESTS}")
 message(STATUS "  ENABLE_VCPKG:      ${ENABLE_VCPKG}")
 message(STATUS "  ENABLE_GRPC:       ${ENABLE_GRPC}")
+message(STATUS "  ENABLE_LUA_BINDING: ${ENABLE_LUA_BINDING}")
 if(ENABLE_VCPKG)
 message(STATUS "  VCPKG_TRIPLET:     ${VCPKG_TARGET_TRIPLET}")
 endif()
@@ -597,6 +647,9 @@ message(STATUS "  Protobuf:        Found")
 endif()
 if(nlohmann_json_FOUND)
 message(STATUS "  nlohmann_json:   Found")
+endif()
+if(ENABLE_LUA_BINDING)
+    message(STATUS "  Lua:             Enabled (${LUA_VERSION_STRING})")
 endif()
 message(STATUS "=================================================")
 message(STATUS "")
