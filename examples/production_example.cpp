@@ -13,27 +13,28 @@
 
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/logger.h"
-#include <iostream>
-#include <thread>
+
 #include <atomic>
-#include <signal.h>
-#include <memory>
-#include <fstream>
-#include <sstream>
 #include <chrono>
+#include <fstream>
+#include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <signal.h>
+#include <sstream>
+#include <thread>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <winsvc.h>
 #else
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 using namespace croupier::sdk;
@@ -74,8 +75,7 @@ struct Metrics {
         ss << "{"
            << "\"requests_received\":" << requests_received << ","
            << "\"requests_processed\":" << requests_processed << ","
-           << "\"requests_failed\":" << requests_failed
-           << "}";
+           << "\"requests_failed\":" << requests_failed << "}";
         return ss.str();
     }
 };
@@ -186,7 +186,7 @@ public:
 #ifdef _WIN32
         server_thread_ = std::thread([this]() { this->RunWindows(); });
 #else
-        server_thread_ = std::thread([this]() { this-> RunUnix(); });
+        server_thread_ = std::thread([this]() { this->RunUnix(); });
 #endif
 
         return true;
@@ -248,7 +248,7 @@ private:
         address.sin_port = htons(port_);
 
         // 绑定
-        if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
             std::cerr << "绑定失败: port " << port_ << '\n';
             return;
         }
@@ -284,7 +284,7 @@ private:
                 struct sockaddr_in client_addr;
                 socklen_t addr_len = sizeof(client_addr);
 
-                int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+                int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
                 if (client_fd < 0) {
                     continue;
                 }
@@ -341,20 +341,28 @@ private:
         int status = healthy ? 200 : 503;
         std::string body = healthy ? "{\"status\":\"healthy\"}" : "{\"status\":\"unhealthy\"}";
 
-        return "HTTP/1.1 " + std::to_string(status) + " OK\r\n"
+        return "HTTP/1.1 " + std::to_string(status) +
+               " OK\r\n"
                "Content-Type: application/json\r\n"
-               "Content-Length: " + std::to_string(body.length()) + "\r\n"
-               "\r\n" + body;
+               "Content-Length: " +
+               std::to_string(body.length()) +
+               "\r\n"
+               "\r\n" +
+               body;
     }
 
     std::string BuildReadyResponse(bool ready) {
         int status = ready ? 200 : 503;
         std::string body = ready ? "{\"status\":\"ready\"}" : "{\"status\":\"not_ready\"}";
 
-        return "HTTP/1.1 " + std::to_string(status) + " OK\r\n"
+        return "HTTP/1.1 " + std::to_string(status) +
+               " OK\r\n"
                "Content-Type: application/json\r\n"
-               "Content-Length: " + std::to_string(body.length()) + "\r\n"
-               "\r\n" + body;
+               "Content-Length: " +
+               std::to_string(body.length()) +
+               "\r\n"
+               "\r\n" +
+               body;
     }
 
     std::string BuildMetricsResponse() {
@@ -362,8 +370,11 @@ private:
 
         return "HTTP/1.1 200 OK\r\n"
                "Content-Type: application/json\r\n"
-               "Content-Length: " + std::to_string(body.length()) + "\r\n"
-               "\r\n" + body;
+               "Content-Length: " +
+               std::to_string(body.length()) +
+               "\r\n"
+               "\r\n" +
+               body;
     }
 
     std::string BuildNotFoundResponse() {
@@ -371,8 +382,11 @@ private:
 
         return "HTTP/1.1 404 Not Found\r\n"
                "Content-Type: application/json\r\n"
-               "Content-Length: " + std::to_string(body.length()) + "\r\n"
-               "\r\n" + body;
+               "Content-Length: " +
+               std::to_string(body.length()) +
+               "\r\n"
+               "\r\n" +
+               body;
     }
 };
 
@@ -389,8 +403,7 @@ std::string PlayerBanHandler(const std::string& context, const std::string& payl
 
         g_metrics.RecordSuccess();
 
-        return R"({"status":"success","action":"ban","timestamp":")" +
-               std::to_string(std::time(nullptr)) + R"("})";
+        return R"({"status":"success","action":"ban","timestamp":")" + std::to_string(std::time(nullptr)) + R"("})";
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
@@ -417,7 +430,8 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
                 "name":"TestPlayer",
                 "level":50,
                 "exp":125000,
-                "last_login":")" + std::to_string(std::time(nullptr)) + R"("
+                "last_login":")" +
+               std::to_string(std::time(nullptr)) + R"("
             }
         })";
 
@@ -448,7 +462,8 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
 
         return R"({
             "status":"success",
-            "transaction_id":"tx_")" + std::to_string(std::time(nullptr)) + R"(",
+            "transaction_id":"tx_")" +
+               std::to_string(std::time(nullptr)) + R"(",
             "from":"player_123",
             "to":"player_456",
             "amount":100,

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
 #include <map>
-#include <vector>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -44,9 +44,11 @@ public:
         }
 
         const SimpleJson& at(const std::string& key) const {
-            if (type != OBJECT) throw std::runtime_error("Not an object");
+            if (type != OBJECT)
+                throw std::runtime_error("Not an object");
             auto it = object_value.find(key);
-            if (it == object_value.end()) throw std::runtime_error("Key not found: " + key);
+            if (it == object_value.end())
+                throw std::runtime_error("Key not found: " + key);
             return it->second;
         }
 
@@ -75,7 +77,7 @@ public:
      * @param obj Object to convert (template for various types)
      * @return JSON string representation
      */
-    template<typename T>
+    template <typename T>
     static std::string ToJsonString(const T& obj);
 
     /**
@@ -87,13 +89,11 @@ public:
      * @return String value
      */
 #ifdef CROUPIER_SDK_ENABLE_JSON
-    static std::string GetStringValue(const nlohmann::json& json_obj,
-                                    const std::string& path,
-                                    const std::string& default_value = "");
+    static std::string GetStringValue(const nlohmann::json& json_obj, const std::string& path,
+                                      const std::string& default_value = "");
 #else
-    static std::string GetStringValue(const SimpleJson& json_obj,
-                                    const std::string& path,
-                                    const std::string& default_value = "");
+    static std::string GetStringValue(const SimpleJson& json_obj, const std::string& path,
+                                      const std::string& default_value = "");
 #endif
 
     /**
@@ -105,13 +105,9 @@ public:
      * @return Integer value
      */
 #ifdef CROUPIER_SDK_ENABLE_JSON
-    static int GetIntValue(const nlohmann::json& json_obj,
-                          const std::string& path,
-                          int default_value = 0);
+    static int GetIntValue(const nlohmann::json& json_obj, const std::string& path, int default_value = 0);
 #else
-    static int GetIntValue(const SimpleJson& json_obj,
-                          const std::string& path,
-                          int default_value = 0);
+    static int GetIntValue(const SimpleJson& json_obj, const std::string& path, int default_value = 0);
 #endif
 
     /**
@@ -123,13 +119,9 @@ public:
      * @return Boolean value
      */
 #ifdef CROUPIER_SDK_ENABLE_JSON
-    static bool GetBoolValue(const nlohmann::json& json_obj,
-                            const std::string& path,
-                            bool default_value = false);
+    static bool GetBoolValue(const nlohmann::json& json_obj, const std::string& path, bool default_value = false);
 #else
-    static bool GetBoolValue(const SimpleJson& json_obj,
-                            const std::string& path,
-                            bool default_value = false);
+    static bool GetBoolValue(const SimpleJson& json_obj, const std::string& path, bool default_value = false);
 #endif
 
     /**
@@ -175,10 +167,11 @@ private:
     static nlohmann::json GetValueByPath(const nlohmann::json& json_obj, const std::vector<std::string>& path_parts);
 #else
     static SimpleJson GetValueByPath(const SimpleJson& json_obj, const std::vector<std::string>& path_parts);
-    static void PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstream& ss, int current_indent, int indent_size);
+    static void PrettyPrintRecursive(const SimpleJson& json_obj, std::stringstream& ss, int current_indent,
+                                     int indent_size);
 #endif
 };
 
-} // namespace utils
-} // namespace sdk
-} // namespace croupier
+}  // namespace utils
+}  // namespace sdk
+}  // namespace croupier

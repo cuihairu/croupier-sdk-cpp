@@ -1,6 +1,7 @@
 #pragma once
 
 #include "croupier/sdk/croupier_client.h"
+
 #include <string>
 #include <vector>
 
@@ -50,7 +51,7 @@ public:
      * @return ClientConfig configuration with environment overrides
      */
     ClientConfig LoadWithEnvironmentOverrides(const std::string& config_file,
-                                             const std::string& env_prefix = "CROUPIER_");
+                                              const std::string& env_prefix = "CROUPIER_");
 
     /**
      * @brief Validate client configuration
@@ -112,6 +113,6 @@ private:
 #endif
 };
 
-} // namespace config
-} // namespace sdk
-} // namespace croupier
+}  // namespace config
+}  // namespace sdk
+}  // namespace croupier

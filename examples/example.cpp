@@ -1,4 +1,5 @@
 #include "croupier/sdk/croupier_client.h"
+
 #include <iostream>
 
 using namespace croupier::sdk;

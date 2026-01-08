@@ -1,21 +1,21 @@
 #pragma once
 
-#include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <mutex>
-#include <sstream>
-#include <chrono>
-#include <iomanip>
-#include <ctime>
 #include <regex>
+#include <sstream>
+#include <string>
 
 // Optional: Use spdlog if available
 // Uncomment to use spdlog instead of simple logger
 // #define CROUPIER_USE_SPDLOG
 
 #ifdef CROUPIER_USE_SPDLOG
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #endif
 
 namespace croupier {
@@ -27,7 +27,8 @@ namespace sdk {
 // Mask a sensitive value (token, password, key) for logging
 // Format: abc...xyz (shows first 3 and last 3 characters)
 inline std::string MaskSensitive(const std::string& value) {
-    if (value.empty()) return "";
+    if (value.empty())
+        return "";
     const size_t min_visible = 3;
     if (value.length() <= min_visible * 2) {
         return std::string(value.length(), '*');
@@ -37,7 +38,8 @@ inline std::string MaskSensitive(const std::string& value) {
 
 // Mask a value but preserve its length (all asterisks)
 inline std::string MaskFully(const std::string& value) {
-    if (value.empty()) return "";
+    if (value.empty())
+        return "";
     return std::string(value.length(), '*');
 }
 
@@ -57,22 +59,14 @@ inline std::string MaskJsonSensitive(const std::string& json, const std::vector<
 // Can be configured to use spdlog if CROUPIER_USE_SPDLOG is defined
 class Logger {
 public:
-    enum class Level {
-        DEBUG = 0,
-        INFO = 1,
-        WARN = 2,
-        ERR = 3,
-        OFF = 4
-    };
+    enum class Level { DEBUG = 0, INFO = 1, WARN = 2, ERR = 3, OFF = 4 };
 
     static Logger& GetInstance() {
         static Logger instance;
         return instance;
     }
 
-    void SetLevel(Level level) {
-        level_ = level;
-    }
+    void SetLevel(Level level) { level_ = level; }
 
     void SetLevelFromString(const std::string& level) {
         if (level == "DEBUG" || level == "debug") {
@@ -96,9 +90,7 @@ public:
         }
     }
 
-    bool IsEnabled(Level level) const {
-        return level >= level_;
-    }
+    bool IsEnabled(Level level) const { return level >= level_; }
 
     void Log(Level level, const std::string& component, const std::string& message) {
         if (!IsEnabled(level)) {
@@ -110,20 +102,20 @@ public:
 #ifdef CROUPIER_USE_SPDLOG
         if (spdlog_logger_) {
             switch (level) {
-                case Level::DEBUG:
-                    spdlog_logger_->debug("[{}] {}", component, message);
-                    break;
-                case Level::INFO:
-                    spdlog_logger_->info("[{}] {}", component, message);
-                    break;
-                case Level::WARN:
-                    spdlog_logger_->warn("[{}] {}", component, message);
-                    break;
-                case Level::ERR:
-                    spdlog_logger_->error("[{}] {}", component, message);
-                    break;
-                default:
-                    break;
+            case Level::DEBUG:
+                spdlog_logger_->debug("[{}] {}", component, message);
+                break;
+            case Level::INFO:
+                spdlog_logger_->info("[{}] {}", component, message);
+                break;
+            case Level::WARN:
+                spdlog_logger_->warn("[{}] {}", component, message);
+                break;
+            case Level::ERR:
+                spdlog_logger_->error("[{}] {}", component, message);
+                break;
+            default:
+                break;
             }
             return;
         }
@@ -137,7 +129,8 @@ public:
     }
 
     // Log with sensitive data masking (for tokens, passwords, etc.)
-    void LogMasked(Level level, const std::string& component, const std::string& message, const std::string& sensitive_value) {
+    void LogMasked(Level level, const std::string& component, const std::string& message,
+                   const std::string& sensitive_value) {
         if (!IsEnabled(level)) {
             return;
         }
@@ -145,26 +138,16 @@ public:
     }
 
     // Convenience methods
-    void Debug(const std::string& component, const std::string& message) {
-        Log(Level::DEBUG, component, message);
-    }
+    void Debug(const std::string& component, const std::string& message) { Log(Level::DEBUG, component, message); }
 
-    void Info(const std::string& component, const std::string& message) {
-        Log(Level::INFO, component, message);
-    }
+    void Info(const std::string& component, const std::string& message) { Log(Level::INFO, component, message); }
 
-    void Warn(const std::string& component, const std::string& message) {
-        Log(Level::WARN, component, message);
-    }
+    void Warn(const std::string& component, const std::string& message) { Log(Level::WARN, component, message); }
 
-    void Error(const std::string& component, const std::string& message) {
-        Log(Level::ERR, component, message);
-    }
+    void Error(const std::string& component, const std::string& message) { Log(Level::ERR, component, message); }
 
 #ifdef CROUPIER_USE_SPDLOG
-    void SetSpdlogLogger(std::shared_ptr<spdlog::logger> logger) {
-        spdlog_logger_ = logger;
-    }
+    void SetSpdlogLogger(std::shared_ptr<spdlog::logger> logger) { spdlog_logger_ = logger; }
 #endif
 
 private:
@@ -182,19 +165,23 @@ private:
 
     std::string LevelToString(Level level) const {
         switch (level) {
-            case Level::DEBUG: return "DEBUG";
-            case Level::INFO:  return "INFO";
-            case Level::WARN:  return "WARN";
-            case Level::ERR: return "ERROR";
-            default:           return "UNKNOWN";
+        case Level::DEBUG:
+            return "DEBUG";
+        case Level::INFO:
+            return "INFO";
+        case Level::WARN:
+            return "WARN";
+        case Level::ERR:
+            return "ERROR";
+        default:
+            return "UNKNOWN";
         }
     }
 
     std::string GetTimestamp() const {
         auto now = std::chrono::system_clock::now();
         auto time_t = std::chrono::system_clock::to_time_t(now);
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()) % 1000;
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 
         std::stringstream ss;
         ss << std::put_time(std::gmtime(&time_t), "%Y-%m-%dT%H:%M:%S");
@@ -210,47 +197,35 @@ private:
 };
 
 // Convenience macros for logging
-#define CROUPIER_LOG_DEBUG(component, message) \
-    croupier::sdk::Logger::GetInstance().Debug(component, message)
+#define CROUPIER_LOG_DEBUG(component, message) croupier::sdk::Logger::GetInstance().Debug(component, message)
 
-#define CROUPIER_LOG_INFO(component, message) \
-    croupier::sdk::Logger::GetInstance().Info(component, message)
+#define CROUPIER_LOG_INFO(component, message) croupier::sdk::Logger::GetInstance().Info(component, message)
 
-#define CROUPIER_LOG_WARN(component, message) \
-    croupier::sdk::Logger::GetInstance().Warn(component, message)
+#define CROUPIER_LOG_WARN(component, message) croupier::sdk::Logger::GetInstance().Warn(component, message)
 
-#define CROUPIER_LOG_ERROR(component, message) \
-    croupier::sdk::Logger::GetInstance().Error(component, message)
+#define CROUPIER_LOG_ERROR(component, message) croupier::sdk::Logger::GetInstance().Error(component, message)
 
 // Convenience macro for logging with masked sensitive value
-#define CROUPIER_LOG_INFO_MASKED(component, message, sensitive_value) \
-    croupier::sdk::Logger::GetInstance().LogMasked(croupier::sdk::Logger::Level::INFO, component, message, sensitive_value)
+#define CROUPIER_LOG_INFO_MASKED(component, message, sensitive_value)                                      \
+    croupier::sdk::Logger::GetInstance().LogMasked(croupier::sdk::Logger::Level::INFO, component, message, \
+                                                   sensitive_value)
 
 // Scoped logger for specific component
 class ComponentLogger {
 public:
-    explicit ComponentLogger(const std::string& component)
-        : component_(component) {}
+    explicit ComponentLogger(const std::string& component) : component_(component) {}
 
-    void Debug(const std::string& message) const {
-        CROUPIER_LOG_DEBUG(component_, message);
-    }
+    void Debug(const std::string& message) const { CROUPIER_LOG_DEBUG(component_, message); }
 
-    void Info(const std::string& message) const {
-        CROUPIER_LOG_INFO(component_, message);
-    }
+    void Info(const std::string& message) const { CROUPIER_LOG_INFO(component_, message); }
 
-    void Warn(const std::string& message) const {
-        CROUPIER_LOG_WARN(component_, message);
-    }
+    void Warn(const std::string& message) const { CROUPIER_LOG_WARN(component_, message); }
 
-    void Error(const std::string& message) const {
-        CROUPIER_LOG_ERROR(component_, message);
-    }
+    void Error(const std::string& message) const { CROUPIER_LOG_ERROR(component_, message); }
 
 private:
     std::string component_;
 };
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

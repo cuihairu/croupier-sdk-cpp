@@ -1,10 +1,11 @@
 #pragma once
 
-#include "croupier_client.h"
-#include "config_driven_loader.h"
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
+
+#include "config_driven_loader.h"
+#include "croupier_client.h"
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -55,7 +56,7 @@ public:
         // 字段定义
         struct FieldSchema {
             std::string name;
-            std::string type;        // "string", "int", "float", "bool", "object", "array"
+            std::string type;  // "string", "int", "float", "bool", "object", "array"
             bool required;
             std::string default_value;
             std::string description;
@@ -63,7 +64,7 @@ public:
         };
 
         std::map<std::string, FieldSchema> fields;
-        std::map<std::string, std::string> operations;     // 操作到函数ID的映射
+        std::map<std::string, std::string> operations;  // 操作到函数ID的映射
         std::map<std::string, RelationshipDef> relationships;
     };
 
@@ -298,7 +299,7 @@ namespace config_examples {
  * }
  */
 
-} // namespace config_examples
+}  // namespace config_examples
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier

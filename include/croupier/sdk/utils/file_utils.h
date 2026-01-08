@@ -1,8 +1,8 @@
 #pragma once
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 
 namespace croupier {
 namespace sdk {
@@ -56,9 +56,7 @@ public:
      * @param append If true, append to existing file; if false, overwrite
      * @return true if write successful
      */
-    static bool WriteFileContent(const std::string& file_path,
-                               const std::string& content,
-                               bool append = false);
+    static bool WriteFileContent(const std::string& file_path, const std::string& content, bool append = false);
 
     /**
      * @brief List files in directory with optional extension filter
@@ -68,9 +66,8 @@ public:
      * @param recursive If true, scan subdirectories recursively
      * @return Vector of file paths
      */
-    static std::vector<std::string> ListFiles(const std::string& directory,
-                                            const std::string& extension = "",
-                                            bool recursive = false);
+    static std::vector<std::string> ListFiles(const std::string& directory, const std::string& extension = "",
+                                              bool recursive = false);
 
     /**
      * @brief List directories in given path
@@ -79,8 +76,7 @@ public:
      * @param recursive If true, scan subdirectories recursively
      * @return Vector of directory paths
      */
-    static std::vector<std::string> ListDirectories(const std::string& directory,
-                                                   bool recursive = false);
+    static std::vector<std::string> ListDirectories(const std::string& directory, bool recursive = false);
 
     /**
      * @brief Get file size in bytes
@@ -154,8 +150,7 @@ public:
      * @param base_path Base path (if empty, uses current directory)
      * @return Absolute path
      */
-    static std::string ToAbsolutePath(const std::string& relative_path,
-                                    const std::string& base_path = "");
+    static std::string ToAbsolutePath(const std::string& relative_path, const std::string& base_path = "");
 
     /**
      * @brief Create temporary file
@@ -164,8 +159,7 @@ public:
      * @param suffix Filename suffix (e.g., ".tmp")
      * @return Path to created temporary file
      */
-    static std::string CreateTempFile(const std::string& prefix = "croupier",
-                                    const std::string& suffix = ".tmp");
+    static std::string CreateTempFile(const std::string& prefix = "croupier", const std::string& suffix = ".tmp");
 
     /**
      * @brief Remove file
@@ -192,9 +186,7 @@ public:
      * @param overwrite If true, overwrite existing destination
      * @return true if copied successfully
      */
-    static bool CopyFile(const std::string& source_path,
-                        const std::string& dest_path,
-                        bool overwrite = false);
+    static bool CopyFile(const std::string& source_path, const std::string& dest_path, bool overwrite = false);
 
     /**
      * @brief Get current working directory
@@ -212,14 +204,12 @@ public:
 
 private:
     // Platform-specific implementations
-    static void ListFilesRecursive(const std::string& directory,
-                                  const std::string& extension,
-                                  std::vector<std::string>& result);
+    static void ListFilesRecursive(const std::string& directory, const std::string& extension,
+                                   std::vector<std::string>& result);
 
-    static void ListDirectoriesRecursive(const std::string& directory,
-                                       std::vector<std::string>& result);
+    static void ListDirectoriesRecursive(const std::string& directory, std::vector<std::string>& result);
 };
 
-} // namespace utils
-} // namespace sdk
-} // namespace croupier
+}  // namespace utils
+}  // namespace sdk
+}  // namespace croupier

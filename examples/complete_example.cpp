@@ -1,8 +1,9 @@
 #include "croupier/sdk/croupier_client.h"
-#include <iostream>
+
 #include <chrono>
-#include <thread>
+#include <iostream>
 #include <signal.h>
+#include <thread>
 
 using namespace croupier::sdk;
 
@@ -136,7 +137,7 @@ int main(int /* argc */, char* /* argv */[]) {
         config.service_id = "game-backend";
         config.agent_addr = "127.0.0.1:19090";
         config.local_listen = "127.0.0.1:0";  // 自动分配端口
-        config.insecure = true;  // 开发环境使用非安全连接
+        config.insecure = true;               // 开发环境使用非安全连接
 
         std::cout << "🔧 配置客户端:" << std::endl;
         std::cout << "   - 游戏 ID: " << config.game_id << std::endl;
@@ -215,8 +216,7 @@ int main(int /* argc */, char* /* argv */[]) {
         auto registered_objects = g_client->GetRegisteredObjects();
         std::cout << "\n📋 已注册的虚拟对象 (" << registered_objects.size() << " 个):" << std::endl;
         for (const auto& obj : registered_objects) {
-            std::cout << "   ✓ " << obj.id << " v" << obj.version
-                      << " - " << obj.name << std::endl;
+            std::cout << "   ✓ " << obj.id << " v" << obj.version << " - " << obj.name << std::endl;
             std::cout << "     操作: ";
             for (const auto& op : obj.operations) {
                 std::cout << op.first << " ";

@@ -1,11 +1,12 @@
 #pragma once
 
 #include "croupier/sdk/croupier_client.h"
-#include <string>
-#include <vector>
+
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 // Forward declarations for platform-specific types
 #ifdef _WIN32
@@ -314,6 +315,6 @@ private:
     static std::mutex registry_mutex_;
 };
 
-} // namespace plugin
-} // namespace sdk
-} // namespace croupier
+}  // namespace plugin
+}  // namespace sdk
+}  // namespace croupier

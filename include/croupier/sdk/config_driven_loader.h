@@ -1,11 +1,12 @@
 #pragma once
 
-#include "croupier_client.h"
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "croupier_client.h"
 
 namespace croupier {
 namespace sdk {
@@ -22,14 +23,16 @@ public:
      *
      * 用于根据函数ID创建对应的处理器
      */
-    using HandlerFactory = std::function<FunctionHandler(const std::string& function_id, const std::map<std::string, std::string>& config)>;
+    using HandlerFactory = std::function<FunctionHandler(const std::string& function_id,
+                                                         const std::map<std::string, std::string>& config)>;
 
     /**
      * @brief 动态库加载器类型
      *
      * 用于从动态库中加载函数处理器
      */
-    using DynamicLibLoader = std::function<FunctionHandler(const std::string& lib_path, const std::string& function_name)>;
+    using DynamicLibLoader =
+        std::function<FunctionHandler(const std::string& lib_path, const std::string& function_name)>;
 
     ConfigDrivenLoader();
     ~ConfigDrivenLoader();
@@ -145,7 +148,8 @@ private:
     ComponentDescriptor ParseJsonToComponent(const std::string& json_content);
     VirtualObjectDescriptor ParseJsonToVirtualObject(const std::string& json_content);
     std::map<std::string, FunctionHandler> ResolveHandlers(const ComponentDescriptor& comp);
-    FunctionHandler CreateHandlerFromConfig(const std::string& function_id, const std::map<std::string, std::string>& config);
+    FunctionHandler CreateHandlerFromConfig(const std::string& function_id,
+                                            const std::map<std::string, std::string>& config);
     FunctionHandler CreateDefaultHandler(const std::string& function_id);
     FunctionHandler LoadFromDynamicLib(const std::string& lib_path, const std::string& function_name);
 };
@@ -182,7 +186,8 @@ public:
      * @param config 配置参数
      * @return FunctionHandler 代理处理器
      */
-    static FunctionHandler CreateProxyHandler(const std::string& target_url, const std::map<std::string, std::string>& config);
+    static FunctionHandler CreateProxyHandler(const std::string& target_url,
+                                              const std::map<std::string, std::string>& config);
 
     /**
      * @brief 创建模板处理器
@@ -191,7 +196,8 @@ public:
      * @param config 配置参数
      * @return FunctionHandler 模板处理器
      */
-    static FunctionHandler CreateTemplateHandler(const std::string& template_string, const std::map<std::string, std::string>& config);
+    static FunctionHandler CreateTemplateHandler(const std::string& template_string,
+                                                 const std::map<std::string, std::string>& config);
 };
 
 // ========== JSON 配置格式定义 ==========
@@ -260,5 +266,5 @@ public:
  * }
  */
 
-} // namespace sdk
-} // namespace croupier
+}  // namespace sdk
+}  // namespace croupier
