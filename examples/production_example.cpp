@@ -27,6 +27,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <winsvc.h>
 #else
 #include <arpa/inet.h>
@@ -162,8 +164,8 @@ void SetupSignalHandlers() {
     };
 
 #ifdef _WIN32
-    signal(SIGINT, static_cast<__sighandler_t>(handler));
-    signal(SIGTERM, static_cast<__sighandler_t>(handler));
+    signal(SIGINT, handler);
+    signal(SIGTERM, handler);
 #else
     struct sigaction sa;
     std::memset(&sa, 0, sizeof(sa));
@@ -300,7 +302,11 @@ private:
 
     void HandleRequest(int client_fd) {
         char buffer[1024] = {0};
+#ifdef _WIN32
+        int bytes_read = recv(client_fd, buffer, (int)(sizeof(buffer) - 1), 0);
+#else
         ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+#endif
         if (bytes_read > 0) {
             buffer[bytes_read] = ' ';
         }
