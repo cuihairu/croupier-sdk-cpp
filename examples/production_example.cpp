@@ -300,7 +300,10 @@ private:
 
     void HandleRequest(int client_fd) {
         char buffer[1024] = {0};
-        read(client_fd, buffer, 1024);
+        ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+        if (bytes_read > 0) {
+            buffer[bytes_read] = ' ';
+        }
 
         std::string path = "/";
         std::string method = "GET";
