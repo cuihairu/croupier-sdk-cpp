@@ -11,6 +11,26 @@
  * 7. TLS/mTLS configuration
  */
 
+// Windows headers must be included before gRPC headers to avoid conflicts
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <winsvc.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/logger.h"
 
@@ -24,20 +44,6 @@
 #include <signal.h>
 #include <sstream>
 #include <thread>
-
-#ifdef _WIN32
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <winsvc.h>
-#else
-#include <arpa/inet.h>
-#include <cstring>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#endif
 
 using namespace croupier::sdk;
 
