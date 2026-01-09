@@ -1,8 +1,6 @@
 version: v2
 plugins:
-  - protoc_builtin: cpp
-    protoc_path: /usr/local/bin/protoc
+  - remote: buf.build/protocolbuffers/cpp
     out: generated
-  - plugin: grpc
-    path: /usr/local/bin/grpc_cpp_plugin
+  - remote: buf.build/grpc/cpp
     out: generated
