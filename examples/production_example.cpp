@@ -37,6 +37,7 @@
 #include <atomic>
 #include <chrono>
 #include <fstream>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <memory>
