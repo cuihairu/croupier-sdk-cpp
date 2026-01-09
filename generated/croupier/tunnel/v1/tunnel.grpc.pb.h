@@ -24,6 +24,7 @@
 #include <grpcpp/support/status.h>
 #include <grpcpp/support/stub_options.h>
 #include <grpcpp/support/sync_stream.h>
+#include <grpcpp/ports_def.inc>
 
 namespace croupier {
 namespace tunnel {
@@ -215,4 +216,5 @@ class TunnelService final {
 }  // namespace croupier
 
 
+#include <grpcpp/ports_undef.inc>
 #endif  // GRPC_croupier_2ftunnel_2fv1_2ftunnel_2eproto__INCLUDED

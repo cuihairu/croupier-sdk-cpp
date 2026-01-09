@@ -24,6 +24,7 @@
 #include <grpcpp/support/status.h>
 #include <grpcpp/support/stub_options.h>
 #include <grpcpp/support/sync_stream.h>
+#include <grpcpp/ports_def.inc>
 
 namespace croupier {
 namespace sdk {
@@ -725,4 +726,5 @@ class FunctionService final {
 }  // namespace croupier
 
 
+#include <grpcpp/ports_undef.inc>
 #endif  // GRPC_croupier_2fsdk_2fv1_2ffunction_2eproto__INCLUDED
