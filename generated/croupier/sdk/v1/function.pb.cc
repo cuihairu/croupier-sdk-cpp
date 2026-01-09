@@ -317,24 +317,24 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2ffunction_2eproto[] AB
     "vent\022\022\n\004type\030\001 \001(\tR\004type\022\030\n\007message\030\002 \001("
     "\tR\007message\022\032\n\010progress\030\003 \001(\005R\010progress\022\030"
     "\n\007payload\030\004 \001(\014R\007payload\")\n\020CancelJobReq"
-    "uest\022\025\n\006job_id\030\001 \001(\tR\005jobId2\313\002\n\017Function"
-    "Service\022I\n\006Invoke\022\036.croupier.sdk.v1.Invo"
-    "keRequest\032\037.croupier.sdk.v1.InvokeRespon"
-    "se\022M\n\010StartJob\022\036.croupier.sdk.v1.InvokeR"
-    "equest\032!.croupier.sdk.v1.StartJobRespons"
-    "e\022K\n\tStreamJob\022!.croupier.sdk.v1.JobStre"
-    "amRequest\032\031.croupier.sdk.v1.JobEvent0\001\022Q"
-    "\n\tCancelJob\022!.croupier.sdk.v1.CancelJobR"
-    "equest\032!.croupier.sdk.v1.StartJobRespons"
-    "eBa\n\"io.github.cuihairu.croupier.sdk.v1P"
-    "\001Z9github.com/cuihairu/croupier/pkg/pb/c"
-    "roupier/sdk/v1;sdkv1b\006proto3"
+    "uest\022\025\n\006job_id\030\001 \001(\tR\005jobId2\321\002\n\025Function"
+    "ClientService\022I\n\006Invoke\022\036.croupier.sdk.v"
+    "1.InvokeRequest\032\037.croupier.sdk.v1.Invoke"
+    "Response\022M\n\010StartJob\022\036.croupier.sdk.v1.I"
+    "nvokeRequest\032!.croupier.sdk.v1.StartJobR"
+    "esponse\022K\n\tStreamJob\022!.croupier.sdk.v1.J"
+    "obStreamRequest\032\031.croupier.sdk.v1.JobEve"
+    "nt0\001\022Q\n\tCancelJob\022!.croupier.sdk.v1.Canc"
+    "elJobRequest\032!.croupier.sdk.v1.StartJobR"
+    "esponseBa\n\"io.github.cuihairu.croupier.s"
+    "dk.v1P\001Z9github.com/cuihairu/croupier/pk"
+    "g/pb/croupier/sdk/v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2ffunction_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2ffunction_2eproto = {
     false,
     false,
-    1028,
+    1034,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2ffunction_2eproto,
     "croupier/sdk/v1/function.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2ffunction_2eproto_once,

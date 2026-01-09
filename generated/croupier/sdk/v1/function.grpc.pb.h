@@ -32,10 +32,10 @@ namespace v1 {
 
 // SDK Function Service - Main interface for invoking functions
 // This is what SDK developers will use to call game functions
-class FunctionService final {
+class FunctionClientService final {
  public:
   static constexpr char const* service_full_name() {
-    return "croupier.sdk.v1.FunctionService";
+    return "croupier.sdk.v1.FunctionClientService";
   }
   class StubInterface {
    public:
