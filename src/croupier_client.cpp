@@ -771,7 +771,7 @@ public:
 #ifdef CROUPIER_SDK_ENABLE_GRPC
     // gRPC components
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<sdkv1::FunctionService::Stub> stub_;
+    std::unique_ptr<sdkv1::InvokerService::Stub> stub_;
 #endif
 
     explicit Impl(const InvokerConfig& config) : config_(config) {
@@ -841,7 +841,7 @@ public:
             }
 
             // Create stub
-            stub_ = sdkv1::FunctionService::NewStub(channel_);
+            stub_ = sdkv1::InvokerService::NewStub(channel_);
             if (!stub_) {
                 SDK_LOG_ERROR("Failed to create gRPC stub");
                 return false;
