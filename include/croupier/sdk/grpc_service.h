@@ -23,7 +23,7 @@
 // Only include gRPC headers when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 #include "croupier/agent/local/v1/local.grpc.pb.h"
-#include "croupier/sdk/v1/invoker.grpc.pb.h"
+#include "croupier/function/v1/function.grpc.pb.h"
 
 #include <google/protobuf/map.h>
 

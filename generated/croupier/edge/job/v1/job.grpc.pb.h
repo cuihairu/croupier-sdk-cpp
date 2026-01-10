@@ -24,7 +24,6 @@
 #include <grpcpp/support/status.h>
 #include <grpcpp/support/stub_options.h>
 #include <grpcpp/support/sync_stream.h>
-#include <grpcpp/ports_def.inc>
 
 namespace croupier {
 namespace edge {
@@ -244,5 +243,4 @@ class JobService final {
 }  // namespace croupier
 
 
-#include <grpcpp/ports_undef.inc>
 #endif  // GRPC_croupier_2fedge_2fjob_2fv1_2fjob_2eproto__INCLUDED

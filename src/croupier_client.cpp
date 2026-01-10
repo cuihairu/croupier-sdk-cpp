@@ -18,7 +18,8 @@
 #include <thread>
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include "croupier/server/v1/server_control.grpc.pb.h"
+#include "croupier/control/v1/control.grpc.pb.h"
+#include "croupier/sdk/v1/client.grpc.pb.h"
 #include "croupier/sdk/v1/invoker.grpc.pb.h"
 
 #include <zlib.h>
@@ -63,7 +64,7 @@ namespace sdk {
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 namespace sdkv1 = ::croupier::sdk::v1;
-namespace serverv1 = ::croupier::server::v1;
+namespace controlv1 = ::croupier::control::v1;
 #endif
 
 // Utility function implementations
@@ -590,13 +591,13 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
             return false;
         }
 
-        auto stub = serverv1::ServerControlService::NewStub(channel);
+        auto stub = controlv1::ControlService::NewStub(channel);
         grpc::ClientContext ctx;
         if (config_.timeout_seconds > 0) {
             ctx.set_deadline(std::chrono::system_clock::now() + timeout);
         }
 
-        serverv1::RegisterCapabilitiesRequest request;
+        controlv1::RegisterCapabilitiesRequest request;
         auto* provider = request.mutable_provider();
         provider->set_id(SafeString(config_.service_id, "cpp-service"));
         provider->set_version(DefaultVersion(config_.service_version));
@@ -604,7 +605,7 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         provider->set_sdk(SafeString(config_.provider_sdk, "croupier-cpp-sdk"));
         request.set_manifest_json_gz(compressed);
 
-        serverv1::RegisterCapabilitiesResponse response;
+        controlv1::RegisterCapabilitiesResponse response;
         grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
         if (!status.ok()) {
             std::cerr << "⚠️  ControlService.RegisterCapabilities failed: " << status.error_message() << '\n';
@@ -770,7 +771,7 @@ public:
 #ifdef CROUPIER_SDK_ENABLE_GRPC
     // gRPC components
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<sdkv1::InvokerService::Stub> stub_;
+    std::unique_ptr<sdkv1::FunctionService::Stub> stub_;
 #endif
 
     explicit Impl(const InvokerConfig& config) : config_(config) {
@@ -840,7 +841,7 @@ public:
             }
 
             // Create stub
-            stub_ = sdkv1::InvokerService::NewStub(channel_);
+            stub_ = sdkv1::FunctionService::NewStub(channel_);
             if (!stub_) {
                 SDK_LOG_ERROR("Failed to create gRPC stub");
                 return false;
