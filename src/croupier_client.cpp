@@ -18,8 +18,8 @@
 #include <thread>
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include "croupier/control/v1/control.grpc.pb.h"
-#include "croupier/function/v1/function.grpc.pb.h"
+#include "croupier/server/v1/server_control.grpc.pb.h"
+#include "croupier/sdk/v1/invoker.grpc.pb.h"
 
 #include <zlib.h>
 #endif
@@ -62,7 +62,8 @@ namespace croupier {
 namespace sdk {
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-namespace functionv1 = ::croupier::function::v1;
+namespace sdkv1 = ::croupier::sdk::v1;
+namespace serverv1 = ::croupier::server::v1;
 #endif
 
 // Utility function implementations
@@ -589,13 +590,13 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
             return false;
         }
 
-        auto stub = croupier::control::v1::ControlService::NewStub(channel);
+        auto stub = serverv1::ServerControlService::NewStub(channel);
         grpc::ClientContext ctx;
         if (config_.timeout_seconds > 0) {
             ctx.set_deadline(std::chrono::system_clock::now() + timeout);
         }
 
-        croupier::control::v1::RegisterCapabilitiesRequest request;
+        serverv1::RegisterCapabilitiesRequest request;
         auto* provider = request.mutable_provider();
         provider->set_id(SafeString(config_.service_id, "cpp-service"));
         provider->set_version(DefaultVersion(config_.service_version));
@@ -603,7 +604,7 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         provider->set_sdk(SafeString(config_.provider_sdk, "croupier-cpp-sdk"));
         request.set_manifest_json_gz(compressed);
 
-        croupier::control::v1::RegisterCapabilitiesResponse response;
+        serverv1::RegisterCapabilitiesResponse response;
         grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
         if (!status.ok()) {
             std::cerr << "⚠️  ControlService.RegisterCapabilities failed: " << status.error_message() << '\n';
@@ -769,7 +770,7 @@ public:
 #ifdef CROUPIER_SDK_ENABLE_GRPC
     // gRPC components
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<functionv1::FunctionService::Stub> stub_;
+    std::unique_ptr<sdkv1::InvokerService::Stub> stub_;
 #endif
 
     explicit Impl(const InvokerConfig& config) : config_(config) {
@@ -839,7 +840,7 @@ public:
             }
 
             // Create stub
-            stub_ = functionv1::FunctionService::NewStub(channel_);
+            stub_ = sdkv1::InvokerService::NewStub(channel_);
             if (!stub_) {
                 SDK_LOG_ERROR("Failed to create gRPC stub");
                 return false;
@@ -964,7 +965,7 @@ public:
             }
 
             // Create request
-            functionv1::InvokeRequest request;
+            sdkv1::InvokeRequest request;
             request.set_function_id(function_id);
             if (!options.idempotency_key.empty()) {
                 request.set_idempotency_key(options.idempotency_key);
@@ -984,7 +985,7 @@ public:
             }
 
             // Send request
-            functionv1::InvokeResponse response;
+            sdkv1::InvokeResponse response;
             grpc::Status status = stub_->Invoke(&context, request, &response);
 
             if (!status.ok()) {
@@ -1110,7 +1111,7 @@ public:
             }
 
             // Create request
-            functionv1::InvokeRequest request;
+            sdkv1::InvokeRequest request;
             request.set_function_id(function_id);
             if (!options.idempotency_key.empty()) {
                 request.set_idempotency_key(options.idempotency_key);
@@ -1130,7 +1131,7 @@ public:
             }
 
             // Send request
-            functionv1::StartJobResponse response;
+            sdkv1::StartJobResponse response;
             grpc::Status status = stub_->StartJob(&context, request, &response);
 
             if (!status.ok()) {
@@ -1182,14 +1183,14 @@ public:
                                      std::chrono::minutes(30));  // Long timeout for streaming
 
                 // Create request
-                functionv1::JobStreamRequest request;
+                sdkv1::JobStreamRequest request;
                 request.set_job_id(job_id);
 
                 // Create streaming reader
-                std::unique_ptr<grpc::ClientReader<functionv1::JobEvent>> reader(stub_->StreamJob(&context, request));
+                std::unique_ptr<grpc::ClientReader<sdkv1::JobEvent>> reader(stub_->StreamJob(&context, request));
 
                 // Read events
-                functionv1::JobEvent grpc_event;
+                sdkv1::JobEvent grpc_event;
                 while (reader->Read(&grpc_event)) {
                     JobEvent event;
                     event.job_id = job_id;
@@ -1288,11 +1289,11 @@ public:
             context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(30));
 
             // Create request
-            functionv1::CancelJobRequest request;
+            sdkv1::CancelJobRequest request;
             request.set_job_id(job_id);
 
             // Send request
-            functionv1::StartJobResponse response;
+            sdkv1::StartJobResponse response;
             grpc::Status status = stub_->CancelJob(&context, request, &response);
 
             if (!status.ok()) {

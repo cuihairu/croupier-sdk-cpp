@@ -22,12 +22,12 @@ function(download_proto_files PROTO_SOURCE_DIR PROTO_DEST_DIR)
     # List of proto files to download
     set(PROTO_FILES
         "croupier/agent/local/v1/local.proto"
-        "croupier/control/v1/control.proto"
-        "croupier/function/v1/function.proto"
+        "croupier/server/v1/server_control.proto"
+        "croupier/sdk/v1/invoker.proto"
         "croupier/edge/job/v1/job.proto"
-        "croupier/tunnel/v1/tunnel.proto"
-        "croupier/options/ui.proto"
-        "croupier/options/function.proto"
+        "croupier/server/v1/server_tunnel.proto"
+        "croupier/options/v1/ui_options.proto"
+        "croupier/options/v1/function_options.proto"
     )
 
     foreach(PROTO_FILE ${PROTO_FILES})
