@@ -19,7 +19,6 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/impl/service_type.h>
 #include <grpcpp/support/sync_stream.h>
-#include <grpcpp/ports_def.inc>
 namespace croupier {
 namespace tunnel {
 namespace v1 {
@@ -80,5 +79,4 @@ TunnelService::Service::~Service() {
 }  // namespace croupier
 }  // namespace tunnel
 }  // namespace v1
-#include <grpcpp/ports_undef.inc>
 
