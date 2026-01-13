@@ -110,6 +110,18 @@ inline constexpr LocalFunctionDescriptor::Impl_::Impl_(
         operation_id_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        input_schema_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        output_schema_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        x_render_schema_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        x_render_ui_schema_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         deprecated_{false},
         _cached_size_{0} {}
 
@@ -371,6 +383,10 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.description_),
         PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.operation_id_),
         PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.deprecated_),
+        PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.input_schema_),
+        PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.output_schema_),
+        PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.x_render_schema_),
+        PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::LocalFunctionDescriptor, _impl_.x_render_ui_schema_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::croupier::agent::local::v1::RegisterLocalRequest, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -474,16 +490,16 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::croupier::agent::local::v1::LocalFunctionDescriptor)},
-        {15, -1, -1, sizeof(::croupier::agent::local::v1::RegisterLocalRequest)},
-        {27, -1, -1, sizeof(::croupier::agent::local::v1::RegisterLocalResponse)},
-        {36, -1, -1, sizeof(::croupier::agent::local::v1::HeartbeatRequest)},
-        {46, -1, -1, sizeof(::croupier::agent::local::v1::HeartbeatResponse)},
-        {54, -1, -1, sizeof(::croupier::agent::local::v1::LocalInstance)},
-        {66, -1, -1, sizeof(::croupier::agent::local::v1::LocalFunction)},
-        {76, -1, -1, sizeof(::croupier::agent::local::v1::ListLocalRequest)},
-        {84, -1, -1, sizeof(::croupier::agent::local::v1::ListLocalResponse)},
-        {93, -1, -1, sizeof(::croupier::agent::local::v1::GetJobResultRequest)},
-        {102, -1, -1, sizeof(::croupier::agent::local::v1::GetJobResultResponse)},
+        {19, -1, -1, sizeof(::croupier::agent::local::v1::RegisterLocalRequest)},
+        {31, -1, -1, sizeof(::croupier::agent::local::v1::RegisterLocalResponse)},
+        {40, -1, -1, sizeof(::croupier::agent::local::v1::HeartbeatRequest)},
+        {50, -1, -1, sizeof(::croupier::agent::local::v1::HeartbeatResponse)},
+        {58, -1, -1, sizeof(::croupier::agent::local::v1::LocalInstance)},
+        {70, -1, -1, sizeof(::croupier::agent::local::v1::LocalFunction)},
+        {80, -1, -1, sizeof(::croupier::agent::local::v1::ListLocalRequest)},
+        {88, -1, -1, sizeof(::croupier::agent::local::v1::ListLocalResponse)},
+        {97, -1, -1, sizeof(::croupier::agent::local::v1::GetJobResultRequest)},
+        {106, -1, -1, sizeof(::croupier::agent::local::v1::GetJobResultResponse)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::croupier::agent::local::v1::_LocalFunctionDescriptor_default_instance_._instance,
@@ -501,53 +517,57 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_croupier_2fagent_2flocal_2fv1_2flocal_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n#croupier/agent/local/v1/local.proto\022\027c"
-    "roupier.agent.local.v1\"\326\001\n\027LocalFunction"
+    "roupier.agent.local.v1\"\363\002\n\027LocalFunction"
     "Descriptor\022\016\n\002id\030\001 \001(\tR\002id\022\030\n\007version\030\002 "
     "\001(\tR\007version\022\022\n\004tags\030\003 \003(\tR\004tags\022\030\n\007summ"
     "ary\030\004 \001(\tR\007summary\022 \n\013description\030\005 \001(\tR"
     "\013description\022!\n\014operation_id\030\006 \001(\tR\013oper"
-    "ationId\022\036\n\ndeprecated\030\007 \001(\010R\ndeprecated\""
-    "\272\001\n\024RegisterLocalRequest\022\035\n\nservice_id\030\001"
-    " \001(\tR\tserviceId\022\030\n\007version\030\002 \001(\tR\007versio"
-    "n\022\031\n\010rpc_addr\030\003 \001(\tR\007rpcAddr\022N\n\tfunction"
-    "s\030\004 \003(\01320.croupier.agent.local.v1.LocalF"
-    "unctionDescriptorR\tfunctions\"6\n\025Register"
-    "LocalResponse\022\035\n\nsession_id\030\001 \001(\tR\tsessi"
-    "onId\"P\n\020HeartbeatRequest\022\035\n\nservice_id\030\001"
-    " \001(\tR\tserviceId\022\035\n\nsession_id\030\002 \001(\tR\tses"
-    "sionId\"\023\n\021HeartbeatResponse\"y\n\rLocalInst"
-    "ance\022\035\n\nservice_id\030\001 \001(\tR\tserviceId\022\022\n\004a"
-    "ddr\030\002 \001(\tR\004addr\022\030\n\007version\030\003 \001(\tR\007versio"
-    "n\022\033\n\tlast_seen\030\004 \001(\tR\010lastSeen\"e\n\rLocalF"
-    "unction\022\016\n\002id\030\001 \001(\tR\002id\022D\n\tinstances\030\002 \003"
-    "(\0132&.croupier.agent.local.v1.LocalInstan"
-    "ceR\tinstances\"\022\n\020ListLocalRequest\"Y\n\021Lis"
-    "tLocalResponse\022D\n\tfunctions\030\001 \003(\0132&.crou"
-    "pier.agent.local.v1.LocalFunctionR\tfunct"
-    "ions\",\n\023GetJobResultRequest\022\025\n\006job_id\030\001 "
-    "\001(\tR\005jobId\"\\\n\024GetJobResultResponse\022\024\n\005st"
-    "ate\030\001 \001(\tR\005state\022\030\n\007payload\030\002 \001(\014R\007paylo"
-    "ad\022\024\n\005error\030\003 \001(\tR\005error2\272\003\n\023LocalContro"
-    "lService\022n\n\rRegisterLocal\022-.croupier.age"
-    "nt.local.v1.RegisterLocalRequest\032..croup"
-    "ier.agent.local.v1.RegisterLocalResponse"
-    "\022b\n\tHeartbeat\022).croupier.agent.local.v1."
-    "HeartbeatRequest\032*.croupier.agent.local."
-    "v1.HeartbeatResponse\022b\n\tListLocal\022).crou"
-    "pier.agent.local.v1.ListLocalRequest\032*.c"
-    "roupier.agent.local.v1.ListLocalResponse"
-    "\022k\n\014GetJobResult\022,.croupier.agent.local."
-    "v1.GetJobResultRequest\032-.croupier.agent."
-    "local.v1.GetJobResultResponseBs\n*io.gith"
-    "ub.cuihairu.croupier.agent.local.v1P\001ZCg"
-    "ithub.com/cuihairu/croupier/pkg/pb/croup"
-    "ier/agent/local/v1;localv1b\006proto3"
+    "ationId\022\036\n\ndeprecated\030\007 \001(\010R\ndeprecated\022"
+    "!\n\014input_schema\030\010 \001(\tR\013inputSchema\022#\n\rou"
+    "tput_schema\030\t \001(\tR\014outputSchema\022&\n\017x_ren"
+    "der_schema\030\n \001(\tR\rxRenderSchema\022+\n\022x_ren"
+    "der_ui_schema\030\013 \001(\tR\017xRenderUiSchema\"\272\001\n"
+    "\024RegisterLocalRequest\022\035\n\nservice_id\030\001 \001("
+    "\tR\tserviceId\022\030\n\007version\030\002 \001(\tR\007version\022\031"
+    "\n\010rpc_addr\030\003 \001(\tR\007rpcAddr\022N\n\tfunctions\030\004"
+    " \003(\01320.croupier.agent.local.v1.LocalFunc"
+    "tionDescriptorR\tfunctions\"6\n\025RegisterLoc"
+    "alResponse\022\035\n\nsession_id\030\001 \001(\tR\tsessionI"
+    "d\"P\n\020HeartbeatRequest\022\035\n\nservice_id\030\001 \001("
+    "\tR\tserviceId\022\035\n\nsession_id\030\002 \001(\tR\tsessio"
+    "nId\"\023\n\021HeartbeatResponse\"y\n\rLocalInstanc"
+    "e\022\035\n\nservice_id\030\001 \001(\tR\tserviceId\022\022\n\004addr"
+    "\030\002 \001(\tR\004addr\022\030\n\007version\030\003 \001(\tR\007version\022\033"
+    "\n\tlast_seen\030\004 \001(\tR\010lastSeen\"e\n\rLocalFunc"
+    "tion\022\016\n\002id\030\001 \001(\tR\002id\022D\n\tinstances\030\002 \003(\0132"
+    "&.croupier.agent.local.v1.LocalInstanceR"
+    "\tinstances\"\022\n\020ListLocalRequest\"Y\n\021ListLo"
+    "calResponse\022D\n\tfunctions\030\001 \003(\0132&.croupie"
+    "r.agent.local.v1.LocalFunctionR\tfunction"
+    "s\",\n\023GetJobResultRequest\022\025\n\006job_id\030\001 \001(\t"
+    "R\005jobId\"\\\n\024GetJobResultResponse\022\024\n\005state"
+    "\030\001 \001(\tR\005state\022\030\n\007payload\030\002 \001(\014R\007payload\022"
+    "\024\n\005error\030\003 \001(\tR\005error2\272\003\n\023LocalControlSe"
+    "rvice\022n\n\rRegisterLocal\022-.croupier.agent."
+    "local.v1.RegisterLocalRequest\032..croupier"
+    ".agent.local.v1.RegisterLocalResponse\022b\n"
+    "\tHeartbeat\022).croupier.agent.local.v1.Hea"
+    "rtbeatRequest\032*.croupier.agent.local.v1."
+    "HeartbeatResponse\022b\n\tListLocal\022).croupie"
+    "r.agent.local.v1.ListLocalRequest\032*.crou"
+    "pier.agent.local.v1.ListLocalResponse\022k\n"
+    "\014GetJobResult\022,.croupier.agent.local.v1."
+    "GetJobResultRequest\032-.croupier.agent.loc"
+    "al.v1.GetJobResultResponseBs\n*io.github."
+    "cuihairu.croupier.agent.local.v1P\001ZCgith"
+    "ub.com/cuihairu/croupier/pkg/pb/croupier"
+    "/agent/local/v1;localv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto = {
     false,
     false,
-    1674,
+    1831,
     descriptor_table_protodef_croupier_2fagent_2flocal_2fv1_2flocal_2eproto,
     "croupier/agent/local/v1/local.proto",
     &descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto_once,
@@ -588,6 +608,10 @@ inline PROTOBUF_NDEBUG_INLINE LocalFunctionDescriptor::Impl_::Impl_(
         summary_(arena, from.summary_),
         description_(arena, from.description_),
         operation_id_(arena, from.operation_id_),
+        input_schema_(arena, from.input_schema_),
+        output_schema_(arena, from.output_schema_),
+        x_render_schema_(arena, from.x_render_schema_),
+        x_render_ui_schema_(arena, from.x_render_ui_schema_),
         _cached_size_{0} {}
 
 LocalFunctionDescriptor::LocalFunctionDescriptor(
@@ -616,6 +640,10 @@ inline PROTOBUF_NDEBUG_INLINE LocalFunctionDescriptor::Impl_::Impl_(
         summary_(arena),
         description_(arena),
         operation_id_(arena),
+        input_schema_(arena),
+        output_schema_(arena),
+        x_render_schema_(arena),
+        x_render_ui_schema_(arena),
         _cached_size_{0} {}
 
 inline void LocalFunctionDescriptor::SharedCtor(::_pb::Arena* arena) {
@@ -635,6 +663,10 @@ inline void LocalFunctionDescriptor::SharedDtor(MessageLite& self) {
   this_._impl_.summary_.Destroy();
   this_._impl_.description_.Destroy();
   this_._impl_.operation_id_.Destroy();
+  this_._impl_.input_schema_.Destroy();
+  this_._impl_.output_schema_.Destroy();
+  this_._impl_.x_render_schema_.Destroy();
+  this_._impl_.x_render_ui_schema_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -686,15 +718,15 @@ const ::google::protobuf::internal::ClassData* LocalFunctionDescriptor::GetClass
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 0, 99, 2> LocalFunctionDescriptor::_table_ = {
+const ::_pbi::TcParseTable<4, 11, 0, 165, 2> LocalFunctionDescriptor::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    7, 56,  // max_field_number, fast_idx_mask
+    11, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967168,  // skipmap
+    4294965248,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
+    11,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -726,6 +758,22 @@ const ::_pbi::TcParseTable<3, 7, 0, 99, 2> LocalFunctionDescriptor::_table_ = {
     // bool deprecated = 7 [json_name = "deprecated"];
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(LocalFunctionDescriptor, _impl_.deprecated_), 63>(),
      {56, 63, 0, PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.deprecated_)}},
+    // string input_schema = 8 [json_name = "inputSchema"];
+    {::_pbi::TcParser::FastUS1,
+     {66, 63, 0, PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.input_schema_)}},
+    // string output_schema = 9 [json_name = "outputSchema"];
+    {::_pbi::TcParser::FastUS1,
+     {74, 63, 0, PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.output_schema_)}},
+    // string x_render_schema = 10 [json_name = "xRenderSchema"];
+    {::_pbi::TcParser::FastUS1,
+     {82, 63, 0, PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.x_render_schema_)}},
+    // string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
+    {::_pbi::TcParser::FastUS1,
+     {90, 63, 0, PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.x_render_ui_schema_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -750,10 +798,22 @@ const ::_pbi::TcParseTable<3, 7, 0, 99, 2> LocalFunctionDescriptor::_table_ = {
     // bool deprecated = 7 [json_name = "deprecated"];
     {PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.deprecated_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // string input_schema = 8 [json_name = "inputSchema"];
+    {PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.input_schema_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string output_schema = 9 [json_name = "outputSchema"];
+    {PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.output_schema_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string x_render_schema = 10 [json_name = "xRenderSchema"];
+    {PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.x_render_schema_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
+    {PROTOBUF_FIELD_OFFSET(LocalFunctionDescriptor, _impl_.x_render_ui_schema_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\57\2\7\4\7\13\14\0"
+    "\57\2\7\4\7\13\14\0\14\15\17\22\0\0\0\0"
     "croupier.agent.local.v1.LocalFunctionDescriptor"
     "id"
     "version"
@@ -761,6 +821,10 @@ const ::_pbi::TcParseTable<3, 7, 0, 99, 2> LocalFunctionDescriptor::_table_ = {
     "summary"
     "description"
     "operation_id"
+    "input_schema"
+    "output_schema"
+    "x_render_schema"
+    "x_render_ui_schema"
   }},
 };
 
@@ -777,6 +841,10 @@ PROTOBUF_NOINLINE void LocalFunctionDescriptor::Clear() {
   _impl_.summary_.ClearToEmpty();
   _impl_.description_.ClearToEmpty();
   _impl_.operation_id_.ClearToEmpty();
+  _impl_.input_schema_.ClearToEmpty();
+  _impl_.output_schema_.ClearToEmpty();
+  _impl_.x_render_schema_.ClearToEmpty();
+  _impl_.x_render_ui_schema_.ClearToEmpty();
   _impl_.deprecated_ = false;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -851,6 +919,38 @@ PROTOBUF_NOINLINE void LocalFunctionDescriptor::Clear() {
                 7, this_._internal_deprecated(), target);
           }
 
+          // string input_schema = 8 [json_name = "inputSchema"];
+          if (!this_._internal_input_schema().empty()) {
+            const std::string& _s = this_._internal_input_schema();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.agent.local.v1.LocalFunctionDescriptor.input_schema");
+            target = stream->WriteStringMaybeAliased(8, _s, target);
+          }
+
+          // string output_schema = 9 [json_name = "outputSchema"];
+          if (!this_._internal_output_schema().empty()) {
+            const std::string& _s = this_._internal_output_schema();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.agent.local.v1.LocalFunctionDescriptor.output_schema");
+            target = stream->WriteStringMaybeAliased(9, _s, target);
+          }
+
+          // string x_render_schema = 10 [json_name = "xRenderSchema"];
+          if (!this_._internal_x_render_schema().empty()) {
+            const std::string& _s = this_._internal_x_render_schema();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema");
+            target = stream->WriteStringMaybeAliased(10, _s, target);
+          }
+
+          // string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
+          if (!this_._internal_x_render_ui_schema().empty()) {
+            const std::string& _s = this_._internal_x_render_ui_schema();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema");
+            target = stream->WriteStringMaybeAliased(11, _s, target);
+          }
+
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
             target =
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -912,6 +1012,26 @@ PROTOBUF_NOINLINE void LocalFunctionDescriptor::Clear() {
               total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                               this_._internal_operation_id());
             }
+            // string input_schema = 8 [json_name = "inputSchema"];
+            if (!this_._internal_input_schema().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_input_schema());
+            }
+            // string output_schema = 9 [json_name = "outputSchema"];
+            if (!this_._internal_output_schema().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_output_schema());
+            }
+            // string x_render_schema = 10 [json_name = "xRenderSchema"];
+            if (!this_._internal_x_render_schema().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_x_render_schema());
+            }
+            // string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
+            if (!this_._internal_x_render_ui_schema().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_x_render_ui_schema());
+            }
             // bool deprecated = 7 [json_name = "deprecated"];
             if (this_._internal_deprecated() != 0) {
               total_size += 2;
@@ -945,6 +1065,18 @@ void LocalFunctionDescriptor::MergeImpl(::google::protobuf::MessageLite& to_msg,
   if (!from._internal_operation_id().empty()) {
     _this->_internal_set_operation_id(from._internal_operation_id());
   }
+  if (!from._internal_input_schema().empty()) {
+    _this->_internal_set_input_schema(from._internal_input_schema());
+  }
+  if (!from._internal_output_schema().empty()) {
+    _this->_internal_set_output_schema(from._internal_output_schema());
+  }
+  if (!from._internal_x_render_schema().empty()) {
+    _this->_internal_set_x_render_schema(from._internal_x_render_schema());
+  }
+  if (!from._internal_x_render_ui_schema().empty()) {
+    _this->_internal_set_x_render_ui_schema(from._internal_x_render_ui_schema());
+  }
   if (from._internal_deprecated() != 0) {
     _this->_impl_.deprecated_ = from._impl_.deprecated_;
   }
@@ -970,6 +1102,10 @@ void LocalFunctionDescriptor::InternalSwap(LocalFunctionDescriptor* PROTOBUF_RES
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.summary_, &other->_impl_.summary_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.description_, &other->_impl_.description_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.operation_id_, &other->_impl_.operation_id_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.input_schema_, &other->_impl_.input_schema_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.output_schema_, &other->_impl_.output_schema_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.x_render_schema_, &other->_impl_.x_render_schema_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.x_render_ui_schema_, &other->_impl_.x_render_ui_schema_, arena);
         swap(_impl_.deprecated_, other->_impl_.deprecated_);
 }
 

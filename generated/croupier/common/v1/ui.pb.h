@@ -72,6 +72,21 @@ extern PermissionSpec_I18nZhEntry_DoNotUseDefaultTypeInternal _PermissionSpec_I1
 class RoleBinding;
 struct RoleBindingDefaultTypeInternal;
 extern RoleBindingDefaultTypeInternal _RoleBinding_default_instance_;
+class RouteDisplayConfig;
+struct RouteDisplayConfigDefaultTypeInternal;
+extern RouteDisplayConfigDefaultTypeInternal _RouteDisplayConfig_default_instance_;
+class XRenderFormConfig;
+struct XRenderFormConfigDefaultTypeInternal;
+extern XRenderFormConfigDefaultTypeInternal _XRenderFormConfig_default_instance_;
+class XRenderFormConfig_WidgetsEntry_DoNotUse;
+struct XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal;
+extern XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal _XRenderFormConfig_WidgetsEntry_DoNotUse_default_instance_;
+class XRenderWidget;
+struct XRenderWidgetDefaultTypeInternal;
+extern XRenderWidgetDefaultTypeInternal _XRenderWidget_default_instance_;
+class XRenderWidget_PropsEntry_DoNotUse;
+struct XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal;
+extern XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal _XRenderWidget_PropsEntry_DoNotUse_default_instance_;
 }  // namespace v1
 }  // namespace common
 }  // namespace croupier
@@ -87,6 +102,45 @@ namespace v1 {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class XRenderWidget_PropsEntry_DoNotUse final
+    : public ::google::protobuf::internal::MapEntry<
+          std::string, std::string,
+          ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+          ::google::protobuf::internal::WireFormatLite::TYPE_STRING> {
+ public:
+  using SuperType = ::google::protobuf::internal::MapEntry<
+      std::string, std::string,
+      ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+      ::google::protobuf::internal::WireFormatLite::TYPE_STRING>;
+  XRenderWidget_PropsEntry_DoNotUse();
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR XRenderWidget_PropsEntry_DoNotUse(
+      ::google::protobuf::internal::ConstantInitialized);
+  explicit XRenderWidget_PropsEntry_DoNotUse(::google::protobuf::Arena* arena);
+  static const XRenderWidget_PropsEntry_DoNotUse* internal_default_instance() {
+    return reinterpret_cast<const XRenderWidget_PropsEntry_DoNotUse*>(
+        &_XRenderWidget_PropsEntry_DoNotUse_default_instance_);
+  }
+
+
+ private:
+  friend class ::google::protobuf::MessageLite;
+  friend struct ::TableStruct_croupier_2fcommon_2fv1_2fui_2eproto;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      60, 2>
+      _table_;
+
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+};
 // -------------------------------------------------------------------
 
 class RoleBinding final : public ::google::protobuf::Message
@@ -854,6 +908,306 @@ class I18nText final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class XRenderWidget final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:croupier.common.v1.XRenderWidget) */ {
+ public:
+  inline XRenderWidget() : XRenderWidget(nullptr) {}
+  ~XRenderWidget() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(XRenderWidget* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(XRenderWidget));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR XRenderWidget(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline XRenderWidget(const XRenderWidget& from) : XRenderWidget(nullptr, from) {}
+  inline XRenderWidget(XRenderWidget&& from) noexcept
+      : XRenderWidget(nullptr, std::move(from)) {}
+  inline XRenderWidget& operator=(const XRenderWidget& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline XRenderWidget& operator=(XRenderWidget&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const XRenderWidget& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const XRenderWidget* internal_default_instance() {
+    return reinterpret_cast<const XRenderWidget*>(
+        &_XRenderWidget_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 6;
+  friend void swap(XRenderWidget& a, XRenderWidget& b) { a.Swap(&b); }
+  inline void Swap(XRenderWidget* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(XRenderWidget* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  XRenderWidget* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<XRenderWidget>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const XRenderWidget& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const XRenderWidget& from) { XRenderWidget::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(XRenderWidget* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "croupier.common.v1.XRenderWidget"; }
+
+ protected:
+  explicit XRenderWidget(::google::protobuf::Arena* arena);
+  XRenderWidget(::google::protobuf::Arena* arena, const XRenderWidget& from);
+  XRenderWidget(::google::protobuf::Arena* arena, XRenderWidget&& from) noexcept
+      : XRenderWidget(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kPropsFieldNumber = 8,
+    kWidgetFieldNumber = 1,
+    kLabelFieldNumber = 2,
+    kPlaceholderFieldNumber = 3,
+    kDisabledFieldNumber = 4,
+    kReadOnlyFieldNumber = 5,
+    kHiddenFieldNumber = 6,
+    kSpanFieldNumber = 7,
+  };
+  // map<string, string> props = 8 [json_name = "props"];
+  int props_size() const;
+  private:
+  int _internal_props_size() const;
+
+  public:
+  void clear_props() ;
+  const ::google::protobuf::Map<std::string, std::string>& props() const;
+  ::google::protobuf::Map<std::string, std::string>* mutable_props();
+
+  private:
+  const ::google::protobuf::Map<std::string, std::string>& _internal_props() const;
+  ::google::protobuf::Map<std::string, std::string>* _internal_mutable_props();
+
+  public:
+  // string widget = 1 [json_name = "widget"];
+  void clear_widget() ;
+  const std::string& widget() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_widget(Arg_&& arg, Args_... args);
+  std::string* mutable_widget();
+  PROTOBUF_NODISCARD std::string* release_widget();
+  void set_allocated_widget(std::string* value);
+
+  private:
+  const std::string& _internal_widget() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_widget(
+      const std::string& value);
+  std::string* _internal_mutable_widget();
+
+  public:
+  // string label = 2 [json_name = "label"];
+  void clear_label() ;
+  const std::string& label() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_label(Arg_&& arg, Args_... args);
+  std::string* mutable_label();
+  PROTOBUF_NODISCARD std::string* release_label();
+  void set_allocated_label(std::string* value);
+
+  private:
+  const std::string& _internal_label() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_label(
+      const std::string& value);
+  std::string* _internal_mutable_label();
+
+  public:
+  // string placeholder = 3 [json_name = "placeholder"];
+  void clear_placeholder() ;
+  const std::string& placeholder() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_placeholder(Arg_&& arg, Args_... args);
+  std::string* mutable_placeholder();
+  PROTOBUF_NODISCARD std::string* release_placeholder();
+  void set_allocated_placeholder(std::string* value);
+
+  private:
+  const std::string& _internal_placeholder() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_placeholder(
+      const std::string& value);
+  std::string* _internal_mutable_placeholder();
+
+  public:
+  // bool disabled = 4 [json_name = "disabled"];
+  void clear_disabled() ;
+  bool disabled() const;
+  void set_disabled(bool value);
+
+  private:
+  bool _internal_disabled() const;
+  void _internal_set_disabled(bool value);
+
+  public:
+  // bool read_only = 5 [json_name = "readOnly"];
+  void clear_read_only() ;
+  bool read_only() const;
+  void set_read_only(bool value);
+
+  private:
+  bool _internal_read_only() const;
+  void _internal_set_read_only(bool value);
+
+  public:
+  // bool hidden = 6 [json_name = "hidden"];
+  void clear_hidden() ;
+  bool hidden() const;
+  void set_hidden(bool value);
+
+  private:
+  bool _internal_hidden() const;
+  void _internal_set_hidden(bool value);
+
+  public:
+  // int32 span = 7 [json_name = "span"];
+  void clear_span() ;
+  ::int32_t span() const;
+  void set_span(::int32_t value);
+
+  private:
+  ::int32_t _internal_span() const;
+  void _internal_set_span(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:croupier.common.v1.XRenderWidget)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 8, 1,
+      76, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const XRenderWidget& from_msg);
+    ::google::protobuf::internal::MapField<XRenderWidget_PropsEntry_DoNotUse, std::string, std::string,
+                      ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+                      ::google::protobuf::internal::WireFormatLite::TYPE_STRING>
+        props_;
+    ::google::protobuf::internal::ArenaStringPtr widget_;
+    ::google::protobuf::internal::ArenaStringPtr label_;
+    ::google::protobuf::internal::ArenaStringPtr placeholder_;
+    bool disabled_;
+    bool read_only_;
+    bool hidden_;
+    ::int32_t span_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_croupier_2fcommon_2fv1_2fui_2eproto;
+};
+// -------------------------------------------------------------------
+
 class PermissionSpec final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:croupier.common.v1.PermissionSpec) */ {
  public:
@@ -1112,6 +1466,631 @@ class PermissionSpec final : public ::google::protobuf::Message
                       ::google::protobuf::internal::WireFormatLite::TYPE_STRING>
         i18n_zh_;
     ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_croupier_2fcommon_2fv1_2fui_2eproto;
+};
+// -------------------------------------------------------------------
+
+class XRenderFormConfig_WidgetsEntry_DoNotUse final
+    : public ::google::protobuf::internal::MapEntry<
+          std::string, ::google::protobuf::Message,
+          ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+          ::google::protobuf::internal::WireFormatLite::TYPE_MESSAGE> {
+ public:
+  using SuperType = ::google::protobuf::internal::MapEntry<
+      std::string, ::google::protobuf::Message,
+      ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+      ::google::protobuf::internal::WireFormatLite::TYPE_MESSAGE>;
+  XRenderFormConfig_WidgetsEntry_DoNotUse();
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR XRenderFormConfig_WidgetsEntry_DoNotUse(
+      ::google::protobuf::internal::ConstantInitialized);
+  explicit XRenderFormConfig_WidgetsEntry_DoNotUse(::google::protobuf::Arena* arena);
+  static const XRenderFormConfig_WidgetsEntry_DoNotUse* internal_default_instance() {
+    return reinterpret_cast<const XRenderFormConfig_WidgetsEntry_DoNotUse*>(
+        &_XRenderFormConfig_WidgetsEntry_DoNotUse_default_instance_);
+  }
+
+
+ private:
+  friend class ::google::protobuf::MessageLite;
+  friend struct ::TableStruct_croupier_2fcommon_2fv1_2fui_2eproto;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 1,
+      61, 2>
+      _table_;
+
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+};
+// -------------------------------------------------------------------
+
+class XRenderFormConfig final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:croupier.common.v1.XRenderFormConfig) */ {
+ public:
+  inline XRenderFormConfig() : XRenderFormConfig(nullptr) {}
+  ~XRenderFormConfig() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(XRenderFormConfig* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(XRenderFormConfig));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR XRenderFormConfig(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline XRenderFormConfig(const XRenderFormConfig& from) : XRenderFormConfig(nullptr, from) {}
+  inline XRenderFormConfig(XRenderFormConfig&& from) noexcept
+      : XRenderFormConfig(nullptr, std::move(from)) {}
+  inline XRenderFormConfig& operator=(const XRenderFormConfig& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline XRenderFormConfig& operator=(XRenderFormConfig&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const XRenderFormConfig& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const XRenderFormConfig* internal_default_instance() {
+    return reinterpret_cast<const XRenderFormConfig*>(
+        &_XRenderFormConfig_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 8;
+  friend void swap(XRenderFormConfig& a, XRenderFormConfig& b) { a.Swap(&b); }
+  inline void Swap(XRenderFormConfig* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(XRenderFormConfig* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  XRenderFormConfig* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<XRenderFormConfig>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const XRenderFormConfig& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const XRenderFormConfig& from) { XRenderFormConfig::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(XRenderFormConfig* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "croupier.common.v1.XRenderFormConfig"; }
+
+ protected:
+  explicit XRenderFormConfig(::google::protobuf::Arena* arena);
+  XRenderFormConfig(::google::protobuf::Arena* arena, const XRenderFormConfig& from);
+  XRenderFormConfig(::google::protobuf::Arena* arena, XRenderFormConfig&& from) noexcept
+      : XRenderFormConfig(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kWidgetsFieldNumber = 6,
+    kDisplayOrderFieldNumber = 7,
+    kLayoutTypeFieldNumber = 1,
+    kLabelAlignFieldNumber = 3,
+    kColumnFieldNumber = 2,
+    kLabelWidthFieldNumber = 4,
+    kColonFieldNumber = 5,
+  };
+  // map<string, .croupier.common.v1.XRenderWidget> widgets = 6 [json_name = "widgets"];
+  int widgets_size() const;
+  private:
+  int _internal_widgets_size() const;
+
+  public:
+  void clear_widgets() ;
+  const ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>& widgets() const;
+  ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>* mutable_widgets();
+
+  private:
+  const ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>& _internal_widgets() const;
+  ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>* _internal_mutable_widgets();
+
+  public:
+  // repeated string display_order = 7 [json_name = "displayOrder"];
+  int display_order_size() const;
+  private:
+  int _internal_display_order_size() const;
+
+  public:
+  void clear_display_order() ;
+  const std::string& display_order(int index) const;
+  std::string* mutable_display_order(int index);
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_display_order(int index, Arg_&& value, Args_... args);
+  std::string* add_display_order();
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void add_display_order(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<std::string>& display_order() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_display_order();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_display_order() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_display_order();
+
+  public:
+  // string layout_type = 1 [json_name = "layoutType"];
+  void clear_layout_type() ;
+  const std::string& layout_type() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_layout_type(Arg_&& arg, Args_... args);
+  std::string* mutable_layout_type();
+  PROTOBUF_NODISCARD std::string* release_layout_type();
+  void set_allocated_layout_type(std::string* value);
+
+  private:
+  const std::string& _internal_layout_type() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_layout_type(
+      const std::string& value);
+  std::string* _internal_mutable_layout_type();
+
+  public:
+  // string label_align = 3 [json_name = "labelAlign"];
+  void clear_label_align() ;
+  const std::string& label_align() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_label_align(Arg_&& arg, Args_... args);
+  std::string* mutable_label_align();
+  PROTOBUF_NODISCARD std::string* release_label_align();
+  void set_allocated_label_align(std::string* value);
+
+  private:
+  const std::string& _internal_label_align() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_label_align(
+      const std::string& value);
+  std::string* _internal_mutable_label_align();
+
+  public:
+  // int32 column = 2 [json_name = "column"];
+  void clear_column() ;
+  ::int32_t column() const;
+  void set_column(::int32_t value);
+
+  private:
+  ::int32_t _internal_column() const;
+  void _internal_set_column(::int32_t value);
+
+  public:
+  // int32 label_width = 4 [json_name = "labelWidth"];
+  void clear_label_width() ;
+  ::int32_t label_width() const;
+  void set_label_width(::int32_t value);
+
+  private:
+  ::int32_t _internal_label_width() const;
+  void _internal_set_label_width(::int32_t value);
+
+  public:
+  // bool colon = 5 [json_name = "colon"];
+  void clear_colon() ;
+  bool colon() const;
+  void set_colon(bool value);
+
+  private:
+  bool _internal_colon() const;
+  void _internal_set_colon(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:croupier.common.v1.XRenderFormConfig)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 7, 2,
+      87, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const XRenderFormConfig& from_msg);
+    ::google::protobuf::internal::MapField<XRenderFormConfig_WidgetsEntry_DoNotUse, std::string, ::croupier::common::v1::XRenderWidget,
+                      ::google::protobuf::internal::WireFormatLite::TYPE_STRING,
+                      ::google::protobuf::internal::WireFormatLite::TYPE_MESSAGE>
+        widgets_;
+    ::google::protobuf::RepeatedPtrField<std::string> display_order_;
+    ::google::protobuf::internal::ArenaStringPtr layout_type_;
+    ::google::protobuf::internal::ArenaStringPtr label_align_;
+    ::int32_t column_;
+    ::int32_t label_width_;
+    bool colon_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_croupier_2fcommon_2fv1_2fui_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RouteDisplayConfig final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:croupier.common.v1.RouteDisplayConfig) */ {
+ public:
+  inline RouteDisplayConfig() : RouteDisplayConfig(nullptr) {}
+  ~RouteDisplayConfig() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(RouteDisplayConfig* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(RouteDisplayConfig));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR RouteDisplayConfig(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline RouteDisplayConfig(const RouteDisplayConfig& from) : RouteDisplayConfig(nullptr, from) {}
+  inline RouteDisplayConfig(RouteDisplayConfig&& from) noexcept
+      : RouteDisplayConfig(nullptr, std::move(from)) {}
+  inline RouteDisplayConfig& operator=(const RouteDisplayConfig& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RouteDisplayConfig& operator=(RouteDisplayConfig&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RouteDisplayConfig& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RouteDisplayConfig* internal_default_instance() {
+    return reinterpret_cast<const RouteDisplayConfig*>(
+        &_RouteDisplayConfig_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 9;
+  friend void swap(RouteDisplayConfig& a, RouteDisplayConfig& b) { a.Swap(&b); }
+  inline void Swap(RouteDisplayConfig* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RouteDisplayConfig* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RouteDisplayConfig* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<RouteDisplayConfig>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const RouteDisplayConfig& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const RouteDisplayConfig& from) { RouteDisplayConfig::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(RouteDisplayConfig* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "croupier.common.v1.RouteDisplayConfig"; }
+
+ protected:
+  explicit RouteDisplayConfig(::google::protobuf::Arena* arena);
+  RouteDisplayConfig(::google::protobuf::Arena* arena, const RouteDisplayConfig& from);
+  RouteDisplayConfig(::google::protobuf::Arena* arena, RouteDisplayConfig&& from) noexcept
+      : RouteDisplayConfig(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kHiddenFieldsFieldNumber = 3,
+    kRequiredFieldsFieldNumber = 4,
+    kRoutePatternFieldNumber = 1,
+    kSubmitButtonTextFieldNumber = 5,
+    kFormConfigFieldNumber = 2,
+    kCompactModeFieldNumber = 6,
+  };
+  // repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+  int hidden_fields_size() const;
+  private:
+  int _internal_hidden_fields_size() const;
+
+  public:
+  void clear_hidden_fields() ;
+  const std::string& hidden_fields(int index) const;
+  std::string* mutable_hidden_fields(int index);
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_hidden_fields(int index, Arg_&& value, Args_... args);
+  std::string* add_hidden_fields();
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void add_hidden_fields(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<std::string>& hidden_fields() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_hidden_fields();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_hidden_fields() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_hidden_fields();
+
+  public:
+  // repeated string required_fields = 4 [json_name = "requiredFields"];
+  int required_fields_size() const;
+  private:
+  int _internal_required_fields_size() const;
+
+  public:
+  void clear_required_fields() ;
+  const std::string& required_fields(int index) const;
+  std::string* mutable_required_fields(int index);
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_required_fields(int index, Arg_&& value, Args_... args);
+  std::string* add_required_fields();
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void add_required_fields(Arg_&& value, Args_... args);
+  const ::google::protobuf::RepeatedPtrField<std::string>& required_fields() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_required_fields();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_required_fields() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_required_fields();
+
+  public:
+  // string route_pattern = 1 [json_name = "routePattern"];
+  void clear_route_pattern() ;
+  const std::string& route_pattern() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_route_pattern(Arg_&& arg, Args_... args);
+  std::string* mutable_route_pattern();
+  PROTOBUF_NODISCARD std::string* release_route_pattern();
+  void set_allocated_route_pattern(std::string* value);
+
+  private:
+  const std::string& _internal_route_pattern() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_route_pattern(
+      const std::string& value);
+  std::string* _internal_mutable_route_pattern();
+
+  public:
+  // string submit_button_text = 5 [json_name = "submitButtonText"];
+  void clear_submit_button_text() ;
+  const std::string& submit_button_text() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_submit_button_text(Arg_&& arg, Args_... args);
+  std::string* mutable_submit_button_text();
+  PROTOBUF_NODISCARD std::string* release_submit_button_text();
+  void set_allocated_submit_button_text(std::string* value);
+
+  private:
+  const std::string& _internal_submit_button_text() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_submit_button_text(
+      const std::string& value);
+  std::string* _internal_mutable_submit_button_text();
+
+  public:
+  // .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+  bool has_form_config() const;
+  void clear_form_config() ;
+  const ::croupier::common::v1::XRenderFormConfig& form_config() const;
+  PROTOBUF_NODISCARD ::croupier::common::v1::XRenderFormConfig* release_form_config();
+  ::croupier::common::v1::XRenderFormConfig* mutable_form_config();
+  void set_allocated_form_config(::croupier::common::v1::XRenderFormConfig* value);
+  void unsafe_arena_set_allocated_form_config(::croupier::common::v1::XRenderFormConfig* value);
+  ::croupier::common::v1::XRenderFormConfig* unsafe_arena_release_form_config();
+
+  private:
+  const ::croupier::common::v1::XRenderFormConfig& _internal_form_config() const;
+  ::croupier::common::v1::XRenderFormConfig* _internal_mutable_form_config();
+
+  public:
+  // bool compact_mode = 6 [json_name = "compactMode"];
+  void clear_compact_mode() ;
+  bool compact_mode() const;
+  void set_compact_mode(bool value);
+
+  private:
+  bool _internal_compact_mode() const;
+  void _internal_set_compact_mode(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:croupier.common.v1.RouteDisplayConfig)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 6, 1,
+      105, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const RouteDisplayConfig& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField<std::string> hidden_fields_;
+    ::google::protobuf::RepeatedPtrField<std::string> required_fields_;
+    ::google::protobuf::internal::ArenaStringPtr route_pattern_;
+    ::google::protobuf::internal::ArenaStringPtr submit_button_text_;
+    ::croupier::common::v1::XRenderFormConfig* form_config_;
+    bool compact_mode_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1843,6 +2822,878 @@ inline ::google::protobuf::Map<std::string, std::string>* PermissionSpec::_inter
 inline ::google::protobuf::Map<std::string, std::string>* PermissionSpec::mutable_i18n_zh() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   // @@protoc_insertion_point(field_mutable_map:croupier.common.v1.PermissionSpec.i18n_zh)
   return _internal_mutable_i18n_zh();
+}
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// XRenderWidget
+
+// string widget = 1 [json_name = "widget"];
+inline void XRenderWidget::clear_widget() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.widget_.ClearToEmpty();
+}
+inline const std::string& XRenderWidget::widget() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.widget)
+  return _internal_widget();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void XRenderWidget::set_widget(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.widget_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.widget)
+}
+inline std::string* XRenderWidget::mutable_widget() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_widget();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderWidget.widget)
+  return _s;
+}
+inline const std::string& XRenderWidget::_internal_widget() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.widget_.Get();
+}
+inline void XRenderWidget::_internal_set_widget(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.widget_.Set(value, GetArena());
+}
+inline std::string* XRenderWidget::_internal_mutable_widget() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.widget_.Mutable( GetArena());
+}
+inline std::string* XRenderWidget::release_widget() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.XRenderWidget.widget)
+  return _impl_.widget_.Release();
+}
+inline void XRenderWidget::set_allocated_widget(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.widget_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.widget_.IsDefault()) {
+    _impl_.widget_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.XRenderWidget.widget)
+}
+
+// string label = 2 [json_name = "label"];
+inline void XRenderWidget::clear_label() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_.ClearToEmpty();
+}
+inline const std::string& XRenderWidget::label() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.label)
+  return _internal_label();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void XRenderWidget::set_label(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.label)
+}
+inline std::string* XRenderWidget::mutable_label() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_label();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderWidget.label)
+  return _s;
+}
+inline const std::string& XRenderWidget::_internal_label() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.label_.Get();
+}
+inline void XRenderWidget::_internal_set_label(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_.Set(value, GetArena());
+}
+inline std::string* XRenderWidget::_internal_mutable_label() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.label_.Mutable( GetArena());
+}
+inline std::string* XRenderWidget::release_label() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.XRenderWidget.label)
+  return _impl_.label_.Release();
+}
+inline void XRenderWidget::set_allocated_label(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.label_.IsDefault()) {
+    _impl_.label_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.XRenderWidget.label)
+}
+
+// string placeholder = 3 [json_name = "placeholder"];
+inline void XRenderWidget::clear_placeholder() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.placeholder_.ClearToEmpty();
+}
+inline const std::string& XRenderWidget::placeholder() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.placeholder)
+  return _internal_placeholder();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void XRenderWidget::set_placeholder(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.placeholder_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.placeholder)
+}
+inline std::string* XRenderWidget::mutable_placeholder() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_placeholder();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderWidget.placeholder)
+  return _s;
+}
+inline const std::string& XRenderWidget::_internal_placeholder() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.placeholder_.Get();
+}
+inline void XRenderWidget::_internal_set_placeholder(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.placeholder_.Set(value, GetArena());
+}
+inline std::string* XRenderWidget::_internal_mutable_placeholder() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.placeholder_.Mutable( GetArena());
+}
+inline std::string* XRenderWidget::release_placeholder() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.XRenderWidget.placeholder)
+  return _impl_.placeholder_.Release();
+}
+inline void XRenderWidget::set_allocated_placeholder(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.placeholder_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.placeholder_.IsDefault()) {
+    _impl_.placeholder_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.XRenderWidget.placeholder)
+}
+
+// bool disabled = 4 [json_name = "disabled"];
+inline void XRenderWidget::clear_disabled() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.disabled_ = false;
+}
+inline bool XRenderWidget::disabled() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.disabled)
+  return _internal_disabled();
+}
+inline void XRenderWidget::set_disabled(bool value) {
+  _internal_set_disabled(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.disabled)
+}
+inline bool XRenderWidget::_internal_disabled() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.disabled_;
+}
+inline void XRenderWidget::_internal_set_disabled(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.disabled_ = value;
+}
+
+// bool read_only = 5 [json_name = "readOnly"];
+inline void XRenderWidget::clear_read_only() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.read_only_ = false;
+}
+inline bool XRenderWidget::read_only() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.read_only)
+  return _internal_read_only();
+}
+inline void XRenderWidget::set_read_only(bool value) {
+  _internal_set_read_only(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.read_only)
+}
+inline bool XRenderWidget::_internal_read_only() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.read_only_;
+}
+inline void XRenderWidget::_internal_set_read_only(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.read_only_ = value;
+}
+
+// bool hidden = 6 [json_name = "hidden"];
+inline void XRenderWidget::clear_hidden() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hidden_ = false;
+}
+inline bool XRenderWidget::hidden() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.hidden)
+  return _internal_hidden();
+}
+inline void XRenderWidget::set_hidden(bool value) {
+  _internal_set_hidden(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.hidden)
+}
+inline bool XRenderWidget::_internal_hidden() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hidden_;
+}
+inline void XRenderWidget::_internal_set_hidden(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hidden_ = value;
+}
+
+// int32 span = 7 [json_name = "span"];
+inline void XRenderWidget::clear_span() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.span_ = 0;
+}
+inline ::int32_t XRenderWidget::span() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderWidget.span)
+  return _internal_span();
+}
+inline void XRenderWidget::set_span(::int32_t value) {
+  _internal_set_span(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderWidget.span)
+}
+inline ::int32_t XRenderWidget::_internal_span() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.span_;
+}
+inline void XRenderWidget::_internal_set_span(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.span_ = value;
+}
+
+// map<string, string> props = 8 [json_name = "props"];
+inline int XRenderWidget::_internal_props_size() const {
+  return _internal_props().size();
+}
+inline int XRenderWidget::props_size() const {
+  return _internal_props_size();
+}
+inline void XRenderWidget::clear_props() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.props_.Clear();
+}
+inline const ::google::protobuf::Map<std::string, std::string>& XRenderWidget::_internal_props() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.props_.GetMap();
+}
+inline const ::google::protobuf::Map<std::string, std::string>& XRenderWidget::props() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_map:croupier.common.v1.XRenderWidget.props)
+  return _internal_props();
+}
+inline ::google::protobuf::Map<std::string, std::string>* XRenderWidget::_internal_mutable_props() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.props_.MutableMap();
+}
+inline ::google::protobuf::Map<std::string, std::string>* XRenderWidget::mutable_props() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_map:croupier.common.v1.XRenderWidget.props)
+  return _internal_mutable_props();
+}
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// XRenderFormConfig
+
+// string layout_type = 1 [json_name = "layoutType"];
+inline void XRenderFormConfig::clear_layout_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.layout_type_.ClearToEmpty();
+}
+inline const std::string& XRenderFormConfig::layout_type() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.layout_type)
+  return _internal_layout_type();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void XRenderFormConfig::set_layout_type(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.layout_type_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.layout_type)
+}
+inline std::string* XRenderFormConfig::mutable_layout_type() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_layout_type();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderFormConfig.layout_type)
+  return _s;
+}
+inline const std::string& XRenderFormConfig::_internal_layout_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.layout_type_.Get();
+}
+inline void XRenderFormConfig::_internal_set_layout_type(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.layout_type_.Set(value, GetArena());
+}
+inline std::string* XRenderFormConfig::_internal_mutable_layout_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.layout_type_.Mutable( GetArena());
+}
+inline std::string* XRenderFormConfig::release_layout_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.XRenderFormConfig.layout_type)
+  return _impl_.layout_type_.Release();
+}
+inline void XRenderFormConfig::set_allocated_layout_type(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.layout_type_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.layout_type_.IsDefault()) {
+    _impl_.layout_type_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.XRenderFormConfig.layout_type)
+}
+
+// int32 column = 2 [json_name = "column"];
+inline void XRenderFormConfig::clear_column() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.column_ = 0;
+}
+inline ::int32_t XRenderFormConfig::column() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.column)
+  return _internal_column();
+}
+inline void XRenderFormConfig::set_column(::int32_t value) {
+  _internal_set_column(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.column)
+}
+inline ::int32_t XRenderFormConfig::_internal_column() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.column_;
+}
+inline void XRenderFormConfig::_internal_set_column(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.column_ = value;
+}
+
+// string label_align = 3 [json_name = "labelAlign"];
+inline void XRenderFormConfig::clear_label_align() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_align_.ClearToEmpty();
+}
+inline const std::string& XRenderFormConfig::label_align() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.label_align)
+  return _internal_label_align();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void XRenderFormConfig::set_label_align(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_align_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.label_align)
+}
+inline std::string* XRenderFormConfig::mutable_label_align() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_label_align();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderFormConfig.label_align)
+  return _s;
+}
+inline const std::string& XRenderFormConfig::_internal_label_align() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.label_align_.Get();
+}
+inline void XRenderFormConfig::_internal_set_label_align(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_align_.Set(value, GetArena());
+}
+inline std::string* XRenderFormConfig::_internal_mutable_label_align() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.label_align_.Mutable( GetArena());
+}
+inline std::string* XRenderFormConfig::release_label_align() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.XRenderFormConfig.label_align)
+  return _impl_.label_align_.Release();
+}
+inline void XRenderFormConfig::set_allocated_label_align(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_align_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.label_align_.IsDefault()) {
+    _impl_.label_align_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.XRenderFormConfig.label_align)
+}
+
+// int32 label_width = 4 [json_name = "labelWidth"];
+inline void XRenderFormConfig::clear_label_width() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_width_ = 0;
+}
+inline ::int32_t XRenderFormConfig::label_width() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.label_width)
+  return _internal_label_width();
+}
+inline void XRenderFormConfig::set_label_width(::int32_t value) {
+  _internal_set_label_width(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.label_width)
+}
+inline ::int32_t XRenderFormConfig::_internal_label_width() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.label_width_;
+}
+inline void XRenderFormConfig::_internal_set_label_width(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.label_width_ = value;
+}
+
+// bool colon = 5 [json_name = "colon"];
+inline void XRenderFormConfig::clear_colon() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.colon_ = false;
+}
+inline bool XRenderFormConfig::colon() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.colon)
+  return _internal_colon();
+}
+inline void XRenderFormConfig::set_colon(bool value) {
+  _internal_set_colon(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.colon)
+}
+inline bool XRenderFormConfig::_internal_colon() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.colon_;
+}
+inline void XRenderFormConfig::_internal_set_colon(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.colon_ = value;
+}
+
+// map<string, .croupier.common.v1.XRenderWidget> widgets = 6 [json_name = "widgets"];
+inline int XRenderFormConfig::_internal_widgets_size() const {
+  return _internal_widgets().size();
+}
+inline int XRenderFormConfig::widgets_size() const {
+  return _internal_widgets_size();
+}
+inline void XRenderFormConfig::clear_widgets() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.widgets_.Clear();
+}
+inline const ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>& XRenderFormConfig::_internal_widgets() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.widgets_.GetMap();
+}
+inline const ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>& XRenderFormConfig::widgets() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_map:croupier.common.v1.XRenderFormConfig.widgets)
+  return _internal_widgets();
+}
+inline ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>* XRenderFormConfig::_internal_mutable_widgets() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.widgets_.MutableMap();
+}
+inline ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>* XRenderFormConfig::mutable_widgets() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_map:croupier.common.v1.XRenderFormConfig.widgets)
+  return _internal_mutable_widgets();
+}
+
+// repeated string display_order = 7 [json_name = "displayOrder"];
+inline int XRenderFormConfig::_internal_display_order_size() const {
+  return _internal_display_order().size();
+}
+inline int XRenderFormConfig::display_order_size() const {
+  return _internal_display_order_size();
+}
+inline void XRenderFormConfig::clear_display_order() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.display_order_.Clear();
+}
+inline std::string* XRenderFormConfig::add_display_order() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_display_order()->Add();
+  // @@protoc_insertion_point(field_add_mutable:croupier.common.v1.XRenderFormConfig.display_order)
+  return _s;
+}
+inline const std::string& XRenderFormConfig::display_order(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.XRenderFormConfig.display_order)
+  return _internal_display_order().Get(index);
+}
+inline std::string* XRenderFormConfig::mutable_display_order(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.XRenderFormConfig.display_order)
+  return _internal_mutable_display_order()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void XRenderFormConfig::set_display_order(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(
+      *_internal_mutable_display_order()->Mutable(index),
+      std::forward<Arg_>(value), args... );
+  // @@protoc_insertion_point(field_set:croupier.common.v1.XRenderFormConfig.display_order)
+}
+template <typename Arg_, typename... Args_>
+inline void XRenderFormConfig::add_display_order(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_display_order(),
+                               std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:croupier.common.v1.XRenderFormConfig.display_order)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+XRenderFormConfig::display_order() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:croupier.common.v1.XRenderFormConfig.display_order)
+  return _internal_display_order();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+XRenderFormConfig::mutable_display_order() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:croupier.common.v1.XRenderFormConfig.display_order)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_display_order();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+XRenderFormConfig::_internal_display_order() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.display_order_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+XRenderFormConfig::_internal_mutable_display_order() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.display_order_;
+}
+
+// -------------------------------------------------------------------
+
+// RouteDisplayConfig
+
+// string route_pattern = 1 [json_name = "routePattern"];
+inline void RouteDisplayConfig::clear_route_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.route_pattern_.ClearToEmpty();
+}
+inline const std::string& RouteDisplayConfig::route_pattern() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.route_pattern)
+  return _internal_route_pattern();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void RouteDisplayConfig::set_route_pattern(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.route_pattern_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.RouteDisplayConfig.route_pattern)
+}
+inline std::string* RouteDisplayConfig::mutable_route_pattern() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_route_pattern();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.RouteDisplayConfig.route_pattern)
+  return _s;
+}
+inline const std::string& RouteDisplayConfig::_internal_route_pattern() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.route_pattern_.Get();
+}
+inline void RouteDisplayConfig::_internal_set_route_pattern(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.route_pattern_.Set(value, GetArena());
+}
+inline std::string* RouteDisplayConfig::_internal_mutable_route_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.route_pattern_.Mutable( GetArena());
+}
+inline std::string* RouteDisplayConfig::release_route_pattern() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.RouteDisplayConfig.route_pattern)
+  return _impl_.route_pattern_.Release();
+}
+inline void RouteDisplayConfig::set_allocated_route_pattern(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.route_pattern_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.route_pattern_.IsDefault()) {
+    _impl_.route_pattern_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.RouteDisplayConfig.route_pattern)
+}
+
+// .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+inline bool RouteDisplayConfig::has_form_config() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.form_config_ != nullptr);
+  return value;
+}
+inline void RouteDisplayConfig::clear_form_config() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.form_config_ != nullptr) _impl_.form_config_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::croupier::common::v1::XRenderFormConfig& RouteDisplayConfig::_internal_form_config() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::croupier::common::v1::XRenderFormConfig* p = _impl_.form_config_;
+  return p != nullptr ? *p : reinterpret_cast<const ::croupier::common::v1::XRenderFormConfig&>(::croupier::common::v1::_XRenderFormConfig_default_instance_);
+}
+inline const ::croupier::common::v1::XRenderFormConfig& RouteDisplayConfig::form_config() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.form_config)
+  return _internal_form_config();
+}
+inline void RouteDisplayConfig::unsafe_arena_set_allocated_form_config(::croupier::common::v1::XRenderFormConfig* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.form_config_);
+  }
+  _impl_.form_config_ = reinterpret_cast<::croupier::common::v1::XRenderFormConfig*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:croupier.common.v1.RouteDisplayConfig.form_config)
+}
+inline ::croupier::common::v1::XRenderFormConfig* RouteDisplayConfig::release_form_config() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::croupier::common::v1::XRenderFormConfig* released = _impl_.form_config_;
+  _impl_.form_config_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::croupier::common::v1::XRenderFormConfig* RouteDisplayConfig::unsafe_arena_release_form_config() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.RouteDisplayConfig.form_config)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::croupier::common::v1::XRenderFormConfig* temp = _impl_.form_config_;
+  _impl_.form_config_ = nullptr;
+  return temp;
+}
+inline ::croupier::common::v1::XRenderFormConfig* RouteDisplayConfig::_internal_mutable_form_config() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.form_config_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::croupier::common::v1::XRenderFormConfig>(GetArena());
+    _impl_.form_config_ = reinterpret_cast<::croupier::common::v1::XRenderFormConfig*>(p);
+  }
+  return _impl_.form_config_;
+}
+inline ::croupier::common::v1::XRenderFormConfig* RouteDisplayConfig::mutable_form_config() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  ::croupier::common::v1::XRenderFormConfig* _msg = _internal_mutable_form_config();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.RouteDisplayConfig.form_config)
+  return _msg;
+}
+inline void RouteDisplayConfig::set_allocated_form_config(::croupier::common::v1::XRenderFormConfig* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.form_config_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.form_config_ = reinterpret_cast<::croupier::common::v1::XRenderFormConfig*>(value);
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.RouteDisplayConfig.form_config)
+}
+
+// repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+inline int RouteDisplayConfig::_internal_hidden_fields_size() const {
+  return _internal_hidden_fields().size();
+}
+inline int RouteDisplayConfig::hidden_fields_size() const {
+  return _internal_hidden_fields_size();
+}
+inline void RouteDisplayConfig::clear_hidden_fields() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hidden_fields_.Clear();
+}
+inline std::string* RouteDisplayConfig::add_hidden_fields() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_hidden_fields()->Add();
+  // @@protoc_insertion_point(field_add_mutable:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+  return _s;
+}
+inline const std::string& RouteDisplayConfig::hidden_fields(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+  return _internal_hidden_fields().Get(index);
+}
+inline std::string* RouteDisplayConfig::mutable_hidden_fields(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+  return _internal_mutable_hidden_fields()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void RouteDisplayConfig::set_hidden_fields(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(
+      *_internal_mutable_hidden_fields()->Mutable(index),
+      std::forward<Arg_>(value), args... );
+  // @@protoc_insertion_point(field_set:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+}
+template <typename Arg_, typename... Args_>
+inline void RouteDisplayConfig::add_hidden_fields(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_hidden_fields(),
+                               std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+RouteDisplayConfig::hidden_fields() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+  return _internal_hidden_fields();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+RouteDisplayConfig::mutable_hidden_fields() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:croupier.common.v1.RouteDisplayConfig.hidden_fields)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_hidden_fields();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+RouteDisplayConfig::_internal_hidden_fields() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hidden_fields_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+RouteDisplayConfig::_internal_mutable_hidden_fields() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.hidden_fields_;
+}
+
+// repeated string required_fields = 4 [json_name = "requiredFields"];
+inline int RouteDisplayConfig::_internal_required_fields_size() const {
+  return _internal_required_fields().size();
+}
+inline int RouteDisplayConfig::required_fields_size() const {
+  return _internal_required_fields_size();
+}
+inline void RouteDisplayConfig::clear_required_fields() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.required_fields_.Clear();
+}
+inline std::string* RouteDisplayConfig::add_required_fields() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  std::string* _s = _internal_mutable_required_fields()->Add();
+  // @@protoc_insertion_point(field_add_mutable:croupier.common.v1.RouteDisplayConfig.required_fields)
+  return _s;
+}
+inline const std::string& RouteDisplayConfig::required_fields(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.required_fields)
+  return _internal_required_fields().Get(index);
+}
+inline std::string* RouteDisplayConfig::mutable_required_fields(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.RouteDisplayConfig.required_fields)
+  return _internal_mutable_required_fields()->Mutable(index);
+}
+template <typename Arg_, typename... Args_>
+inline void RouteDisplayConfig::set_required_fields(int index, Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::AssignToString(
+      *_internal_mutable_required_fields()->Mutable(index),
+      std::forward<Arg_>(value), args... );
+  // @@protoc_insertion_point(field_set:croupier.common.v1.RouteDisplayConfig.required_fields)
+}
+template <typename Arg_, typename... Args_>
+inline void RouteDisplayConfig::add_required_fields(Arg_&& value, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::google::protobuf::internal::AddToRepeatedPtrField(*_internal_mutable_required_fields(),
+                               std::forward<Arg_>(value),
+                               args... );
+  // @@protoc_insertion_point(field_add:croupier.common.v1.RouteDisplayConfig.required_fields)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+RouteDisplayConfig::required_fields() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:croupier.common.v1.RouteDisplayConfig.required_fields)
+  return _internal_required_fields();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+RouteDisplayConfig::mutable_required_fields() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:croupier.common.v1.RouteDisplayConfig.required_fields)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_required_fields();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+RouteDisplayConfig::_internal_required_fields() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.required_fields_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+RouteDisplayConfig::_internal_mutable_required_fields() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.required_fields_;
+}
+
+// string submit_button_text = 5 [json_name = "submitButtonText"];
+inline void RouteDisplayConfig::clear_submit_button_text() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.submit_button_text_.ClearToEmpty();
+}
+inline const std::string& RouteDisplayConfig::submit_button_text() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.submit_button_text)
+  return _internal_submit_button_text();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void RouteDisplayConfig::set_submit_button_text(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.submit_button_text_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:croupier.common.v1.RouteDisplayConfig.submit_button_text)
+}
+inline std::string* RouteDisplayConfig::mutable_submit_button_text() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_submit_button_text();
+  // @@protoc_insertion_point(field_mutable:croupier.common.v1.RouteDisplayConfig.submit_button_text)
+  return _s;
+}
+inline const std::string& RouteDisplayConfig::_internal_submit_button_text() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.submit_button_text_.Get();
+}
+inline void RouteDisplayConfig::_internal_set_submit_button_text(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.submit_button_text_.Set(value, GetArena());
+}
+inline std::string* RouteDisplayConfig::_internal_mutable_submit_button_text() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.submit_button_text_.Mutable( GetArena());
+}
+inline std::string* RouteDisplayConfig::release_submit_button_text() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:croupier.common.v1.RouteDisplayConfig.submit_button_text)
+  return _impl_.submit_button_text_.Release();
+}
+inline void RouteDisplayConfig::set_allocated_submit_button_text(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.submit_button_text_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.submit_button_text_.IsDefault()) {
+    _impl_.submit_button_text_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:croupier.common.v1.RouteDisplayConfig.submit_button_text)
+}
+
+// bool compact_mode = 6 [json_name = "compactMode"];
+inline void RouteDisplayConfig::clear_compact_mode() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.compact_mode_ = false;
+}
+inline bool RouteDisplayConfig::compact_mode() const {
+  // @@protoc_insertion_point(field_get:croupier.common.v1.RouteDisplayConfig.compact_mode)
+  return _internal_compact_mode();
+}
+inline void RouteDisplayConfig::set_compact_mode(bool value) {
+  _internal_set_compact_mode(value);
+  // @@protoc_insertion_point(field_set:croupier.common.v1.RouteDisplayConfig.compact_mode)
+}
+inline bool RouteDisplayConfig::_internal_compact_mode() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.compact_mode_;
+}
+inline void RouteDisplayConfig::_internal_set_compact_mode(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.compact_mode_ = value;
 }
 
 #ifdef __GNUC__

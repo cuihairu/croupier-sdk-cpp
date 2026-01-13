@@ -27,6 +27,24 @@ namespace _fl = ::google::protobuf::internal::field_layout;
 namespace croupier {
 namespace common {
 namespace v1 {
+              template <typename>
+PROTOBUF_CONSTEXPR XRenderWidget_PropsEntry_DoNotUse::XRenderWidget_PropsEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : XRenderWidget_PropsEntry_DoNotUse::MapEntry(_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : XRenderWidget_PropsEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    XRenderWidget_PropsEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 XRenderWidget_PropsEntry_DoNotUseDefaultTypeInternal _XRenderWidget_PropsEntry_DoNotUse_default_instance_;
 
 inline constexpr RoleBinding::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -145,6 +163,44 @@ struct I18nTextDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 I18nTextDefaultTypeInternal _I18nText_default_instance_;
 
+inline constexpr XRenderWidget::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : props_{},
+        widget_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        label_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        placeholder_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        disabled_{false},
+        read_only_{false},
+        hidden_{false},
+        span_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR XRenderWidget::XRenderWidget(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct XRenderWidgetDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR XRenderWidgetDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~XRenderWidgetDefaultTypeInternal() {}
+  union {
+    XRenderWidget _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 XRenderWidgetDefaultTypeInternal _XRenderWidget_default_instance_;
+
 inline constexpr PermissionSpec::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : verbs_{},
@@ -172,6 +228,93 @@ struct PermissionSpecDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PermissionSpecDefaultTypeInternal _PermissionSpec_default_instance_;
+              template <typename>
+PROTOBUF_CONSTEXPR XRenderFormConfig_WidgetsEntry_DoNotUse::XRenderFormConfig_WidgetsEntry_DoNotUse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : XRenderFormConfig_WidgetsEntry_DoNotUse::MapEntry(_class_data_.base()){}
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : XRenderFormConfig_WidgetsEntry_DoNotUse::MapEntry() {
+}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+struct XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    XRenderFormConfig_WidgetsEntry_DoNotUse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 XRenderFormConfig_WidgetsEntry_DoNotUseDefaultTypeInternal _XRenderFormConfig_WidgetsEntry_DoNotUse_default_instance_;
+
+inline constexpr XRenderFormConfig::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : widgets_{},
+        display_order_{},
+        layout_type_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        label_align_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        column_{0},
+        label_width_{0},
+        colon_{false},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR XRenderFormConfig::XRenderFormConfig(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct XRenderFormConfigDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR XRenderFormConfigDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~XRenderFormConfigDefaultTypeInternal() {}
+  union {
+    XRenderFormConfig _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 XRenderFormConfigDefaultTypeInternal _XRenderFormConfig_default_instance_;
+
+inline constexpr RouteDisplayConfig::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        hidden_fields_{},
+        required_fields_{},
+        route_pattern_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        submit_button_text_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        form_config_{nullptr},
+        compact_mode_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RouteDisplayConfig::RouteDisplayConfig(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct RouteDisplayConfigDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RouteDisplayConfigDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RouteDisplayConfigDefaultTypeInternal() {}
+  union {
+    RouteDisplayConfig _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouteDisplayConfigDefaultTypeInternal _RouteDisplayConfig_default_instance_;
 }  // namespace v1
 }  // namespace common
 }  // namespace croupier
@@ -241,6 +384,81 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::croupier::common::v1::PermissionSpec, _impl_.scopes_),
         PROTOBUF_FIELD_OFFSET(::croupier::common::v1::PermissionSpec, _impl_.defaults_),
         PROTOBUF_FIELD_OFFSET(::croupier::common::v1::PermissionSpec, _impl_.i18n_zh_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse, _impl_.key_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse, _impl_.value_),
+        0,
+        1,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.widget_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.label_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.placeholder_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.disabled_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.read_only_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.hidden_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.span_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderWidget, _impl_.props_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.key_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.value_),
+        0,
+        1,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.layout_type_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.column_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.label_align_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.label_width_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.colon_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.widgets_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::XRenderFormConfig, _impl_.display_order_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.route_pattern_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.form_config_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.hidden_fields_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.required_fields_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.submit_button_text_),
+        PROTOBUF_FIELD_OFFSET(::croupier::common::v1::RouteDisplayConfig, _impl_.compact_mode_),
+        ~0u,
+        0,
+        ~0u,
+        ~0u,
+        ~0u,
+        ~0u,
 };
 
 static const ::_pbi::MigrationSchema
@@ -250,6 +468,11 @@ static const ::_pbi::MigrationSchema
         {25, -1, -1, sizeof(::croupier::common::v1::RoleBinding)},
         {35, 45, -1, sizeof(::croupier::common::v1::PermissionSpec_I18nZhEntry_DoNotUse)},
         {47, -1, -1, sizeof(::croupier::common::v1::PermissionSpec)},
+        {59, 69, -1, sizeof(::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse)},
+        {71, -1, -1, sizeof(::croupier::common::v1::XRenderWidget)},
+        {87, 97, -1, sizeof(::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse)},
+        {99, -1, -1, sizeof(::croupier::common::v1::XRenderFormConfig)},
+        {114, 128, -1, sizeof(::croupier::common::v1::RouteDisplayConfig)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::croupier::common::v1::_I18nText_default_instance_._instance,
@@ -257,6 +480,11 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::croupier::common::v1::_RoleBinding_default_instance_._instance,
     &::croupier::common::v1::_PermissionSpec_I18nZhEntry_DoNotUse_default_instance_._instance,
     &::croupier::common::v1::_PermissionSpec_default_instance_._instance,
+    &::croupier::common::v1::_XRenderWidget_PropsEntry_DoNotUse_default_instance_._instance,
+    &::croupier::common::v1::_XRenderWidget_default_instance_._instance,
+    &::croupier::common::v1::_XRenderFormConfig_WidgetsEntry_DoNotUse_default_instance_._instance,
+    &::croupier::common::v1::_XRenderFormConfig_default_instance_._instance,
+    &::croupier::common::v1::_RouteDisplayConfig_default_instance_._instance,
 };
 const char descriptor_table_protodef_croupier_2fcommon_2fv1_2fui_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -274,22 +502,47 @@ const char descriptor_table_protodef_croupier_2fcommon_2fv1_2fui_2eproto[] ABSL_
     "s\022G\n\007i18n_zh\030\004 \003(\0132..croupier.common.v1."
     "PermissionSpec.I18nZhEntryR\006i18nZh\0329\n\013I1"
     "8nZhEntry\022\020\n\003key\030\001 \001(\tR\003key\022\024\n\005value\030\002 \001"
-    "(\tR\005value:\0028\001Bj\n%io.github.cuihairu.crou"
-    "pier.common.v1P\001Z\?github.com/cuihairu/cr"
-    "oupier/pkg/pb/croupier/common/v1;commonv"
-    "1b\006proto3"
+    "(\tR\005value:\0028\001\"\302\002\n\rXRenderWidget\022\026\n\006widge"
+    "t\030\001 \001(\tR\006widget\022\024\n\005label\030\002 \001(\tR\005label\022 \n"
+    "\013placeholder\030\003 \001(\tR\013placeholder\022\032\n\010disab"
+    "led\030\004 \001(\010R\010disabled\022\033\n\tread_only\030\005 \001(\010R\010"
+    "readOnly\022\026\n\006hidden\030\006 \001(\010R\006hidden\022\022\n\004span"
+    "\030\007 \001(\005R\004span\022B\n\005props\030\010 \003(\0132,.croupier.c"
+    "ommon.v1.XRenderWidget.PropsEntryR\005props"
+    "\0328\n\nPropsEntry\022\020\n\003key\030\001 \001(\tR\003key\022\024\n\005valu"
+    "e\030\002 \001(\tR\005value:\0028\001\"\366\002\n\021XRenderFormConfig"
+    "\022\037\n\013layout_type\030\001 \001(\tR\nlayoutType\022\026\n\006col"
+    "umn\030\002 \001(\005R\006column\022\037\n\013label_align\030\003 \001(\tR\n"
+    "labelAlign\022\037\n\013label_width\030\004 \001(\005R\nlabelWi"
+    "dth\022\024\n\005colon\030\005 \001(\010R\005colon\022L\n\007widgets\030\006 \003"
+    "(\01322.croupier.common.v1.XRenderFormConfi"
+    "g.WidgetsEntryR\007widgets\022#\n\rdisplay_order"
+    "\030\007 \003(\tR\014displayOrder\032]\n\014WidgetsEntry\022\020\n\003"
+    "key\030\001 \001(\tR\003key\0227\n\005value\030\002 \001(\0132!.croupier"
+    ".common.v1.XRenderWidgetR\005value:\0028\001\"\240\002\n\022"
+    "RouteDisplayConfig\022#\n\rroute_pattern\030\001 \001("
+    "\tR\014routePattern\022F\n\013form_config\030\002 \001(\0132%.c"
+    "roupier.common.v1.XRenderFormConfigR\nfor"
+    "mConfig\022#\n\rhidden_fields\030\003 \003(\tR\014hiddenFi"
+    "elds\022\'\n\017required_fields\030\004 \003(\tR\016requiredF"
+    "ields\022,\n\022submit_button_text\030\005 \001(\tR\020submi"
+    "tButtonText\022!\n\014compact_mode\030\006 \001(\010R\013compa"
+    "ctModeBj\n%io.github.cuihairu.croupier.co"
+    "mmon.v1P\001Z\?github.com/cuihairu/croupier/"
+    "pkg/pb/croupier/common/v1;commonv1b\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto = {
     false,
     false,
-    689,
+    1682,
     descriptor_table_protodef_croupier_2fcommon_2fv1_2fui_2eproto,
     "croupier/common/v1/ui.proto",
     &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto_once,
     nullptr,
     0,
-    5,
+    10,
     schemas,
     file_default_instances,
     TableStruct_croupier_2fcommon_2fv1_2fui_2eproto::offsets,
@@ -1706,6 +1959,1524 @@ void PermissionSpec::InternalSwap(PermissionSpec* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata PermissionSpec::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+              XRenderWidget_PropsEntry_DoNotUse::XRenderWidget_PropsEntry_DoNotUse() : SuperType(_class_data_.base()) {}
+              XRenderWidget_PropsEntry_DoNotUse::XRenderWidget_PropsEntry_DoNotUse(::google::protobuf::Arena* arena)
+                  : SuperType(arena, _class_data_.base()) {}
+#else   // PROTOBUF_CUSTOM_VTABLE
+              XRenderWidget_PropsEntry_DoNotUse::XRenderWidget_PropsEntry_DoNotUse() : SuperType() {}
+              XRenderWidget_PropsEntry_DoNotUse::XRenderWidget_PropsEntry_DoNotUse(::google::protobuf::Arena* arena) : SuperType(arena) {}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+              inline void* XRenderWidget_PropsEntry_DoNotUse::PlacementNew_(const void*, void* mem,
+                                                      ::google::protobuf::Arena* arena) {
+                return ::new (mem) XRenderWidget_PropsEntry_DoNotUse(arena);
+              }
+              constexpr auto XRenderWidget_PropsEntry_DoNotUse::InternalNewImpl_() {
+                return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(XRenderWidget_PropsEntry_DoNotUse),
+                                                          alignof(XRenderWidget_PropsEntry_DoNotUse));
+              }
+              PROTOBUF_CONSTINIT
+              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+              const ::google::protobuf::internal::ClassDataFull XRenderWidget_PropsEntry_DoNotUse::_class_data_ = {
+                  ::google::protobuf::internal::ClassData{
+                      &_XRenderWidget_PropsEntry_DoNotUse_default_instance_._instance,
+                      &_table_.header,
+                      nullptr,  // OnDemandRegisterArenaDtor
+                      nullptr,  // IsInitialized
+                      &XRenderWidget_PropsEntry_DoNotUse::MergeImpl,
+                      ::google::protobuf::Message::GetNewImpl<XRenderWidget_PropsEntry_DoNotUse>(),
+              #if defined(PROTOBUF_CUSTOM_VTABLE)
+                      &XRenderWidget_PropsEntry_DoNotUse::SharedDtor,
+                      static_cast<void (::google::protobuf::MessageLite::*)()>(
+                          &XRenderWidget_PropsEntry_DoNotUse::ClearImpl),
+                          ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+                          ,
+              #endif  // PROTOBUF_CUSTOM_VTABLE
+                      PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_._cached_size_),
+                      false,
+                  },
+                  &XRenderWidget_PropsEntry_DoNotUse::kDescriptorMethods,
+                  &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto,
+                  nullptr,  // tracker
+              };
+              const ::google::protobuf::internal::ClassData* XRenderWidget_PropsEntry_DoNotUse::GetClassData() const {
+                ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+                ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+                return _class_data_.base();
+              }
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 60, 2> XRenderWidget_PropsEntry_DoNotUse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderWidget_PropsEntry_DoNotUse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string value = 2 [json_name = "value"];
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_.value_)}},
+    // string key = 1 [json_name = "key"];
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_.key_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string key = 1 [json_name = "key"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_.key_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string value = 2 [json_name = "value"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget_PropsEntry_DoNotUse, _impl_.value_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\53\3\5\0\0\0\0\0"
+    "croupier.common.v1.XRenderWidget.PropsEntry"
+    "key"
+    "value"
+  }},
+};
+
+// ===================================================================
+
+class XRenderWidget::_Internal {
+ public:
+};
+
+XRenderWidget::XRenderWidget(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:croupier.common.v1.XRenderWidget)
+}
+inline PROTOBUF_NDEBUG_INLINE XRenderWidget::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::croupier::common::v1::XRenderWidget& from_msg)
+      : props_{visibility, arena, from.props_},
+        widget_(arena, from.widget_),
+        label_(arena, from.label_),
+        placeholder_(arena, from.placeholder_),
+        _cached_size_{0} {}
+
+XRenderWidget::XRenderWidget(
+    ::google::protobuf::Arena* arena,
+    const XRenderWidget& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  XRenderWidget* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, disabled_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, disabled_),
+           offsetof(Impl_, span_) -
+               offsetof(Impl_, disabled_) +
+               sizeof(Impl_::span_));
+
+  // @@protoc_insertion_point(copy_constructor:croupier.common.v1.XRenderWidget)
+}
+inline PROTOBUF_NDEBUG_INLINE XRenderWidget::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : props_{visibility, arena},
+        widget_(arena),
+        label_(arena),
+        placeholder_(arena),
+        _cached_size_{0} {}
+
+inline void XRenderWidget::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, disabled_),
+           0,
+           offsetof(Impl_, span_) -
+               offsetof(Impl_, disabled_) +
+               sizeof(Impl_::span_));
+}
+XRenderWidget::~XRenderWidget() {
+  // @@protoc_insertion_point(destructor:croupier.common.v1.XRenderWidget)
+  SharedDtor(*this);
+}
+inline void XRenderWidget::SharedDtor(MessageLite& self) {
+  XRenderWidget& this_ = static_cast<XRenderWidget&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.widget_.Destroy();
+  this_._impl_.label_.Destroy();
+  this_._impl_.placeholder_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* XRenderWidget::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) XRenderWidget(arena);
+}
+constexpr auto XRenderWidget::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.props_) +
+          decltype(XRenderWidget::_impl_.props_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.props_) +
+          decltype(XRenderWidget::_impl_.props_)::
+              InternalGetArenaOffsetAlt(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(XRenderWidget), alignof(XRenderWidget), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&XRenderWidget::PlacementNew_,
+                                 sizeof(XRenderWidget),
+                                 alignof(XRenderWidget));
+  }
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull XRenderWidget::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_XRenderWidget_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &XRenderWidget::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<XRenderWidget>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &XRenderWidget::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<XRenderWidget>(), &XRenderWidget::ByteSizeLong,
+            &XRenderWidget::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_._cached_size_),
+        false,
+    },
+    &XRenderWidget::kDescriptorMethods,
+    &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* XRenderWidget::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 8, 1, 76, 2> XRenderWidget::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    8, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967040,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    8,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderWidget>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string widget = 1 [json_name = "widget"];
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.widget_)}},
+    // string label = 2 [json_name = "label"];
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.label_)}},
+    // string placeholder = 3 [json_name = "placeholder"];
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.placeholder_)}},
+    // bool disabled = 4 [json_name = "disabled"];
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(XRenderWidget, _impl_.disabled_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.disabled_)}},
+    // bool read_only = 5 [json_name = "readOnly"];
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(XRenderWidget, _impl_.read_only_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.read_only_)}},
+    // bool hidden = 6 [json_name = "hidden"];
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(XRenderWidget, _impl_.hidden_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.hidden_)}},
+    // int32 span = 7 [json_name = "span"];
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(XRenderWidget, _impl_.span_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.span_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string widget = 1 [json_name = "widget"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.widget_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string label = 2 [json_name = "label"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.label_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string placeholder = 3 [json_name = "placeholder"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.placeholder_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool disabled = 4 [json_name = "disabled"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.disabled_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool read_only = 5 [json_name = "readOnly"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.read_only_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool hidden = 6 [json_name = "hidden"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.hidden_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 span = 7 [json_name = "span"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.span_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // map<string, string> props = 8 [json_name = "props"];
+    {PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.props_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+  }}, {{
+    {::_pbi::TcParser::GetMapAuxInfo<
+        decltype(XRenderWidget()._impl_.props_)>(
+        1, 0, 0, 9,
+        9)},
+  }}, {{
+    "\40\6\5\13\0\0\0\0\5\0\0\0\0\0\0\0"
+    "croupier.common.v1.XRenderWidget"
+    "widget"
+    "label"
+    "placeholder"
+    "props"
+  }},
+};
+
+PROTOBUF_NOINLINE void XRenderWidget::Clear() {
+// @@protoc_insertion_point(message_clear_start:croupier.common.v1.XRenderWidget)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.props_.Clear();
+  _impl_.widget_.ClearToEmpty();
+  _impl_.label_.ClearToEmpty();
+  _impl_.placeholder_.ClearToEmpty();
+  ::memset(&_impl_.disabled_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.span_) -
+      reinterpret_cast<char*>(&_impl_.disabled_)) + sizeof(_impl_.span_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* XRenderWidget::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const XRenderWidget& this_ = static_cast<const XRenderWidget&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* XRenderWidget::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const XRenderWidget& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:croupier.common.v1.XRenderWidget)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // string widget = 1 [json_name = "widget"];
+          if (!this_._internal_widget().empty()) {
+            const std::string& _s = this_._internal_widget();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.widget");
+            target = stream->WriteStringMaybeAliased(1, _s, target);
+          }
+
+          // string label = 2 [json_name = "label"];
+          if (!this_._internal_label().empty()) {
+            const std::string& _s = this_._internal_label();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.label");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          // string placeholder = 3 [json_name = "placeholder"];
+          if (!this_._internal_placeholder().empty()) {
+            const std::string& _s = this_._internal_placeholder();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.placeholder");
+            target = stream->WriteStringMaybeAliased(3, _s, target);
+          }
+
+          // bool disabled = 4 [json_name = "disabled"];
+          if (this_._internal_disabled() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteBoolToArray(
+                4, this_._internal_disabled(), target);
+          }
+
+          // bool read_only = 5 [json_name = "readOnly"];
+          if (this_._internal_read_only() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteBoolToArray(
+                5, this_._internal_read_only(), target);
+          }
+
+          // bool hidden = 6 [json_name = "hidden"];
+          if (this_._internal_hidden() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteBoolToArray(
+                6, this_._internal_hidden(), target);
+          }
+
+          // int32 span = 7 [json_name = "span"];
+          if (this_._internal_span() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<7>(
+                    stream, this_._internal_span(), target);
+          }
+
+          // map<string, string> props = 8 [json_name = "props"];
+          if (!this_._internal_props().empty()) {
+            using MapType = ::google::protobuf::Map<std::string, std::string>;
+            using WireHelper = _pbi::MapEntryFuncs<std::string, std::string,
+                                           _pbi::WireFormatLite::TYPE_STRING,
+                                           _pbi::WireFormatLite::TYPE_STRING>;
+            const auto& field = this_._internal_props();
+
+            if (stream->IsSerializationDeterministic() && field.size() > 1) {
+              for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
+                target = WireHelper::InternalSerialize(
+                    8, entry.first, entry.second, target, stream);
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.props");
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.props");
+              }
+            } else {
+              for (const auto& entry : field) {
+                target = WireHelper::InternalSerialize(
+                    8, entry.first, entry.second, target, stream);
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.props");
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.second.data(), static_cast<int>(entry.second.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderWidget.props");
+              }
+            }
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:croupier.common.v1.XRenderWidget)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t XRenderWidget::ByteSizeLong(const MessageLite& base) {
+          const XRenderWidget& this_ = static_cast<const XRenderWidget&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t XRenderWidget::ByteSizeLong() const {
+          const XRenderWidget& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:croupier.common.v1.XRenderWidget)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // map<string, string> props = 8 [json_name = "props"];
+            {
+              total_size +=
+                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_props_size());
+              for (const auto& entry : this_._internal_props()) {
+                total_size += _pbi::MapEntryFuncs<std::string, std::string,
+                                               _pbi::WireFormatLite::TYPE_STRING,
+                                               _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
+              }
+            }
+          }
+           {
+            // string widget = 1 [json_name = "widget"];
+            if (!this_._internal_widget().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_widget());
+            }
+            // string label = 2 [json_name = "label"];
+            if (!this_._internal_label().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_label());
+            }
+            // string placeholder = 3 [json_name = "placeholder"];
+            if (!this_._internal_placeholder().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_placeholder());
+            }
+            // bool disabled = 4 [json_name = "disabled"];
+            if (this_._internal_disabled() != 0) {
+              total_size += 2;
+            }
+            // bool read_only = 5 [json_name = "readOnly"];
+            if (this_._internal_read_only() != 0) {
+              total_size += 2;
+            }
+            // bool hidden = 6 [json_name = "hidden"];
+            if (this_._internal_hidden() != 0) {
+              total_size += 2;
+            }
+            // int32 span = 7 [json_name = "span"];
+            if (this_._internal_span() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_span());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void XRenderWidget::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<XRenderWidget*>(&to_msg);
+  auto& from = static_cast<const XRenderWidget&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:croupier.common.v1.XRenderWidget)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.props_.MergeFrom(from._impl_.props_);
+  if (!from._internal_widget().empty()) {
+    _this->_internal_set_widget(from._internal_widget());
+  }
+  if (!from._internal_label().empty()) {
+    _this->_internal_set_label(from._internal_label());
+  }
+  if (!from._internal_placeholder().empty()) {
+    _this->_internal_set_placeholder(from._internal_placeholder());
+  }
+  if (from._internal_disabled() != 0) {
+    _this->_impl_.disabled_ = from._impl_.disabled_;
+  }
+  if (from._internal_read_only() != 0) {
+    _this->_impl_.read_only_ = from._impl_.read_only_;
+  }
+  if (from._internal_hidden() != 0) {
+    _this->_impl_.hidden_ = from._impl_.hidden_;
+  }
+  if (from._internal_span() != 0) {
+    _this->_impl_.span_ = from._impl_.span_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void XRenderWidget::CopyFrom(const XRenderWidget& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:croupier.common.v1.XRenderWidget)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void XRenderWidget::InternalSwap(XRenderWidget* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.props_.InternalSwap(&other->_impl_.props_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.widget_, &other->_impl_.widget_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.label_, &other->_impl_.label_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.placeholder_, &other->_impl_.placeholder_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.span_)
+      + sizeof(XRenderWidget::_impl_.span_)
+      - PROTOBUF_FIELD_OFFSET(XRenderWidget, _impl_.disabled_)>(
+          reinterpret_cast<char*>(&_impl_.disabled_),
+          reinterpret_cast<char*>(&other->_impl_.disabled_));
+}
+
+::google::protobuf::Metadata XRenderWidget::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+              XRenderFormConfig_WidgetsEntry_DoNotUse::XRenderFormConfig_WidgetsEntry_DoNotUse() : SuperType(_class_data_.base()) {}
+              XRenderFormConfig_WidgetsEntry_DoNotUse::XRenderFormConfig_WidgetsEntry_DoNotUse(::google::protobuf::Arena* arena)
+                  : SuperType(arena, _class_data_.base()) {}
+#else   // PROTOBUF_CUSTOM_VTABLE
+              XRenderFormConfig_WidgetsEntry_DoNotUse::XRenderFormConfig_WidgetsEntry_DoNotUse() : SuperType() {}
+              XRenderFormConfig_WidgetsEntry_DoNotUse::XRenderFormConfig_WidgetsEntry_DoNotUse(::google::protobuf::Arena* arena) : SuperType(arena) {}
+#endif  // PROTOBUF_CUSTOM_VTABLE
+              inline void* XRenderFormConfig_WidgetsEntry_DoNotUse::PlacementNew_(const void*, void* mem,
+                                                      ::google::protobuf::Arena* arena) {
+                return ::new (mem) XRenderFormConfig_WidgetsEntry_DoNotUse(arena);
+              }
+              constexpr auto XRenderFormConfig_WidgetsEntry_DoNotUse::InternalNewImpl_() {
+                return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(XRenderFormConfig_WidgetsEntry_DoNotUse),
+                                                          alignof(XRenderFormConfig_WidgetsEntry_DoNotUse));
+              }
+              PROTOBUF_CONSTINIT
+              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+              const ::google::protobuf::internal::ClassDataFull XRenderFormConfig_WidgetsEntry_DoNotUse::_class_data_ = {
+                  ::google::protobuf::internal::ClassData{
+                      &_XRenderFormConfig_WidgetsEntry_DoNotUse_default_instance_._instance,
+                      &_table_.header,
+                      nullptr,  // OnDemandRegisterArenaDtor
+                      nullptr,  // IsInitialized
+                      &XRenderFormConfig_WidgetsEntry_DoNotUse::MergeImpl,
+                      ::google::protobuf::Message::GetNewImpl<XRenderFormConfig_WidgetsEntry_DoNotUse>(),
+              #if defined(PROTOBUF_CUSTOM_VTABLE)
+                      &XRenderFormConfig_WidgetsEntry_DoNotUse::SharedDtor,
+                      static_cast<void (::google::protobuf::MessageLite::*)()>(
+                          &XRenderFormConfig_WidgetsEntry_DoNotUse::ClearImpl),
+                          ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+                          ,
+              #endif  // PROTOBUF_CUSTOM_VTABLE
+                      PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_._cached_size_),
+                      false,
+                  },
+                  &XRenderFormConfig_WidgetsEntry_DoNotUse::kDescriptorMethods,
+                  &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto,
+                  nullptr,  // tracker
+              };
+              const ::google::protobuf::internal::ClassData* XRenderFormConfig_WidgetsEntry_DoNotUse::GetClassData() const {
+                ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+                ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+                return _class_data_.base();
+              }
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 1, 61, 2> XRenderFormConfig_WidgetsEntry_DoNotUse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::DiscardEverythingFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderFormConfig_WidgetsEntry_DoNotUse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // .croupier.common.v1.XRenderWidget value = 2 [json_name = "value"];
+    {::_pbi::TcParser::FastMtS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.value_)}},
+    // string key = 1 [json_name = "key"];
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.key_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string key = 1 [json_name = "key"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.key_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .croupier.common.v1.XRenderWidget value = 2 [json_name = "value"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig_WidgetsEntry_DoNotUse, _impl_.value_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderWidget>()},
+  }}, {{
+    "\61\3\0\0\0\0\0\0"
+    "croupier.common.v1.XRenderFormConfig.WidgetsEntry"
+    "key"
+  }},
+};
+
+// ===================================================================
+
+class XRenderFormConfig::_Internal {
+ public:
+};
+
+XRenderFormConfig::XRenderFormConfig(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:croupier.common.v1.XRenderFormConfig)
+}
+inline PROTOBUF_NDEBUG_INLINE XRenderFormConfig::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::croupier::common::v1::XRenderFormConfig& from_msg)
+      : widgets_{visibility, arena, from.widgets_},
+        display_order_{visibility, arena, from.display_order_},
+        layout_type_(arena, from.layout_type_),
+        label_align_(arena, from.label_align_),
+        _cached_size_{0} {}
+
+XRenderFormConfig::XRenderFormConfig(
+    ::google::protobuf::Arena* arena,
+    const XRenderFormConfig& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  XRenderFormConfig* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, column_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, column_),
+           offsetof(Impl_, colon_) -
+               offsetof(Impl_, column_) +
+               sizeof(Impl_::colon_));
+
+  // @@protoc_insertion_point(copy_constructor:croupier.common.v1.XRenderFormConfig)
+}
+inline PROTOBUF_NDEBUG_INLINE XRenderFormConfig::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : widgets_{visibility, arena},
+        display_order_{visibility, arena},
+        layout_type_(arena),
+        label_align_(arena),
+        _cached_size_{0} {}
+
+inline void XRenderFormConfig::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, column_),
+           0,
+           offsetof(Impl_, colon_) -
+               offsetof(Impl_, column_) +
+               sizeof(Impl_::colon_));
+}
+XRenderFormConfig::~XRenderFormConfig() {
+  // @@protoc_insertion_point(destructor:croupier.common.v1.XRenderFormConfig)
+  SharedDtor(*this);
+}
+inline void XRenderFormConfig::SharedDtor(MessageLite& self) {
+  XRenderFormConfig& this_ = static_cast<XRenderFormConfig&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.layout_type_.Destroy();
+  this_._impl_.label_align_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* XRenderFormConfig::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) XRenderFormConfig(arena);
+}
+constexpr auto XRenderFormConfig::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.widgets_) +
+          decltype(XRenderFormConfig::_impl_.widgets_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.widgets_) +
+          decltype(XRenderFormConfig::_impl_.widgets_)::
+              InternalGetArenaOffsetAlt(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.display_order_) +
+          decltype(XRenderFormConfig::_impl_.display_order_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(XRenderFormConfig), alignof(XRenderFormConfig), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&XRenderFormConfig::PlacementNew_,
+                                 sizeof(XRenderFormConfig),
+                                 alignof(XRenderFormConfig));
+  }
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull XRenderFormConfig::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_XRenderFormConfig_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &XRenderFormConfig::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<XRenderFormConfig>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &XRenderFormConfig::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<XRenderFormConfig>(), &XRenderFormConfig::ByteSizeLong,
+            &XRenderFormConfig::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_._cached_size_),
+        false,
+    },
+    &XRenderFormConfig::kDescriptorMethods,
+    &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* XRenderFormConfig::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 7, 2, 87, 2> XRenderFormConfig::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    7, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967168,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    7,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderFormConfig>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string layout_type = 1 [json_name = "layoutType"];
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.layout_type_)}},
+    // int32 column = 2 [json_name = "column"];
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(XRenderFormConfig, _impl_.column_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.column_)}},
+    // string label_align = 3 [json_name = "labelAlign"];
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.label_align_)}},
+    // int32 label_width = 4 [json_name = "labelWidth"];
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(XRenderFormConfig, _impl_.label_width_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.label_width_)}},
+    // bool colon = 5 [json_name = "colon"];
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(XRenderFormConfig, _impl_.colon_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.colon_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated string display_order = 7 [json_name = "displayOrder"];
+    {::_pbi::TcParser::FastUR1,
+     {58, 63, 0, PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.display_order_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string layout_type = 1 [json_name = "layoutType"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.layout_type_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 column = 2 [json_name = "column"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.column_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string label_align = 3 [json_name = "labelAlign"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.label_align_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 label_width = 4 [json_name = "labelWidth"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.label_width_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool colon = 5 [json_name = "colon"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.colon_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // map<string, .croupier.common.v1.XRenderWidget> widgets = 6 [json_name = "widgets"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.widgets_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
+    // repeated string display_order = 7 [json_name = "displayOrder"];
+    {PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.display_order_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+  }}, {{
+    {::_pbi::TcParser::GetMapAuxInfo<
+        decltype(XRenderFormConfig()._impl_.widgets_)>(
+        1, 0, 0, 9,
+        11)},
+    {::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderWidget>()},
+  }}, {{
+    "\44\13\0\13\0\0\7\15"
+    "croupier.common.v1.XRenderFormConfig"
+    "layout_type"
+    "label_align"
+    "widgets"
+    "display_order"
+  }},
+};
+
+PROTOBUF_NOINLINE void XRenderFormConfig::Clear() {
+// @@protoc_insertion_point(message_clear_start:croupier.common.v1.XRenderFormConfig)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.widgets_.Clear();
+  _impl_.display_order_.Clear();
+  _impl_.layout_type_.ClearToEmpty();
+  _impl_.label_align_.ClearToEmpty();
+  ::memset(&_impl_.column_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.colon_) -
+      reinterpret_cast<char*>(&_impl_.column_)) + sizeof(_impl_.colon_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* XRenderFormConfig::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const XRenderFormConfig& this_ = static_cast<const XRenderFormConfig&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* XRenderFormConfig::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const XRenderFormConfig& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:croupier.common.v1.XRenderFormConfig)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // string layout_type = 1 [json_name = "layoutType"];
+          if (!this_._internal_layout_type().empty()) {
+            const std::string& _s = this_._internal_layout_type();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderFormConfig.layout_type");
+            target = stream->WriteStringMaybeAliased(1, _s, target);
+          }
+
+          // int32 column = 2 [json_name = "column"];
+          if (this_._internal_column() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<2>(
+                    stream, this_._internal_column(), target);
+          }
+
+          // string label_align = 3 [json_name = "labelAlign"];
+          if (!this_._internal_label_align().empty()) {
+            const std::string& _s = this_._internal_label_align();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderFormConfig.label_align");
+            target = stream->WriteStringMaybeAliased(3, _s, target);
+          }
+
+          // int32 label_width = 4 [json_name = "labelWidth"];
+          if (this_._internal_label_width() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<4>(
+                    stream, this_._internal_label_width(), target);
+          }
+
+          // bool colon = 5 [json_name = "colon"];
+          if (this_._internal_colon() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteBoolToArray(
+                5, this_._internal_colon(), target);
+          }
+
+          // map<string, .croupier.common.v1.XRenderWidget> widgets = 6 [json_name = "widgets"];
+          if (!this_._internal_widgets().empty()) {
+            using MapType = ::google::protobuf::Map<std::string, ::croupier::common::v1::XRenderWidget>;
+            using WireHelper = _pbi::MapEntryFuncs<std::string, ::croupier::common::v1::XRenderWidget,
+                                           _pbi::WireFormatLite::TYPE_STRING,
+                                           _pbi::WireFormatLite::TYPE_MESSAGE>;
+            const auto& field = this_._internal_widgets();
+
+            if (stream->IsSerializationDeterministic() && field.size() > 1) {
+              for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
+                target = WireHelper::InternalSerialize(
+                    6, entry.first, entry.second, target, stream);
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderFormConfig.widgets");
+              }
+            } else {
+              for (const auto& entry : field) {
+                target = WireHelper::InternalSerialize(
+                    6, entry.first, entry.second, target, stream);
+                ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                    entry.first.data(), static_cast<int>(entry.first.length()),
+ ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderFormConfig.widgets");
+              }
+            }
+          }
+
+          // repeated string display_order = 7 [json_name = "displayOrder"];
+          for (int i = 0, n = this_._internal_display_order_size(); i < n; ++i) {
+            const auto& s = this_._internal_display_order().Get(i);
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.XRenderFormConfig.display_order");
+            target = stream->WriteString(7, s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:croupier.common.v1.XRenderFormConfig)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t XRenderFormConfig::ByteSizeLong(const MessageLite& base) {
+          const XRenderFormConfig& this_ = static_cast<const XRenderFormConfig&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t XRenderFormConfig::ByteSizeLong() const {
+          const XRenderFormConfig& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:croupier.common.v1.XRenderFormConfig)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // map<string, .croupier.common.v1.XRenderWidget> widgets = 6 [json_name = "widgets"];
+            {
+              total_size +=
+                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_widgets_size());
+              for (const auto& entry : this_._internal_widgets()) {
+                total_size += _pbi::MapEntryFuncs<std::string, ::croupier::common::v1::XRenderWidget,
+                                               _pbi::WireFormatLite::TYPE_STRING,
+                                               _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
+              }
+            }
+            // repeated string display_order = 7 [json_name = "displayOrder"];
+            {
+              total_size +=
+                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_display_order().size());
+              for (int i = 0, n = this_._internal_display_order().size(); i < n; ++i) {
+                total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+                    this_._internal_display_order().Get(i));
+              }
+            }
+          }
+           {
+            // string layout_type = 1 [json_name = "layoutType"];
+            if (!this_._internal_layout_type().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_layout_type());
+            }
+            // string label_align = 3 [json_name = "labelAlign"];
+            if (!this_._internal_label_align().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_label_align());
+            }
+            // int32 column = 2 [json_name = "column"];
+            if (this_._internal_column() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_column());
+            }
+            // int32 label_width = 4 [json_name = "labelWidth"];
+            if (this_._internal_label_width() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_label_width());
+            }
+            // bool colon = 5 [json_name = "colon"];
+            if (this_._internal_colon() != 0) {
+              total_size += 2;
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void XRenderFormConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<XRenderFormConfig*>(&to_msg);
+  auto& from = static_cast<const XRenderFormConfig&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:croupier.common.v1.XRenderFormConfig)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.widgets_.MergeFrom(from._impl_.widgets_);
+  _this->_internal_mutable_display_order()->MergeFrom(from._internal_display_order());
+  if (!from._internal_layout_type().empty()) {
+    _this->_internal_set_layout_type(from._internal_layout_type());
+  }
+  if (!from._internal_label_align().empty()) {
+    _this->_internal_set_label_align(from._internal_label_align());
+  }
+  if (from._internal_column() != 0) {
+    _this->_impl_.column_ = from._impl_.column_;
+  }
+  if (from._internal_label_width() != 0) {
+    _this->_impl_.label_width_ = from._impl_.label_width_;
+  }
+  if (from._internal_colon() != 0) {
+    _this->_impl_.colon_ = from._impl_.colon_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void XRenderFormConfig::CopyFrom(const XRenderFormConfig& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:croupier.common.v1.XRenderFormConfig)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void XRenderFormConfig::InternalSwap(XRenderFormConfig* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.widgets_.InternalSwap(&other->_impl_.widgets_);
+  _impl_.display_order_.InternalSwap(&other->_impl_.display_order_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.layout_type_, &other->_impl_.layout_type_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.label_align_, &other->_impl_.label_align_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.colon_)
+      + sizeof(XRenderFormConfig::_impl_.colon_)
+      - PROTOBUF_FIELD_OFFSET(XRenderFormConfig, _impl_.column_)>(
+          reinterpret_cast<char*>(&_impl_.column_),
+          reinterpret_cast<char*>(&other->_impl_.column_));
+}
+
+::google::protobuf::Metadata XRenderFormConfig::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class RouteDisplayConfig::_Internal {
+ public:
+  using HasBits =
+      decltype(std::declval<RouteDisplayConfig>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_._has_bits_);
+};
+
+RouteDisplayConfig::RouteDisplayConfig(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:croupier.common.v1.RouteDisplayConfig)
+}
+inline PROTOBUF_NDEBUG_INLINE RouteDisplayConfig::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::croupier::common::v1::RouteDisplayConfig& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        hidden_fields_{visibility, arena, from.hidden_fields_},
+        required_fields_{visibility, arena, from.required_fields_},
+        route_pattern_(arena, from.route_pattern_),
+        submit_button_text_(arena, from.submit_button_text_) {}
+
+RouteDisplayConfig::RouteDisplayConfig(
+    ::google::protobuf::Arena* arena,
+    const RouteDisplayConfig& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  RouteDisplayConfig* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.form_config_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::croupier::common::v1::XRenderFormConfig>(
+                              arena, *from._impl_.form_config_)
+                        : nullptr;
+  _impl_.compact_mode_ = from._impl_.compact_mode_;
+
+  // @@protoc_insertion_point(copy_constructor:croupier.common.v1.RouteDisplayConfig)
+}
+inline PROTOBUF_NDEBUG_INLINE RouteDisplayConfig::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        hidden_fields_{visibility, arena},
+        required_fields_{visibility, arena},
+        route_pattern_(arena),
+        submit_button_text_(arena) {}
+
+inline void RouteDisplayConfig::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, form_config_),
+           0,
+           offsetof(Impl_, compact_mode_) -
+               offsetof(Impl_, form_config_) +
+               sizeof(Impl_::compact_mode_));
+}
+RouteDisplayConfig::~RouteDisplayConfig() {
+  // @@protoc_insertion_point(destructor:croupier.common.v1.RouteDisplayConfig)
+  SharedDtor(*this);
+}
+inline void RouteDisplayConfig::SharedDtor(MessageLite& self) {
+  RouteDisplayConfig& this_ = static_cast<RouteDisplayConfig&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.route_pattern_.Destroy();
+  this_._impl_.submit_button_text_.Destroy();
+  delete this_._impl_.form_config_;
+  this_._impl_.~Impl_();
+}
+
+inline void* RouteDisplayConfig::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) RouteDisplayConfig(arena);
+}
+constexpr auto RouteDisplayConfig::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.hidden_fields_) +
+          decltype(RouteDisplayConfig::_impl_.hidden_fields_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.required_fields_) +
+          decltype(RouteDisplayConfig::_impl_.required_fields_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::CopyInit(
+        sizeof(RouteDisplayConfig), alignof(RouteDisplayConfig), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&RouteDisplayConfig::PlacementNew_,
+                                 sizeof(RouteDisplayConfig),
+                                 alignof(RouteDisplayConfig));
+  }
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull RouteDisplayConfig::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_RouteDisplayConfig_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &RouteDisplayConfig::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<RouteDisplayConfig>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &RouteDisplayConfig::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<RouteDisplayConfig>(), &RouteDisplayConfig::ByteSizeLong,
+            &RouteDisplayConfig::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_._cached_size_),
+        false,
+    },
+    &RouteDisplayConfig::kDescriptorMethods,
+    &descriptor_table_croupier_2fcommon_2fv1_2fui_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* RouteDisplayConfig::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 6, 1, 105, 2> RouteDisplayConfig::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_._has_bits_),
+    0, // no _extensions_
+    6, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967232,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    6,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::croupier::common::v1::RouteDisplayConfig>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string route_pattern = 1 [json_name = "routePattern"];
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.route_pattern_)}},
+    // .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+    {::_pbi::TcParser::FastMtS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.form_config_)}},
+    // repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+    {::_pbi::TcParser::FastUR1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.hidden_fields_)}},
+    // repeated string required_fields = 4 [json_name = "requiredFields"];
+    {::_pbi::TcParser::FastUR1,
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.required_fields_)}},
+    // string submit_button_text = 5 [json_name = "submitButtonText"];
+    {::_pbi::TcParser::FastUS1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.submit_button_text_)}},
+    // bool compact_mode = 6 [json_name = "compactMode"];
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(RouteDisplayConfig, _impl_.compact_mode_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.compact_mode_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string route_pattern = 1 [json_name = "routePattern"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.route_pattern_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.form_config_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.hidden_fields_), -1, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // repeated string required_fields = 4 [json_name = "requiredFields"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.required_fields_), -1, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // string submit_button_text = 5 [json_name = "submitButtonText"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.submit_button_text_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // bool compact_mode = 6 [json_name = "compactMode"];
+    {PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.compact_mode_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::croupier::common::v1::XRenderFormConfig>()},
+  }}, {{
+    "\45\15\0\15\17\22\0\0"
+    "croupier.common.v1.RouteDisplayConfig"
+    "route_pattern"
+    "hidden_fields"
+    "required_fields"
+    "submit_button_text"
+  }},
+};
+
+PROTOBUF_NOINLINE void RouteDisplayConfig::Clear() {
+// @@protoc_insertion_point(message_clear_start:croupier.common.v1.RouteDisplayConfig)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.hidden_fields_.Clear();
+  _impl_.required_fields_.Clear();
+  _impl_.route_pattern_.ClearToEmpty();
+  _impl_.submit_button_text_.ClearToEmpty();
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.form_config_ != nullptr);
+    _impl_.form_config_->Clear();
+  }
+  _impl_.compact_mode_ = false;
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* RouteDisplayConfig::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const RouteDisplayConfig& this_ = static_cast<const RouteDisplayConfig&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* RouteDisplayConfig::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const RouteDisplayConfig& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:croupier.common.v1.RouteDisplayConfig)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // string route_pattern = 1 [json_name = "routePattern"];
+          if (!this_._internal_route_pattern().empty()) {
+            const std::string& _s = this_._internal_route_pattern();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.RouteDisplayConfig.route_pattern");
+            target = stream->WriteStringMaybeAliased(1, _s, target);
+          }
+
+          cached_has_bits = this_._impl_._has_bits_[0];
+          // .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+          if (cached_has_bits & 0x00000001u) {
+            target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                2, *this_._impl_.form_config_, this_._impl_.form_config_->GetCachedSize(), target,
+                stream);
+          }
+
+          // repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+          for (int i = 0, n = this_._internal_hidden_fields_size(); i < n; ++i) {
+            const auto& s = this_._internal_hidden_fields().Get(i);
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.RouteDisplayConfig.hidden_fields");
+            target = stream->WriteString(3, s, target);
+          }
+
+          // repeated string required_fields = 4 [json_name = "requiredFields"];
+          for (int i = 0, n = this_._internal_required_fields_size(); i < n; ++i) {
+            const auto& s = this_._internal_required_fields().Get(i);
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.RouteDisplayConfig.required_fields");
+            target = stream->WriteString(4, s, target);
+          }
+
+          // string submit_button_text = 5 [json_name = "submitButtonText"];
+          if (!this_._internal_submit_button_text().empty()) {
+            const std::string& _s = this_._internal_submit_button_text();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "croupier.common.v1.RouteDisplayConfig.submit_button_text");
+            target = stream->WriteStringMaybeAliased(5, _s, target);
+          }
+
+          // bool compact_mode = 6 [json_name = "compactMode"];
+          if (this_._internal_compact_mode() != 0) {
+            target = stream->EnsureSpace(target);
+            target = ::_pbi::WireFormatLite::WriteBoolToArray(
+                6, this_._internal_compact_mode(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:croupier.common.v1.RouteDisplayConfig)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t RouteDisplayConfig::ByteSizeLong(const MessageLite& base) {
+          const RouteDisplayConfig& this_ = static_cast<const RouteDisplayConfig&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t RouteDisplayConfig::ByteSizeLong() const {
+          const RouteDisplayConfig& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:croupier.common.v1.RouteDisplayConfig)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // repeated string hidden_fields = 3 [json_name = "hiddenFields"];
+            {
+              total_size +=
+                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_hidden_fields().size());
+              for (int i = 0, n = this_._internal_hidden_fields().size(); i < n; ++i) {
+                total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+                    this_._internal_hidden_fields().Get(i));
+              }
+            }
+            // repeated string required_fields = 4 [json_name = "requiredFields"];
+            {
+              total_size +=
+                  1 * ::google::protobuf::internal::FromIntSize(this_._internal_required_fields().size());
+              for (int i = 0, n = this_._internal_required_fields().size(); i < n; ++i) {
+                total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+                    this_._internal_required_fields().Get(i));
+              }
+            }
+          }
+           {
+            // string route_pattern = 1 [json_name = "routePattern"];
+            if (!this_._internal_route_pattern().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_route_pattern());
+            }
+            // string submit_button_text = 5 [json_name = "submitButtonText"];
+            if (!this_._internal_submit_button_text().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_submit_button_text());
+            }
+          }
+           {
+            // .croupier.common.v1.XRenderFormConfig form_config = 2 [json_name = "formConfig"];
+            cached_has_bits = this_._impl_._has_bits_[0];
+            if (cached_has_bits & 0x00000001u) {
+              total_size += 1 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.form_config_);
+            }
+          }
+           {
+            // bool compact_mode = 6 [json_name = "compactMode"];
+            if (this_._internal_compact_mode() != 0) {
+              total_size += 2;
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void RouteDisplayConfig::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<RouteDisplayConfig*>(&to_msg);
+  auto& from = static_cast<const RouteDisplayConfig&>(from_msg);
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:croupier.common.v1.RouteDisplayConfig)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_hidden_fields()->MergeFrom(from._internal_hidden_fields());
+  _this->_internal_mutable_required_fields()->MergeFrom(from._internal_required_fields());
+  if (!from._internal_route_pattern().empty()) {
+    _this->_internal_set_route_pattern(from._internal_route_pattern());
+  }
+  if (!from._internal_submit_button_text().empty()) {
+    _this->_internal_set_submit_button_text(from._internal_submit_button_text());
+  }
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(from._impl_.form_config_ != nullptr);
+    if (_this->_impl_.form_config_ == nullptr) {
+      _this->_impl_.form_config_ =
+          ::google::protobuf::Message::CopyConstruct<::croupier::common::v1::XRenderFormConfig>(arena, *from._impl_.form_config_);
+    } else {
+      _this->_impl_.form_config_->MergeFrom(*from._impl_.form_config_);
+    }
+  }
+  if (from._internal_compact_mode() != 0) {
+    _this->_impl_.compact_mode_ = from._impl_.compact_mode_;
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RouteDisplayConfig::CopyFrom(const RouteDisplayConfig& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:croupier.common.v1.RouteDisplayConfig)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void RouteDisplayConfig::InternalSwap(RouteDisplayConfig* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.hidden_fields_.InternalSwap(&other->_impl_.hidden_fields_);
+  _impl_.required_fields_.InternalSwap(&other->_impl_.required_fields_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.route_pattern_, &other->_impl_.route_pattern_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.submit_button_text_, &other->_impl_.submit_button_text_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.compact_mode_)
+      + sizeof(RouteDisplayConfig::_impl_.compact_mode_)
+      - PROTOBUF_FIELD_OFFSET(RouteDisplayConfig, _impl_.form_config_)>(
+          reinterpret_cast<char*>(&_impl_.form_config_),
+          reinterpret_cast<char*>(&other->_impl_.form_config_));
+}
+
+::google::protobuf::Metadata RouteDisplayConfig::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
