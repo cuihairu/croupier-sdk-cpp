@@ -25,7 +25,7 @@
     },
     {
       "name": "protobuf",
-      "version": "5.29.2"
+      "version": "5.29.5"
     },
     {
       "name": "abseil",
