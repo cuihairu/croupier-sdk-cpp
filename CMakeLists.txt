@@ -278,14 +278,16 @@ if(BUILD_SHARED_LIBS)
         EXPORT_NAME "croupier-sdk"
     )
 
-    # Set output directories for the shared library
-    # On Windows: .dll goes to bin/, .lib (import library) stays in build root for linking
+    # Set output directories for the shared library (vcpkg-compatible layout)
+    # - RUNTIME (.dll, .exe) → bin/
+    # - LIBRARY (.so, .dylib) → lib/
+    # - ARCHIVE (.lib import lib, .a) → lib/
     set_target_properties(croupier-sdk-shared PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-        # Keep import library in build root so linker can find it directly
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
+
 
     target_include_directories(croupier-sdk-shared
         PUBLIC
@@ -348,7 +350,7 @@ if(BUILD_STATIC_LIBS)
     set_target_properties(croupier-sdk-static PROPERTIES
         OUTPUT_NAME "croupier-sdk-static"
         EXPORT_NAME "croupier-sdk-static"
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
 
     target_include_directories(croupier-sdk-static
@@ -424,6 +426,9 @@ endif()
 
 # ========== Example Programs ==========
 if(BUILD_EXAMPLES)
+    # Add library search path for Windows import libraries
+    link_directories(${CMAKE_BINARY_DIR}/lib)
+
     # Basic example
     add_executable(croupier-example examples/example.cpp)
     target_link_libraries(croupier-example
