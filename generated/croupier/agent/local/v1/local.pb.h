@@ -708,8 +708,6 @@ class LocalFunctionDescriptor final : public ::google::protobuf::Message
     kOperationIdFieldNumber = 6,
     kInputSchemaFieldNumber = 8,
     kOutputSchemaFieldNumber = 9,
-    kXRenderSchemaFieldNumber = 10,
-    kXRenderUiSchemaFieldNumber = 11,
     kDeprecatedFieldNumber = 7,
   };
   // repeated string tags = 3 [json_name = "tags"];
@@ -846,38 +844,6 @@ class LocalFunctionDescriptor final : public ::google::protobuf::Message
   std::string* _internal_mutable_output_schema();
 
   public:
-  // string x_render_schema = 10 [json_name = "xRenderSchema"];
-  void clear_x_render_schema() ;
-  const std::string& x_render_schema() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_x_render_schema(Arg_&& arg, Args_... args);
-  std::string* mutable_x_render_schema();
-  PROTOBUF_NODISCARD std::string* release_x_render_schema();
-  void set_allocated_x_render_schema(std::string* value);
-
-  private:
-  const std::string& _internal_x_render_schema() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_x_render_schema(
-      const std::string& value);
-  std::string* _internal_mutable_x_render_schema();
-
-  public:
-  // string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
-  void clear_x_render_ui_schema() ;
-  const std::string& x_render_ui_schema() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_x_render_ui_schema(Arg_&& arg, Args_... args);
-  std::string* mutable_x_render_ui_schema();
-  PROTOBUF_NODISCARD std::string* release_x_render_ui_schema();
-  void set_allocated_x_render_ui_schema(std::string* value);
-
-  private:
-  const std::string& _internal_x_render_ui_schema() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_x_render_ui_schema(
-      const std::string& value);
-  std::string* _internal_mutable_x_render_ui_schema();
-
-  public:
   // bool deprecated = 7 [json_name = "deprecated"];
   void clear_deprecated() ;
   bool deprecated() const;
@@ -893,8 +859,8 @@ class LocalFunctionDescriptor final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 11, 0,
-      165, 2>
+      4, 9, 0,
+      132, 2>
       _table_;
 
   friend class ::google::protobuf::MessageLite;
@@ -919,8 +885,6 @@ class LocalFunctionDescriptor final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr operation_id_;
     ::google::protobuf::internal::ArenaStringPtr input_schema_;
     ::google::protobuf::internal::ArenaStringPtr output_schema_;
-    ::google::protobuf::internal::ArenaStringPtr x_render_schema_;
-    ::google::protobuf::internal::ArenaStringPtr x_render_ui_schema_;
     bool deprecated_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -2960,102 +2924,6 @@ inline void LocalFunctionDescriptor::set_allocated_output_schema(std::string* va
     _impl_.output_schema_.Set("", GetArena());
   }
   // @@protoc_insertion_point(field_set_allocated:croupier.agent.local.v1.LocalFunctionDescriptor.output_schema)
-}
-
-// string x_render_schema = 10 [json_name = "xRenderSchema"];
-inline void LocalFunctionDescriptor::clear_x_render_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_schema_.ClearToEmpty();
-}
-inline const std::string& LocalFunctionDescriptor::x_render_schema() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema)
-  return _internal_x_render_schema();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void LocalFunctionDescriptor::set_x_render_schema(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_schema_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema)
-}
-inline std::string* LocalFunctionDescriptor::mutable_x_render_schema() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_x_render_schema();
-  // @@protoc_insertion_point(field_mutable:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema)
-  return _s;
-}
-inline const std::string& LocalFunctionDescriptor::_internal_x_render_schema() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.x_render_schema_.Get();
-}
-inline void LocalFunctionDescriptor::_internal_set_x_render_schema(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_schema_.Set(value, GetArena());
-}
-inline std::string* LocalFunctionDescriptor::_internal_mutable_x_render_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.x_render_schema_.Mutable( GetArena());
-}
-inline std::string* LocalFunctionDescriptor::release_x_render_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema)
-  return _impl_.x_render_schema_.Release();
-}
-inline void LocalFunctionDescriptor::set_allocated_x_render_schema(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_schema_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.x_render_schema_.IsDefault()) {
-    _impl_.x_render_schema_.Set("", GetArena());
-  }
-  // @@protoc_insertion_point(field_set_allocated:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_schema)
-}
-
-// string x_render_ui_schema = 11 [json_name = "xRenderUiSchema"];
-inline void LocalFunctionDescriptor::clear_x_render_ui_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_ui_schema_.ClearToEmpty();
-}
-inline const std::string& LocalFunctionDescriptor::x_render_ui_schema() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema)
-  return _internal_x_render_ui_schema();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void LocalFunctionDescriptor::set_x_render_ui_schema(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_ui_schema_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema)
-}
-inline std::string* LocalFunctionDescriptor::mutable_x_render_ui_schema() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_x_render_ui_schema();
-  // @@protoc_insertion_point(field_mutable:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema)
-  return _s;
-}
-inline const std::string& LocalFunctionDescriptor::_internal_x_render_ui_schema() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.x_render_ui_schema_.Get();
-}
-inline void LocalFunctionDescriptor::_internal_set_x_render_ui_schema(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_ui_schema_.Set(value, GetArena());
-}
-inline std::string* LocalFunctionDescriptor::_internal_mutable_x_render_ui_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.x_render_ui_schema_.Mutable( GetArena());
-}
-inline std::string* LocalFunctionDescriptor::release_x_render_ui_schema() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema)
-  return _impl_.x_render_ui_schema_.Release();
-}
-inline void LocalFunctionDescriptor::set_allocated_x_render_ui_schema(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.x_render_ui_schema_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.x_render_ui_schema_.IsDefault()) {
-    _impl_.x_render_ui_schema_.Set("", GetArena());
-  }
-  // @@protoc_insertion_point(field_set_allocated:croupier.agent.local.v1.LocalFunctionDescriptor.x_render_ui_schema)
 }
 
 // -------------------------------------------------------------------
