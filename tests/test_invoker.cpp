@@ -8,6 +8,10 @@
 #include <string>
 #include <thread>
 
+#ifdef CROUPIER_SDK_ENABLE_GRPC
+#include "croupier/sdk/v1/invoker.grpc.pb.h"
+#endif
+
 using namespace croupier::sdk;
 
 TEST(InvokerTest, ValidateJsonBasic) {
@@ -50,21 +54,218 @@ TEST(InvokerTest, MockInvokeAndJobFlow) {
 
 namespace {
 
+// Test implementation of InvokerService for testing CroupierInvoker
+class TestInvokerServiceImpl final : public croupier::sdk::v1::InvokerService::Service {
+ public:
+  explicit TestInvokerServiceImpl(std::map<std::string, FunctionHandler> handlers)
+      : handlers_(std::move(handlers)) {
+    std::cout << "🎯 Local function service initialized, handler count: " << handlers_.size() << '\n';
+  }
+
+  void UpdateHandlers(const std::map<std::string, FunctionHandler>& handlers) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    handlers_ = handlers;
+  }
+
+  grpc::Status Invoke(grpc::ServerContext* context,
+                      const croupier::sdk::v1::InvokeRequest* request,
+                      croupier::sdk::v1::InvokeResponse* response) override {
+    (void)context;
+    const std::string& function_id = request->function_id();
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = handlers_.find(function_id);
+    if (it == handlers_.end()) {
+      return grpc::Status(grpc::StatusCode::NOT_FOUND,
+                          "Function not found: " + function_id);
+    }
+
+    try {
+      // Serialize metadata to JSON context
+      std::string ctx = "{";
+      bool first = true;
+      for (const auto& kv : request->metadata()) {
+        if (!first) ctx += ",";
+        ctx += "\"" + kv.first + "\":\"" + kv.second + "\"";
+        first = false;
+      }
+      ctx += "}";
+
+      std::string payload(request->payload().begin(), request->payload().end());
+      std::string result = it->second(ctx, payload);
+      response->set_payload(result);
+      return grpc::Status::OK;
+    } catch (const std::exception& e) {
+      return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
+    }
+  }
+
+  grpc::Status StartJob(grpc::ServerContext* context,
+                        const croupier::sdk::v1::InvokeRequest* request,
+                        croupier::sdk::v1::StartJobResponse* response) override {
+    (void)context;
+    const std::string& function_id = request->function_id();
+    std::cout << "Starting job for function: " << function_id << '\n';
+
+    FunctionHandler handler;
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      auto it = handlers_.find(function_id);
+      if (it == handlers_.end()) {
+        return grpc::Status(grpc::StatusCode::NOT_FOUND,
+                            "Function not found: " + function_id);
+      }
+      handler = it->second;
+    }
+
+    // Generate job ID
+    std::string job_id = "job-" + function_id + "-" + std::to_string(++job_counter_);
+    response->set_job_id(job_id);
+
+    // Start job in background thread
+    std::string payload(request->payload().begin(), request->payload().end());
+    std::string ctx = "{}";
+
+    auto state = std::make_shared<JobState>();
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      jobs_[job_id] = state;
+    }
+
+    std::thread([job_id, handler, ctx, payload, state]() {
+      // Send started event
+      {
+        std::lock_guard<std::mutex> lock(state->mutex);
+        croupier::sdk::v1::JobEvent started;
+        started.set_type("started");
+        started.set_message("Job started");
+        state->events.push_back(started);
+        state->cv.notify_all();
+      }
+
+      try {
+        std::string result = handler(ctx, payload);
+
+        std::lock_guard<std::mutex> lock(state->mutex);
+        if (!state->cancelled) {
+          croupier::sdk::v1::JobEvent completed;
+          completed.set_type("completed");
+          completed.set_message("Job completed");
+          completed.set_payload(result);
+          state->events.push_back(completed);
+          state->done = true;
+        }
+        state->cv.notify_all();
+      } catch (const std::exception& e) {
+        std::lock_guard<std::mutex> lock(state->mutex);
+        croupier::sdk::v1::JobEvent error;
+        error.set_type("error");
+        error.set_message(e.what());
+        state->events.push_back(error);
+        state->done = true;
+        state->cv.notify_all();
+      }
+    }).detach();
+
+    return grpc::Status::OK;
+  }
+
+  grpc::Status StreamJob(grpc::ServerContext* context,
+                         const croupier::sdk::v1::JobStreamRequest* request,
+                         grpc::ServerWriter<croupier::sdk::v1::JobEvent>* writer) override {
+    const std::string& job_id = request->job_id();
+
+    std::shared_ptr<JobState> state;
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      auto it = jobs_.find(job_id);
+      if (it == jobs_.end()) {
+        return grpc::Status(grpc::StatusCode::NOT_FOUND, "Job not found: " + job_id);
+      }
+      state = it->second;
+    }
+
+    size_t sent = 0;
+    while (!context->IsCancelled()) {
+      std::unique_lock<std::mutex> lock(state->mutex);
+      state->cv.wait_for(lock, std::chrono::milliseconds(100), [&]() {
+        return sent < state->events.size() || state->done;
+      });
+
+      while (sent < state->events.size()) {
+        writer->Write(state->events[sent]);
+        ++sent;
+      }
+
+      if (state->done) {
+        break;
+      }
+    }
+
+    return grpc::Status::OK;
+  }
+
+  grpc::Status CancelJob(grpc::ServerContext* context,
+                         const croupier::sdk::v1::CancelJobRequest* request,
+                         croupier::sdk::v1::StartJobResponse* response) override {
+    (void)context;
+    const std::string& job_id = request->job_id();
+    response->set_job_id(job_id);
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = jobs_.find(job_id);
+    if (it == jobs_.end()) {
+      return grpc::Status(grpc::StatusCode::NOT_FOUND, "Job not found: " + job_id);
+    }
+
+    auto& state = it->second;
+    {
+      std::lock_guard<std::mutex> state_lock(state->mutex);
+      if (!state->done) {
+        state->cancelled = true;
+        croupier::sdk::v1::JobEvent cancelled;
+        cancelled.set_type("cancelled");
+        cancelled.set_message("Job cancelled");
+        state->events.push_back(cancelled);
+        state->done = true;
+      }
+      state->cv.notify_all();
+    }
+
+    return grpc::Status::OK;
+  }
+
+ private:
+  struct JobState {
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::vector<croupier::sdk::v1::JobEvent> events;
+    bool done = false;
+    bool cancelled = false;
+  };
+
+  std::map<std::string, FunctionHandler> handlers_;
+  std::mutex mutex_;
+  std::atomic<uint64_t> job_counter_{0};
+  std::map<std::string, std::shared_ptr<JobState>> jobs_;
+};
+
 class InProcessFunctionServer {
  public:
   InProcessFunctionServer(std::map<std::string, FunctionHandler> handlers)
-      : handlers_(std::move(handlers)),
-        service_(handlers_) {}
+      : service_(std::make_unique<TestInvokerServiceImpl>(std::move(handlers))) {}
 
   void Start() {
     grpc::ServerBuilder builder;
     int port = 0;
     builder.AddListeningPort("127.0.0.1:0", grpc::InsecureServerCredentials(), &port);
-    builder.RegisterService(&service_);
+    builder.RegisterService(service_.get());
     server_ = builder.BuildAndStart();
     ASSERT_TRUE(server_);
     ASSERT_GT(port, 0);
     address_ = "127.0.0.1:" + std::to_string(port);
+    std::cout << "[INFO] [croupier] Connecting to server/agent at: " << address_ << '\n';
+    std::cout << "[INFO] [croupier] Connected to: " << address_ << '\n';
   }
 
   void Stop() {
@@ -77,8 +278,7 @@ class InProcessFunctionServer {
   const std::string& address() const { return address_; }
 
  private:
-  std::map<std::string, FunctionHandler> handlers_;
-  croupier::sdk::grpc_service::LocalFunctionServiceImpl service_;
+  std::unique_ptr<TestInvokerServiceImpl> service_;
   std::unique_ptr<grpc::Server> server_;
   std::string address_;
 };
