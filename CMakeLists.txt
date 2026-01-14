@@ -33,6 +33,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Enable position independent code for shared libraries
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Windows DLL symbol export: automatically export all symbols from shared library
+# This ensures the import library (.lib) is generated when building DLLs
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 # ========== Build Options ==========
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(BUILD_STATIC_LIBS "Build static libraries" ON)
