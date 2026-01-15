@@ -82,6 +82,13 @@ if(ENABLE_VCPKG)
             CACHE STRING "Vcpkg toolchain file")
     endif()
 
+    # Set vcpkg overlay ports for custom versions
+    get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+    if(EXISTS "${PROJECT_ROOT}/vcpkg-overlays/ports")
+        set(ENV{VCPKG_OVERLAY_PORTS} "${PROJECT_ROOT}/vcpkg-overlays/ports")
+        message(STATUS "Using vcpkg overlay ports: ${PROJECT_ROOT}/vcpkg-overlays/ports")
+    endif()
+
     # vcpkg triplet configuration
     if(NOT VCPKG_TARGET_TRIPLET)
         if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -172,7 +179,7 @@ if(MSVC)
     # MSVC specific settings
     # Use /W4 for SDK code but disable warnings-as-errors for specific warnings
     # from protobuf generated code
-    add_compile_options(/W4)
+    add_compile_options(/W4 /utf-8)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     # Disable C4100 (unreferenced parameter) and C4267 (size_t to int conversion)
     # for generated protobuf code - these are common in generated code

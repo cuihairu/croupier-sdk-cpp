@@ -21,7 +21,7 @@
   "overrides": [
     {
       "name": "grpc",
-      "version": "1.69.0"
+      "version": "1.71.0"
     },
     {
       "name": "protobuf",
