@@ -170,8 +170,8 @@ jobs:
       if: matrix.arch == 'x64' && !matrix.cross_compile
       run: |
         if [ "$RUNNER_OS" = "Windows" ]; then
-          # Add vcpkg bin directory to PATH for DLL discovery
-          export PATH="$PWD/build/vcpkg_installed/${{ matrix.vcpkg_triplet }}/bin:$PATH"
+          # Add build output directory and vcpkg bin directory to PATH for DLL discovery
+          export PATH="$PWD/build/bin:$PWD/build/vcpkg_installed/${{ matrix.vcpkg_triplet }}/bin:$PATH"
         fi
         cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
       shell: bash
