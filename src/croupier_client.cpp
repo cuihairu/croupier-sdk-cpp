@@ -31,32 +31,41 @@
 
 // Logging macros with configuration support
 // These check the global logger configuration before outputting
+// Note: These macros support stream-style syntax: SDK_LOG_INFO("value: " << value)
 #define SDK_LOG_INFO(msg)                                                                        \
     do {                                                                                         \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) \
             break;                                                                               \
-        std::cout << "[INFO] [croupier] " << (msg) << '\n';                                      \
+        std::ostringstream oss_;                                                                 \
+        oss_ << msg;                                                                             \
+        std::cout << "[INFO] [croupier] " << oss_.str() << '\n';                                 \
     } while (0)
 
 #define SDK_LOG_WARN(msg)                                                                        \
     do {                                                                                         \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) \
             break;                                                                               \
-        std::cerr << "[WARN] [croupier] " << (msg) << '\n';                                      \
+        std::ostringstream oss_;                                                                 \
+        oss_ << msg;                                                                             \
+        std::cerr << "[WARN] [croupier] " << oss_.str() << '\n';                                 \
     } while (0)
 
 #define SDK_LOG_ERROR(msg)                                                                      \
     do {                                                                                        \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) \
             break;                                                                              \
-        std::cerr << "[ERROR] [croupier] " << (msg) << '\n';                                    \
+        std::ostringstream oss_;                                                                \
+        oss_ << msg;                                                                            \
+        std::cerr << "[ERROR] [croupier] " << oss_.str() << '\n';                               \
     } while (0)
 
 #define SDK_LOG_DEBUG(msg)                                                                        \
     do {                                                                                          \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) \
             break;                                                                                \
-        std::cout << "[DEBUG] [croupier] " << (msg) << '\n';                                      \
+        std::ostringstream oss_;                                                                  \
+        oss_ << msg;                                                                              \
+        std::cout << "[DEBUG] [croupier] " << oss_.str() << '\n';                                 \
     } while (0)
 
 namespace croupier {
