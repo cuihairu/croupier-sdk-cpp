@@ -169,8 +169,8 @@ ConfigManager::ApplicationConfig ConfigManager::LoadApplicationConfig(const std:
     // 4. 加载全局设置
     std::string global_config_file = config_dir + "/global.json";
     try {
-        std::string content = LoadFileContent(global_config_file);
 #ifdef CROUPIER_SDK_ENABLE_JSON
+        std::string content = LoadFileContent(global_config_file);
         json global_json = json::parse(content);
         for (const auto& [key, value] : global_json.items()) {
             if (value.is_string()) {
@@ -324,11 +324,20 @@ std::vector<std::string> ConfigManager::ValidateApplicationConfig(const Applicat
         // 验证字段定义
         for (const auto& [field_name, field] : schema.fields) {
             if (field.type.empty()) {
-                errors.push_back(prefix + "字段[" + field_name + "]类型不能为空");
+                std::string error_msg = prefix;
+                error_msg += "字段[";
+                error_msg += field_name;
+                error_msg += "]类型不能为空";
+                errors.push_back(error_msg);
             }
             if (field.type != "string" && field.type != "int" && field.type != "float" && field.type != "bool" &&
                 field.type != "object" && field.type != "array") {
-                errors.push_back(prefix + "字段[" + field_name + "]类型无效: " + field.type);
+                std::string error_msg = prefix;
+                error_msg += "字段[";
+                error_msg += field_name;
+                error_msg += "]类型无效: ";
+                error_msg += field.type;
+                errors.push_back(error_msg);
             }
         }
     }
@@ -466,7 +475,10 @@ std::vector<std::string> ConfigManager::ListFiles(const std::string& directory, 
             std::string filename = entry->d_name;
             if (filename.length() >= file_extension.length() &&
                 filename.substr(filename.length() - file_extension.length()) == file_extension) {
-                files.push_back(directory + "/" + filename);
+                std::string file_path = directory;
+                file_path += "/";
+                file_path += filename;
+                files.push_back(file_path);
             }
         }
         closedir(dir);

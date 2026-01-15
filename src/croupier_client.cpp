@@ -35,28 +35,28 @@
     do {                                                                                         \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::INFO)) \
             break;                                                                               \
-        std::cout << "[INFO] [croupier] " << msg << '\n';                                        \
+        std::cout << "[INFO] [croupier] " << (msg) << '\n';                                      \
     } while (0)
 
 #define SDK_LOG_WARN(msg)                                                                        \
     do {                                                                                         \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::WARN)) \
             break;                                                                               \
-        std::cerr << "[WARN] [croupier] " << msg << '\n';                                        \
+        std::cerr << "[WARN] [croupier] " << (msg) << '\n';                                      \
     } while (0)
 
 #define SDK_LOG_ERROR(msg)                                                                      \
     do {                                                                                        \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::ERR)) \
             break;                                                                              \
-        std::cerr << "[ERROR] [croupier] " << msg << '\n';                                      \
+        std::cerr << "[ERROR] [croupier] " << (msg) << '\n';                                    \
     } while (0)
 
 #define SDK_LOG_DEBUG(msg)                                                                        \
     do {                                                                                          \
         if (!croupier::sdk::Logger::GetInstance().IsEnabled(croupier::sdk::Logger::Level::DEBUG)) \
             break;                                                                                \
-        std::cout << "[DEBUG] [croupier] " << msg << '\n';                                        \
+        std::cout << "[DEBUG] [croupier] " << (msg) << '\n';                                      \
     } while (0)
 
 namespace croupier {
@@ -221,7 +221,7 @@ public:
             return false;
         }
 
-        handlers_[desc.id] = handler;
+        handlers_[desc.id] = std::move(handler);
         descriptors_[desc.id] = desc;
 
         SDK_LOG_INFO("Registered function: " << desc.id << " (version: " << desc.version << ")");
@@ -326,6 +326,7 @@ public:
     // New: Get registered objects
     std::vector<VirtualObjectDescriptor> GetRegisteredObjects() const {
         std::vector<VirtualObjectDescriptor> result;
+        result.reserve(objects_.size());
         for (const auto& pair : objects_) {
             result.push_back(pair.second);
         }
@@ -335,6 +336,7 @@ public:
     // New: Get registered components
     std::vector<ComponentDescriptor> GetRegisteredComponents() const {
         std::vector<ComponentDescriptor> result;
+        result.reserve(components_.size());
         for (const auto& pair : components_) {
             result.push_back(pair.second);
         }
@@ -1479,7 +1481,7 @@ CroupierClient::~CroupierClient() = default;
 
 // ========== Existing Function Registration ==========
 bool CroupierClient::RegisterFunction(const FunctionDescriptor& desc, FunctionHandler handler) {
-    return impl_->RegisterFunction(desc, handler);
+    return impl_->RegisterFunction(desc, std::move(handler));
 }
 
 // ========== Virtual Object Registration ==========

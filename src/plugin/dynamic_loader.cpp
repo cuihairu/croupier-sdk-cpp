@@ -39,6 +39,7 @@ PluginInfo PluginRegistry::GetPluginInfo(const std::string& plugin_name) {
 std::vector<PluginInfo> PluginRegistry::GetAllPlugins() {
     std::lock_guard<std::mutex> lock(registry_mutex_);
     std::vector<PluginInfo> plugins;
+    plugins.reserve(registry_.size());
     for (const auto& [name, info] : registry_) {
         plugins.push_back(info);
     }
@@ -53,7 +54,7 @@ bool PluginRegistry::IsPluginRegistered(const std::string& plugin_name) {
 // ========== DynamicLibraryManager Implementation ==========
 
 DynamicLibraryManager::DynamicLibraryManager() {
-    std::cout << "Dynamic library manager initialized" << std::endl;
+    std::cout << "Dynamic library manager initialized" << '\n';
 }
 
 DynamicLibraryManager::~DynamicLibraryManager() {
@@ -65,11 +66,11 @@ DynamicLibraryManager::~DynamicLibraryManager() {
         }
     }
     libraries_.clear();
-    std::cout << "Dynamic library manager cleanup completed" << std::endl;
+    std::cout << "Dynamic library manager cleanup completed" << '\n';
 }
 
 std::string DynamicLibraryManager::LoadLibrary(const std::string& lib_path) {
-    std::cout << "Loading dynamic library: " << lib_path << std::endl;
+    std::cout << "Loading dynamic library: " << lib_path << '\n';
 
     // Check if file exists
     if (!utils::FileSystemUtils::FileExists(lib_path)) {
@@ -85,7 +86,7 @@ std::string DynamicLibraryManager::LoadLibrary(const std::string& lib_path) {
     // Check if already loaded
     auto it = libraries_.find(library_id);
     if (it != libraries_.end()) {
-        std::cout << "Library already loaded with ID: " << library_id << std::endl;
+        std::cout << "Library already loaded with ID: " << library_id << '\n';
         return library_id;
     }
 
@@ -105,12 +106,12 @@ std::string DynamicLibraryManager::LoadLibrary(const std::string& lib_path) {
 
     libraries_[library_id] = std::move(entry);
 
-    std::cout << "✅ Library loaded successfully with ID: " << library_id << std::endl;
+    std::cout << "✅ Library loaded successfully with ID: " << library_id << '\n';
     return library_id;
 }
 
 bool DynamicLibraryManager::UnloadLibrary(const std::string& library_id) {
-    std::cout << "Unloading library: " << library_id << std::endl;
+    std::cout << "Unloading library: " << library_id << '\n';
 
     std::lock_guard<std::mutex> lock(libraries_mutex_);
 
@@ -126,7 +127,7 @@ bool DynamicLibraryManager::UnloadLibrary(const std::string& library_id) {
     }
 
     libraries_.erase(it);
-    std::cout << "✅ Library unloaded successfully: " << library_id << std::endl;
+    std::cout << "✅ Library unloaded successfully: " << library_id << '\n';
     return true;
 }
 
@@ -151,7 +152,7 @@ void* DynamicLibraryManager::GetFunction(const std::string& library_id, const st
         return nullptr;
     }
 
-    std::cout << "✅ Function resolved: " << function_name << " in " << library_id << std::endl;
+    std::cout << "✅ Function resolved: " << function_name << " in " << library_id << '\n';
     return func_ptr;
 }
 
@@ -173,7 +174,7 @@ FunctionHandler DynamicLibraryManager::GetFunctionHandler(const std::string& lib
             const char* result = plugin_func(context.c_str(), payload.c_str());
             return result ? std::string(result) : "{}";
         } catch (const std::exception& e) {
-            std::cerr << "❌ Plugin function error in " << function_name << ": " << e.what() << std::endl;
+            std::cerr << "❌ Plugin function error in " << function_name << ": " << e.what() << '\n';
             return R"({"error": ")" + std::string(e.what()) + R"(", "function": ")" + function_name + R"("})";
         }
     };
@@ -187,6 +188,7 @@ bool DynamicLibraryManager::IsLibraryLoaded(const std::string& library_id) const
 std::vector<std::string> DynamicLibraryManager::GetLoadedLibraries() const {
     std::lock_guard<std::mutex> lock(libraries_mutex_);
     std::vector<std::string> library_ids;
+    library_ids.reserve(libraries_.size());
     for (const auto& [id, entry] : libraries_) {
         library_ids.push_back(id);
     }
@@ -204,7 +206,7 @@ std::string DynamicLibraryManager::GetLastError() const {
 }
 
 void DynamicLibraryManager::SetErrorCallback(std::function<void(const std::string&)> callback) {
-    error_callback_ = callback;
+    error_callback_ = std::move(callback);
 }
 
 // ========== Platform-specific Implementations ==========
@@ -280,7 +282,7 @@ void DynamicLibraryManager::SetLastError(const std::string& error) {
 }
 
 void DynamicLibraryManager::NotifyError(const std::string& error) {
-    std::cerr << "❌ Dynamic library error: " << error << std::endl;
+    std::cerr << "❌ Dynamic library error: " << error << '\n';
     if (error_callback_) {
         error_callback_(error);
     }
@@ -289,7 +291,7 @@ void DynamicLibraryManager::NotifyError(const std::string& error) {
 // ========== PluginManager Implementation ==========
 
 PluginManager::PluginManager() : auto_loading_enabled_(false) {
-    std::cout << "Plugin manager initialized" << std::endl;
+    std::cout << "Plugin manager initialized" << '\n';
 
     // Set default search paths
     search_paths_ = {"./plugins", "./libs", "/usr/local/lib/croupier/plugins", "/opt/croupier/plugins"};
@@ -302,16 +304,16 @@ PluginManager::~PluginManager() {
         CleanupPlugin(name);
     }
     plugins_.clear();
-    std::cout << "Plugin manager cleanup completed" << std::endl;
+    std::cout << "Plugin manager cleanup completed" << '\n';
 }
 
 bool PluginManager::LoadPlugin(const std::string& plugin_path) {
-    std::cout << "Loading plugin: " << plugin_path << std::endl;
+    std::cout << "Loading plugin: " << plugin_path << '\n';
 
     // Load the dynamic library
     std::string library_id = library_manager_.LoadLibrary(plugin_path);
     if (library_id.empty()) {
-        std::cerr << "❌ Failed to load plugin library: " << library_manager_.GetLastError() << std::endl;
+        std::cerr << "❌ Failed to load plugin library: " << library_manager_.GetLastError() << '\n';
         return false;
     }
 
@@ -321,18 +323,18 @@ bool PluginManager::LoadPlugin(const std::string& plugin_path) {
         return false;
     }
 
-    std::cout << "✅ Plugin loaded successfully: " << ExtractPluginName(plugin_path) << std::endl;
+    std::cout << "✅ Plugin loaded successfully: " << ExtractPluginName(plugin_path) << '\n';
     return true;
 }
 
 bool PluginManager::UnloadPlugin(const std::string& plugin_name) {
-    std::cout << "Unloading plugin: " << plugin_name << std::endl;
+    std::cout << "Unloading plugin: " << plugin_name << '\n';
 
     std::lock_guard<std::mutex> lock(plugins_mutex_);
 
     auto it = plugins_.find(plugin_name);
     if (it == plugins_.end()) {
-        std::cerr << "❌ Plugin not found: " << plugin_name << std::endl;
+        std::cerr << "❌ Plugin not found: " << plugin_name << '\n';
         return false;
     }
 
@@ -348,9 +350,9 @@ bool PluginManager::UnloadPlugin(const std::string& plugin_name) {
     plugins_.erase(it);
 
     if (success) {
-        std::cout << "✅ Plugin unloaded successfully: " << plugin_name << std::endl;
+        std::cout << "✅ Plugin unloaded successfully: " << plugin_name << '\n';
     } else {
-        std::cerr << "⚠️ Plugin removed but library unload failed: " << plugin_name << std::endl;
+        std::cerr << "⚠️ Plugin removed but library unload failed: " << plugin_name << '\n';
     }
 
     return success;
@@ -366,7 +368,7 @@ FunctionHandler PluginManager::GetPluginFunction(const std::string& function_id)
     // Parse function_id as "plugin_name.function_name"
     size_t dot_pos = function_id.find('.');
     if (dot_pos == std::string::npos) {
-        std::cerr << "❌ Invalid function ID format: " << function_id << " (expected: plugin.function)" << std::endl;
+        std::cerr << "❌ Invalid function ID format: " << function_id << " (expected: plugin.function)" << '\n';
         return nullptr;
     }
 
@@ -377,14 +379,14 @@ FunctionHandler PluginManager::GetPluginFunction(const std::string& function_id)
 
     auto it = plugins_.find(plugin_name);
     if (it == plugins_.end()) {
-        std::cerr << "❌ Plugin not found: " << plugin_name << std::endl;
+        std::cerr << "❌ Plugin not found: " << plugin_name << '\n';
         return nullptr;
     }
 
     auto& functions = it->second->functions;
     auto func_it = functions.find(function_name);
     if (func_it == functions.end()) {
-        std::cerr << "❌ Function not found: " << function_name << " in plugin: " << plugin_name << std::endl;
+        std::cerr << "❌ Function not found: " << function_name << " in plugin: " << plugin_name << '\n';
         return nullptr;
     }
 
@@ -396,7 +398,7 @@ bool PluginManager::RegisterPluginFunctions(CroupierClient& client, const std::s
 
     auto it = plugins_.find(plugin_name);
     if (it == plugins_.end()) {
-        std::cerr << "❌ Plugin not found for registration: " << plugin_name << std::endl;
+        std::cerr << "❌ Plugin not found for registration: " << plugin_name << '\n';
         return false;
     }
 
@@ -405,14 +407,17 @@ bool PluginManager::RegisterPluginFunctions(CroupierClient& client, const std::s
 
     for (const auto& [func_name, handler] : entry->functions) {
         FunctionDescriptor desc;
-        desc.id = plugin_name + "." + func_name;
+        std::string func_id = plugin_name;
+        func_id += ".";
+        func_id += func_name;
+        desc.id = func_id;
         desc.version = entry->info.version;
 
         bool success = client.RegisterFunction(desc, handler);
         if (success) {
-            std::cout << "✅ Registered plugin function: " << desc.id << std::endl;
+            std::cout << "✅ Registered plugin function: " << desc.id << '\n';
         } else {
-            std::cerr << "❌ Failed to register plugin function: " << desc.id << std::endl;
+            std::cerr << "❌ Failed to register plugin function: " << desc.id << '\n';
             all_success = false;
         }
     }
@@ -423,6 +428,7 @@ bool PluginManager::RegisterPluginFunctions(CroupierClient& client, const std::s
 std::vector<std::string> PluginManager::GetLoadedPlugins() const {
     std::lock_guard<std::mutex> lock(plugins_mutex_);
     std::vector<std::string> plugin_names;
+    plugin_names.reserve(plugins_.size());
     for (const auto& [name, entry] : plugins_) {
         plugin_names.push_back(name);
     }
@@ -445,7 +451,7 @@ std::vector<std::string> PluginManager::GetPluginFunctions(const std::string& pl
 }
 
 std::vector<std::string> PluginManager::ScanPlugins(const std::string& directory, bool load_immediately) {
-    std::cout << "Scanning for plugins in: " << directory << std::endl;
+    std::cout << "Scanning for plugins in: " << directory << '\n';
 
     std::vector<std::string> plugin_files;
     std::vector<std::string> extensions;
@@ -463,7 +469,7 @@ std::vector<std::string> PluginManager::ScanPlugins(const std::string& directory
         plugin_files.insert(plugin_files.end(), files.begin(), files.end());
     }
 
-    std::cout << "Found " << plugin_files.size() << " potential plugin files" << std::endl;
+    std::cout << "Found " << plugin_files.size() << " potential plugin files" << '\n';
 
     if (load_immediately) {
         for (const std::string& file : plugin_files) {
@@ -476,7 +482,7 @@ std::vector<std::string> PluginManager::ScanPlugins(const std::string& directory
 
 void PluginManager::SetSearchPaths(const std::vector<std::string>& paths) {
     search_paths_ = paths;
-    std::cout << "Updated plugin search paths to " << paths.size() << " directories" << std::endl;
+    std::cout << "Updated plugin search paths to " << paths.size() << " directories" << '\n';
 }
 
 std::vector<std::string> PluginManager::GetSearchPaths() const {
@@ -485,7 +491,7 @@ std::vector<std::string> PluginManager::GetSearchPaths() const {
 
 void PluginManager::SetAutoLoading(bool enabled) {
     auto_loading_enabled_ = enabled;
-    std::cout << "Plugin auto-loading " << (enabled ? "enabled" : "disabled") << std::endl;
+    std::cout << "Plugin auto-loading " << (enabled ? "enabled" : "disabled") << '\n';
 
     if (enabled) {
         // Scan all search paths for plugins
@@ -509,14 +515,14 @@ bool PluginManager::InitializePlugin(const std::string& library_id, const std::s
         reinterpret_cast<PluginInfoFunc>(library_manager_.GetFunction(library_id, "croupier_plugin_info"));
 
     if (!info_func) {
-        std::cerr << "❌ Plugin info function not found in: " << plugin_path << std::endl;
+        std::cerr << "❌ Plugin info function not found in: " << plugin_path << '\n';
         return false;
     }
 
     // Get plugin info
     PluginInfo* info_ptr = info_func();
     if (!info_ptr) {
-        std::cerr << "❌ Plugin info function returned null: " << plugin_path << std::endl;
+        std::cerr << "❌ Plugin info function returned null: " << plugin_path << '\n';
         return false;
     }
 
@@ -532,7 +538,7 @@ bool PluginManager::InitializePlugin(const std::string& library_id, const std::s
     if (init_func) {
         int result = init_func();
         if (result != 0) {
-            std::cerr << "❌ Plugin initialization failed with code: " << result << std::endl;
+            std::cerr << "❌ Plugin initialization failed with code: " << result << '\n';
             return false;
         }
     }
@@ -576,9 +582,9 @@ void PluginManager::CleanupPlugin(const std::string& plugin_name) {
     if (cleanup_func) {
         try {
             cleanup_func();
-            std::cout << "✅ Plugin cleanup completed: " << plugin_name << std::endl;
+            std::cout << "✅ Plugin cleanup completed: " << plugin_name << '\n';
         } catch (const std::exception& e) {
-            std::cerr << "⚠️ Plugin cleanup error: " << e.what() << std::endl;
+            std::cerr << "⚠️ Plugin cleanup error: " << e.what() << '\n';
         }
     }
 }
@@ -608,17 +614,17 @@ std::string PluginManager::ExtractPluginName(const std::string& plugin_path) {
 
 bool PluginManager::ValidatePlugin(const PluginInfo& info) {
     if (info.name.empty()) {
-        std::cerr << "❌ Plugin name is empty" << std::endl;
+        std::cerr << "❌ Plugin name is empty" << '\n';
         return false;
     }
 
     if (info.version.empty()) {
-        std::cerr << "❌ Plugin version is empty for: " << info.name << std::endl;
+        std::cerr << "❌ Plugin version is empty for: " << info.name << '\n';
         return false;
     }
 
     if (info.provided_functions.empty()) {
-        std::cerr << "⚠️ Plugin provides no functions: " << info.name << std::endl;
+        std::cerr << "⚠️ Plugin provides no functions: " << info.name << '\n';
         // This is not necessarily an error, but worth noting
     }
 
@@ -634,7 +640,7 @@ std::vector<std::string> PluginManager::DiscoverPluginFunctions(const std::strin
         if (func_ptr) {
             discovered_functions.push_back(func_name);
         } else {
-            std::cerr << "⚠️ Function listed but not found: " << func_name << " in " << info.name << std::endl;
+            std::cerr << "⚠️ Function listed but not found: " << func_name << " in " << info.name << '\n';
         }
     }
 

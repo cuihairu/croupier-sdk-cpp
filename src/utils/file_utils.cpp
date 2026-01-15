@@ -104,7 +104,7 @@ bool FileSystemUtils::WriteFileContent(const std::string& file_path, const std::
 
     std::ofstream file(file_path, mode);
     if (!file.is_open()) {
-        std::cerr << "Failed to open file for writing: " << file_path << std::endl;
+        std::cerr << "Failed to open file for writing: " << file_path << '\n';
         return false;
     }
 
@@ -119,7 +119,7 @@ std::vector<std::string> FileSystemUtils::ListFiles(const std::string& directory
     std::vector<std::string> result;
 
     if (!DirectoryExists(directory)) {
-        std::cerr << "Directory does not exist: " << directory << std::endl;
+        std::cerr << "Directory does not exist: " << directory << '\n';
         return result;
     }
 
@@ -168,7 +168,7 @@ std::vector<std::string> FileSystemUtils::ListDirectories(const std::string& dir
     std::vector<std::string> result;
 
     if (!DirectoryExists(directory)) {
-        std::cerr << "Directory does not exist: " << directory << std::endl;
+        std::cerr << "Directory does not exist: " << directory << '\n';
         return result;
     }
 
@@ -411,7 +411,7 @@ bool FileSystemUtils::RemoveDirectory(const std::string& dir_path, bool recursiv
         auto files = ListFiles(dir_path);
         for (const auto& file : files) {
             if (!RemoveFile(file)) {
-                std::cerr << "Failed to remove file: " << file << std::endl;
+                std::cerr << "Failed to remove file: " << file << '\n';
                 return false;
             }
         }
@@ -419,7 +419,7 @@ bool FileSystemUtils::RemoveDirectory(const std::string& dir_path, bool recursiv
         auto subdirs = ListDirectories(dir_path);
         for (const auto& subdir : subdirs) {
             if (!RemoveDirectory(subdir, true)) {
-                std::cerr << "Failed to remove subdirectory: " << subdir << std::endl;
+                std::cerr << "Failed to remove subdirectory: " << subdir << '\n';
                 return false;
             }
         }
@@ -435,12 +435,12 @@ bool FileSystemUtils::RemoveDirectory(const std::string& dir_path, bool recursiv
 
 bool FileSystemUtils::CopyFile(const std::string& source_path, const std::string& dest_path, bool overwrite) {
     if (!FileExists(source_path)) {
-        std::cerr << "Source file does not exist: " << source_path << std::endl;
+        std::cerr << "Source file does not exist: " << source_path << '\n';
         return false;
     }
 
     if (!overwrite && FileExists(dest_path)) {
-        std::cerr << "Destination file exists and overwrite is disabled: " << dest_path << std::endl;
+        std::cerr << "Destination file exists and overwrite is disabled: " << dest_path << '\n';
         return false;
     }
 
@@ -448,7 +448,7 @@ bool FileSystemUtils::CopyFile(const std::string& source_path, const std::string
         std::string content = ReadFileContent(source_path);
         return WriteFileContent(dest_path, content, false);
     } catch (const std::exception& e) {
-        std::cerr << "Failed to copy file: " << e.what() << std::endl;
+        std::cerr << "Failed to copy file: " << e.what() << '\n';
         return false;
     }
 }

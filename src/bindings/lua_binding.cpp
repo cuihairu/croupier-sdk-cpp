@@ -94,6 +94,8 @@ int LuaBinding::new_client(lua_State* L) {
     try {
         *ud = new CroupierClient(server_address);
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 
@@ -136,6 +138,8 @@ int LuaBinding::client_register_virtual_object(lua_State* L) {
         lua_pushboolean(L, success);
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -153,6 +157,8 @@ int LuaBinding::client_unregister_virtual_object(lua_State* L) {
         lua_pushboolean(L, success);
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -188,6 +194,8 @@ int LuaBinding::client_invoke_function(lua_State* L) {
         lua_pushstring(L, result.c_str());
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -242,6 +250,8 @@ int LuaBinding::client_batch_invoke(lua_State* L) {
         }
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -272,6 +282,8 @@ int LuaBinding::client_get_virtual_object(lua_State* L) {
         lua_pushstring(L, vo_data.c_str());
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -296,6 +308,8 @@ int LuaBinding::client_list_virtual_objects(lua_State* L) {
         }
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -317,6 +331,8 @@ int LuaBinding::client_set_credentials(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
@@ -332,6 +348,8 @@ int LuaBinding::client_close(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     } catch (const std::exception& e) {
+        // Intentionally suppress exception - return error to Lua instead
+        (void)e;
         return push_error(L, e.what());
     }
 }
