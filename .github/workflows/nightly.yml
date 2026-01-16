@@ -168,7 +168,13 @@ jobs:
 
     - name: Run Tests
       if: matrix.arch == 'x64' && !matrix.cross_compile
-      run: cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+      run: |
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          # Add vcpkg bin directory to PATH for DLL discovery
+          export PATH="$PWD/build/vcpkg_installed/${{ matrix.vcpkg_triplet }}/bin:$PATH"
+        fi
+        cd build && ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+      shell: bash
 
     - name: Create Separate Static and Dynamic Packages
       run: |
