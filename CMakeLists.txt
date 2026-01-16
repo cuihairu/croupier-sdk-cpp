@@ -575,12 +575,23 @@ if(BUILD_TESTS)
             set(_croupier_gtest_main gtest_main)
         endif()
 
-        target_link_libraries(croupier-sdk-tests
-            PRIVATE
-                ${_CROUPIER_SDK_TARGET}
-                ${_croupier_gtest_main}
-        )
-        add_dependencies(croupier-sdk-tests ${_CROUPIER_SDK_TARGET})
+        # On Windows, always use static linking for tests to avoid DLL-related crashes
+        # This fixes SEGFAULT issues in CI when gRPC is built as a DLL
+        if(WIN32 AND TARGET croupier-sdk-static)
+            target_link_libraries(croupier-sdk-tests
+                PRIVATE
+                    croupier-sdk-static
+                    ${_croupier_gtest_main}
+            )
+            add_dependencies(croupier-sdk-tests croupier-sdk-static)
+        else()
+            target_link_libraries(croupier-sdk-tests
+                PRIVATE
+                    ${_CROUPIER_SDK_TARGET}
+                    ${_croupier_gtest_main}
+            )
+            add_dependencies(croupier-sdk-tests ${_CROUPIER_SDK_TARGET})
+        endif()
 
         add_test(NAME CroupierSDKTests COMMAND croupier-sdk-tests)
     else()
