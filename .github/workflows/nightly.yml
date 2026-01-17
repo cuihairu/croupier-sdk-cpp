@@ -32,7 +32,7 @@ jobs:
         DATE=$(date +%Y%m%d)
         TIME=$(date +%H%M)
         COMMIT_SHORT=$(git rev-parse --short HEAD)
-        VERSION="${SDK_VERSION_BASE}.0-nightly.${DATE}.${COMMIT_SHORT}"
+        VERSION="${SDK_VERSION_BASE}.0-nightly"
         # Use fixed tag for replacement instead of dated tag
         VERSION_TAG="nightly"
 
