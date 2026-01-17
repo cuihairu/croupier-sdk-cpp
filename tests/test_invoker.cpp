@@ -300,6 +300,8 @@ TEST(InvokerTest, GrpcInvokePassesRequestMetadataToHandler) {
        }},
   });
   server.Start();
+  // Give the server a moment to fully initialize (especially important on Windows)
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   InvokerConfig cfg;
   cfg.address = server.address();
@@ -335,6 +337,8 @@ TEST(InvokerTest, GrpcJobStartStreamAndCancel) {
        }},
   });
   server.Start();
+  // Give the server a moment to fully initialize (especially important on Windows)
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   InvokerConfig cfg;
   cfg.address = server.address();
