@@ -368,10 +368,11 @@ bool FileSystemUtils::IsAbsolutePath(const std::string& path) {
 
 #ifdef _WIN32
     // Windows: starts with drive letter (C:) or UNC path (\\) or Unix-style (/)
-    // We also recognize Unix-style paths for cross-platform compatibility
+    // We also recognize Unix-style paths and single-backslash roots for cross-platform compatibility
     return (path.length() >= 2 && path[1] == ':') ||
            (path.length() >= 2 && path[0] == '\\' && path[1] == '\\') ||
-           (path[0] == '/');  // Unix-style absolute path
+           (path[0] == '/') ||  // Unix-style absolute path
+           (path[0] == '\\');   // Single backslash root (e.g., "\path" from NormalizePath)
 #else
     // Unix: starts with /
     return path[0] == '/';
