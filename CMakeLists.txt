@@ -569,6 +569,7 @@ if(BUILD_TESTS)
             tests/test_invoker.cpp
             tests/test_json_utils.cpp
             tests/test_file_utils.cpp
+            tests/test_main_thread_dispatcher.cpp
         )
 
         if(TARGET GTest::gtest_main)

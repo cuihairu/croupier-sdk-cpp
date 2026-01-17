@@ -455,8 +455,21 @@ TEST_F(FileSystemUtilsTest, CreateTempFile_Default) {
 
 TEST_F(FileSystemUtilsTest, CreateTempFile_WithPrefix) {
     std::string temp = FileSystemUtils::CreateTempFile("myprefix_");
-    EXPECT_TRUE(temp.find("myprefix") != std::string::npos);
-    FileSystemUtils::RemoveFile(temp);
+    EXPECT_FALSE(temp.empty()) << "CreateTempFile should return a non-empty path";
+    if (!temp.empty()) {
+        // Check that at least part of the prefix is in the filename
+        // Windows GetTempFileNameA only uses first 3 characters of prefix
+#ifdef _WIN32
+        std::string filename = FileSystemUtils::GetFileName(temp);
+        EXPECT_TRUE(filename.find("myp") != std::string::npos ||
+                    filename.find("myprefix") != std::string::npos)
+            << "Expected prefix 'myp' or 'myprefix' in filename: " << filename;
+#else
+        EXPECT_TRUE(temp.find("myprefix") != std::string::npos)
+            << "Expected 'myprefix' in path: " << temp;
+#endif
+        FileSystemUtils::RemoveFile(temp);
+    }
 }
 
 TEST_F(FileSystemUtilsTest, CreateTempFile_WithSuffix) {

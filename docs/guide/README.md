@@ -39,3 +39,4 @@ croupier-sdk-cpp/
 - [安装指南](./installation.md) - 详细安装步骤
 - [快速开始](./quick-start.md) - 第一个示例程序
 - [构建指南](./building.md) - 高级构建选项
+- [主线程调度器](./threading.md) - gRPC 回调线程安全处理

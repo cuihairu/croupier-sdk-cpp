@@ -283,19 +283,54 @@ std::string FileSystemUtils::NormalizePath(const std::string& path) {
     if (path.empty())
         return path;
 
-    std::vector<std::string> components;
-    std::stringstream ss(path);
-    std::string component;
-    char separator = GetPathSeparator();
+    // First, normalize all separators to a common format for parsing
+    std::string normalized_input = path;
+    for (char& c : normalized_input) {
+        if (c == '\\') {
+            c = '/';
+        }
+    }
 
-    // Split path into components
-    while (std::getline(ss, component, separator)) {
+    // Check if path is absolute (before normalization, using original path)
+    bool is_absolute = false;
+    std::string drive_prefix;  // For Windows drive letters like "C:"
+
+#ifdef _WIN32
+    // Windows: Check for drive letter or UNC path
+    if (path.length() >= 2 && path[1] == ':') {
+        is_absolute = true;
+        drive_prefix = path.substr(0, 2);
+        normalized_input = normalized_input.substr(2);  // Remove drive letter for processing
+        if (!normalized_input.empty() && (normalized_input[0] == '/' || normalized_input[0] == '\\')) {
+            normalized_input = normalized_input.substr(1);
+        }
+    } else if (path.length() >= 2 && path[0] == '\\' && path[1] == '\\') {
+        is_absolute = true;
+    } else if (!normalized_input.empty() && normalized_input[0] == '/') {
+        // Unix-style absolute path on Windows - treat as absolute for compatibility
+        is_absolute = true;
+        normalized_input = normalized_input.substr(1);
+    }
+#else
+    // Unix: starts with /
+    if (!normalized_input.empty() && normalized_input[0] == '/') {
+        is_absolute = true;
+        normalized_input = normalized_input.substr(1);  // Remove leading /
+    }
+#endif
+
+    // Split path into components using '/' (since we normalized all separators)
+    std::vector<std::string> components;
+    std::stringstream ss(normalized_input);
+    std::string component;
+
+    while (std::getline(ss, component, '/')) {
         if (component.empty() || component == ".") {
             continue;
         } else if (component == "..") {
             if (!components.empty() && components.back() != "..") {
                 components.pop_back();
-            } else if (!IsAbsolutePath(path)) {
+            } else if (!is_absolute) {
                 components.push_back("..");
             }
         } else {
@@ -303,14 +338,14 @@ std::string FileSystemUtils::NormalizePath(const std::string& path) {
         }
     }
 
-    // Reconstruct path
+    // Reconstruct path with platform-appropriate separator
+    char separator = GetPathSeparator();
     std::string result;
-    if (IsAbsolutePath(path)) {
+
+    if (is_absolute) {
 #ifdef _WIN32
-        // Handle Windows drive letters
-        if (!components.empty() && components[0].length() == 2 && components[0][1] == ':') {
-            result = components[0];
-            components.erase(components.begin());
+        if (!drive_prefix.empty()) {
+            result = drive_prefix;
         }
         result += separator;
 #else
@@ -332,8 +367,11 @@ bool FileSystemUtils::IsAbsolutePath(const std::string& path) {
         return false;
 
 #ifdef _WIN32
-    // Windows: starts with drive letter (C:) or UNC path (\\)
-    return (path.length() >= 2 && path[1] == ':') || (path.length() >= 2 && path[0] == '\\' && path[1] == '\\');
+    // Windows: starts with drive letter (C:) or UNC path (\\) or Unix-style (/)
+    // We also recognize Unix-style paths for cross-platform compatibility
+    return (path.length() >= 2 && path[1] == ':') ||
+           (path.length() >= 2 && path[0] == '\\' && path[1] == '\\') ||
+           (path[0] == '/');  // Unix-style absolute path
 #else
     // Unix: starts with /
     return path[0] == '/';
@@ -368,13 +406,22 @@ std::string FileSystemUtils::CreateTempFile(const std::string& prefix, const std
         return "";
     }
 
-    if (GetTempFileNameA(temp_path, prefix.c_str(), 0, temp_filename) == 0) {
+    // Windows GetTempFileNameA limits prefix to 3 characters
+    std::string short_prefix = prefix.empty() ? "tmp" : prefix.substr(0, 3);
+    if (GetTempFileNameA(temp_path, short_prefix.c_str(), 0, temp_filename) == 0) {
         return "";
     }
 
     std::string result = temp_filename;
-    if (!suffix.empty() && GetFileExtension(result) != suffix) {
-        result += suffix;
+
+    // Handle suffix if provided
+    if (!suffix.empty()) {
+        std::string new_path = result + suffix;
+        // Rename the temp file to include suffix
+        if (rename(result.c_str(), new_path.c_str()) == 0) {
+            return new_path;
+        }
+        // If rename fails, still return the original file
     }
 
     return result;
@@ -383,7 +430,9 @@ std::string FileSystemUtils::CreateTempFile(const std::string& prefix, const std
     std::vector<char> temp_path(temp_template.begin(), temp_template.end());
     temp_path.push_back('\0');
 
-    int fd = mkstemp(temp_path.data());
+    // Use mkstemps() which supports suffix length parameter
+    int suffix_len = static_cast<int>(suffix.length());
+    int fd = mkstemps(temp_path.data(), suffix_len);
     if (fd != -1) {
         close(fd);
         return std::string(temp_path.data());
