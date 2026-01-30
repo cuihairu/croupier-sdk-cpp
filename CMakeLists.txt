@@ -306,20 +306,31 @@ endif()
 if(BUILD_SHARED_LIBS)
     add_library(croupier-sdk-shared SHARED ${SDK_SOURCES} ${SDK_HEADERS})
     set_target_properties(croupier-sdk-shared PROPERTIES
-        OUTPUT_NAME "croupier-sdk$<$<CONFIG:Debug>:-d>"
+        OUTPUT_NAME "croupier-sdk"
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_VERSION_MAJOR}
         EXPORT_NAME "croupier-sdk"
     )
 
     # Set output directories for the shared library (vcpkg-compatible layout)
-    # - RUNTIME (.dll, .exe) → bin/
-    # - LIBRARY (.so, .dylib) → lib/
-    # - ARCHIVE (.lib import lib, .a) → lib/
+    # Release: RUNTIME → bin/, LIBRARY → lib/, ARCHIVE → lib/
+    # Debug: RUNTIME → debug/bin/, LIBRARY → debug/lib/, ARCHIVE → debug/lib/
     set_target_properties(croupier-sdk-shared PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/debug/bin
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/bin
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/debug/lib
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/debug/lib
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/lib
     )
 
 
@@ -382,9 +393,14 @@ endif()
 if(BUILD_STATIC_LIBS)
     add_library(croupier-sdk-static STATIC ${SDK_SOURCES} ${SDK_HEADERS})
     set_target_properties(croupier-sdk-static PROPERTIES
-        OUTPUT_NAME "croupier-sdk-static$<$<CONFIG:Debug>:-d>"
+        OUTPUT_NAME "croupier-sdk-static"
         EXPORT_NAME "croupier-sdk-static"
+        # vcpkg-style: Release in lib/, Debug in debug/lib/
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/debug/lib
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/lib
     )
 
     target_include_directories(croupier-sdk-static

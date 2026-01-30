@@ -172,12 +172,12 @@ jobs:
       shell: pwsh
       run: |
         $runtimeSuffix = if ("${{ matrix.runtime }}" -eq "static") { "mt" } else { "md" }
-        $typeSuffix = if ("${{ matrix.build-type }}" -eq "Debug") { "d" } else { "" }
         $artifactName = "croupier-sdk-windows-x64-${{ matrix.build-type }}-${runtimeSuffix}"
 
-        # 创建输出目录
+        # 创建输出目录（vcpkg 风格：lib/ 和 debug/lib/）
         New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/include" -Force | Out-Null
         New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/lib" -Force | Out-Null
+        New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/debug/lib" -Force | Out-Null
         New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/bin" -Force | Out-Null
 
         # 复制头文件
@@ -188,14 +188,23 @@ jobs:
             Copy-Item -Path "build/include/croupier" -Destination "artifacts/$artifactName/include/" -Recurse -Force
         }
 
-        # 复制库文件
+        # 复制 Release 库文件
         if (Test-Path "build/lib/*.lib") {
             Copy-Item -Path "build/lib/*.lib" -Destination "artifacts/$artifactName/lib/" -Force
         }
 
-        # 复制 DLL 文件（动态运行时版本）
+        # 复制 Debug 库文件（vcpkg 风格：debug/lib/）
+        if (Test-Path "build/debug/lib/*.lib") {
+            Copy-Item -Path "build/debug/lib/*.lib" -Destination "artifacts/$artifactName/debug/lib/" -Force
+        }
+
+        # 复制 DLL 文件
         if (Test-Path "build/bin/*.dll") {
             Copy-Item -Path "build/bin/*.dll" -Destination "artifacts/$artifactName/bin/" -Force
+        }
+        # Debug DLL
+        if (Test-Path "build/debug/bin/*.dll") {
+            Copy-Item -Path "build/debug/bin/*.dll" -Destination "artifacts/$artifactName/bin/" -Force
         }
 
         # 创建 README
@@ -206,20 +215,22 @@ jobs:
         - Runtime: $runtimeSuffix ($(if ("${{ matrix.runtime }}" -eq "static") { "MT/MTd (Static)" } else { "MD/MDd (Dynamic)" }))
         - Architecture: x64
 
-        ## Directory Structure
+        ## Directory Structure (vcpkg-style)
 
         ## Usage
 
         ### Static Library (MT/MTd)
         Add to your project:
         - Additional Include Directories: `path/to/include`
-        - Additional Library Directories: `path/to/lib`
+        - Additional Library Directories (Release): `path/to/lib`
+        - Additional Library Directories (Debug): `path/to/debug/lib`
         - Additional Dependencies: `croupier-sdk-static.lib`
 
         ### Dynamic Library (MD/MDd)
         Add to your project:
         - Additional Include Directories: `path/to/include`
-        - Additional Library Directories: `path/to/lib`
+        - Additional Library Directories (Release): `path/to/lib`
+        - Additional Library Directories (Debug): `path/to/debug/lib`
         - Additional Dependencies: `croupier-sdk.lib`
         - Copy `croupier-sdk.dll` to your executable directory.
         "@ | Out-File -FilePath "artifacts/$artifactName/README.txt" -Encoding UTF8
