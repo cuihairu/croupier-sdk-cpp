@@ -109,8 +109,18 @@ struct ClientConfig {
     std::map<std::string, std::string> headers;  // Additional headers
 
     // ========== Timeouts ==========
-    int timeout_seconds = 30;     // Connection timeout
+    int timeout_seconds = 30;     // Connection timeout (for blocking connect)
     int heartbeat_interval = 60;  // Heartbeat interval in seconds
+
+    // ========== Connection Mode ==========
+    // When true (default), Connect() blocks until connection is established or timeout.
+    // When false, Connect() returns immediately and connection proceeds in background.
+    // Use non-blocking mode in game servers to prevent startup delays when agent is unavailable.
+    bool blocking_connect = true;
+
+    // Timeout for initial connection attempt in non-blocking mode (default: 5s).
+    // Shorter than timeout_seconds since retries happen in background via auto_reconnect.
+    int connect_timeout_seconds = 5;
 
     // ========== Logging Configuration ==========
     bool disable_logging = false;    // Disable all logging
