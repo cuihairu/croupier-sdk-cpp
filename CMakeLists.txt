@@ -3,6 +3,25 @@ cmake_minimum_required(VERSION 3.20)
 # Load version configuration
 include(VERSION.cmake)
 
+# ========== MSVC Runtime Library Settings (must be before project()) ==========
+if(MSVC)
+    # Enable CMP0091 policy to allow setting MSVC runtime library
+    if(POLICY CMP0091)
+        cmake_policy(SET CMP0091 NEW)
+    endif()
+
+    # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
+    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
+
+    if(CROUPIER_USE_STATIC_RUNTIME)
+        # Use static runtime: MT for Release, MTd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+        # Use dynamic runtime: MD for Release, MDd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+    endif()
+endif()
+
 project(croupier-cpp-sdk
     VERSION ${CROUPIER_SDK_VERSION}
     DESCRIPTION "${CROUPIER_SDK_DESCRIPTION}"
@@ -174,27 +193,6 @@ endif()
 
 endif()
 
-# ========== MSVC Runtime Library Settings ==========
-if(MSVC)
-    # Enable CMP0091 policy to allow setting MSVC runtime library
-    if(POLICY CMP0091)
-        cmake_policy(SET CMP0091 NEW)
-    endif()
-
-    # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
-    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
-
-    if(CROUPIER_USE_STATIC_RUNTIME)
-        # Use static runtime: MT for Release, MTd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-        message(STATUS "Croupier SDK: Using static runtime library (MT/MTd)")
-    else()
-        # Use dynamic runtime: MD for Release, MDd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
-        message(STATUS "Croupier SDK: Using dynamic runtime library (MD/MDd)")
-    endif()
-endif()
-
 # ========== Compiler Settings ==========
 if(MSVC)
     # MSVC specific settings
@@ -333,7 +331,6 @@ if(BUILD_SHARED_LIBS)
         ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/lib
     )
 
-
     target_include_directories(croupier-sdk-shared
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -465,6 +462,24 @@ if(BUILD_STATIC_LIBS)
 
     # Alias for easier usage
     add_library(croupier::sdk-static ALIAS croupier-sdk-static)
+
+    # ========== Merged Static Library (Contains all dependencies) ==========
+    # Create a merged static library that includes gRPC, abseil, protobuf, etc.
+    # This is the "drop-in" replacement for users who don't want to manage dependencies
+    if(ENABLE_GRPC AND MSVC)
+        # Create an interface library that transitively links all dependencies
+        # This allows consumers to link against croupier-sdk-static-merged
+        # and automatically get all required gRPC/abseil libraries
+        add_library(croupier-sdk-static-merged INTERFACE IMPORTED GLOBAL)
+        set_target_properties(croupier-sdk-static-merged PROPERTIES
+            INTERFACE_LINK_LIBRARIES "croupier-sdk-static;gRPC::grpc++;gRPC::grpc++_reflection;gRPC::gpr;protobuf::libprotobuf;ZLIB::ZLIB;absl::base;absl::log_internal;absl::log_message;absl::log_sink;absl::raw_logging_internal;absl::strings;absl::strings_internal;absl::malloc_internal;absl::throw_delegate;absl::time;absl::synchronization;absl::slab_ptr;absl::spinlock_wait;absl::hash;absl::city;absl::int128;absl::str_format;absl::optional;absl::status"
+        )
+        set_target_properties(croupier-sdk-static-merged PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include;$<TARGET_PROPERTY:croupier-sdk-static,INTERFACE_INCLUDE_DIRECTORIES>"
+        )
+        add_library(croupier::sdk-static-merged ALIAS croupier-sdk-static-merged)
+        message(STATUS "Merged static library target: croupier-sdk-static-merged (MSVC only, links gRPC/abseil transitively)")
+    endif()
 endif()
 
 # Default library target (shared if available, otherwise static)
