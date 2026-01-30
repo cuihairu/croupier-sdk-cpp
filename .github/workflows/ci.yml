@@ -112,6 +112,124 @@ jobs:
           build/bin/
           build/lib/
 
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: [Release, Debug]
+        runtime: [static, dynamic]  # static=MT/MTd, dynamic=MD/MDd
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgJsonGlob: 'vcpkg.json'
+        doNotCache: true  # Windows 上缓存可能不稳定
+
+    - name: Configure CMake (Static Runtime)
+      if: matrix.runtime == 'static'
+      run: |
+        cmake -B build `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static `
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" `
+          -DCROUPIER_USE_STATIC_RUNTIME=ON `
+          -DBUILD_STATIC_LIBS=ON `
+          -DBUILD_SHARED_LIBS=OFF `
+          -DBUILD_EXAMPLES=OFF `
+          -DBUILD_TESTS=OFF
+
+    - name: Configure CMake (Dynamic Runtime)
+      if: matrix.runtime == 'dynamic'
+      run: |
+        cmake -B build `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" `
+          -DCROUPIER_USE_STATIC_RUNTIME=OFF `
+          -DBUILD_STATIC_LIBS=ON `
+          -DBUILD_SHARED_LIBS=ON `
+          -DBUILD_EXAMPLES=OFF `
+          -DBUILD_TESTS=OFF
+
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build-type }} --parallel
+
+    - name: Prepare artifacts
+      shell: pwsh
+      run: |
+        $runtimeSuffix = if ("${{ matrix.runtime }}" -eq "static") { "mt" } else { "md" }
+        $typeSuffix = if ("${{ matrix.build-type }}" -eq "Debug") { "d" } else { "" }
+        $artifactName = "croupier-sdk-windows-x64-${{ matrix.build-type }}-${runtimeSuffix}"
+
+        # 创建输出目录
+        New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/include" -Force | Out-Null
+        New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/lib" -Force | Out-Null
+        New-Item -ItemType Directory -Force -Path "artifacts/$artifactName/bin" -Force | Out-Null
+
+        # 复制头文件
+        Copy-Item -Path "include/croupier" -Destination "artifacts/$artifactName/include/" -Recurse -Force
+
+        # 复制生成的 proto 头文件（如果存在）
+        if (Test-Path "build/include/croupier") {
+            Copy-Item -Path "build/include/croupier" -Destination "artifacts/$artifactName/include/" -Recurse -Force
+        }
+
+        # 复制库文件
+        if (Test-Path "build/lib/*.lib") {
+            Copy-Item -Path "build/lib/*.lib" -Destination "artifacts/$artifactName/lib/" -Force
+        }
+
+        # 复制 DLL 文件（动态运行时版本）
+        if (Test-Path "build/bin/*.dll") {
+            Copy-Item -Path "build/bin/*.dll" -Destination "artifacts/$artifactName/bin/" -Force
+        }
+
+        # 创建 README
+        @"
+        # Croupier C++ SDK for Windows
+
+        - Build Type: ${{ matrix.build-type }}
+        - Runtime: $runtimeSuffix ($(if ("${{ matrix.runtime }}" -eq "static") { "MT/MTd (Static)" } else { "MD/MDd (Dynamic)" }))
+        - Architecture: x64
+
+        ## Directory Structure
+
+        ## Usage
+
+        ### Static Library (MT/MTd)
+        Add to your project:
+        - Additional Include Directories: `path/to/include`
+        - Additional Library Directories: `path/to/lib`
+        - Additional Dependencies: `croupier-sdk-static.lib`
+
+        ### Dynamic Library (MD/MDd)
+        Add to your project:
+        - Additional Include Directories: `path/to/include`
+        - Additional Library Directories: `path/to/lib`
+        - Additional Dependencies: `croupier-sdk.lib`
+        - Copy `croupier-sdk.dll` to your executable directory.
+        "@ | Out-File -FilePath "artifacts/$artifactName/README.txt" -Encoding UTF8
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-sdk-windows-x64-${{ matrix.build-type }}-${{ matrix.runtime }}
+        path: artifacts/
+
   coverage:
     runs-on: ubuntu-latest
     steps:
