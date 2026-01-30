@@ -174,6 +174,27 @@ endif()
 
 endif()
 
+# ========== MSVC Runtime Library Settings ==========
+if(MSVC)
+    # Enable CMP0091 policy to allow setting MSVC runtime library
+    if(POLICY CMP0091)
+        cmake_policy(SET CMP0091 NEW)
+    endif()
+
+    # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
+    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
+
+    if(CROUPIER_USE_STATIC_RUNTIME)
+        # Use static runtime: MT for Release, MTd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        message(STATUS "Croupier SDK: Using static runtime library (MT/MTd)")
+    else()
+        # Use dynamic runtime: MD for Release, MDd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+        message(STATUS "Croupier SDK: Using dynamic runtime library (MD/MDd)")
+    endif()
+endif()
+
 # ========== Compiler Settings ==========
 if(MSVC)
     # MSVC specific settings
@@ -285,7 +306,7 @@ endif()
 if(BUILD_SHARED_LIBS)
     add_library(croupier-sdk-shared SHARED ${SDK_SOURCES} ${SDK_HEADERS})
     set_target_properties(croupier-sdk-shared PROPERTIES
-        OUTPUT_NAME "croupier-sdk"
+        OUTPUT_NAME "croupier-sdk$<$<CONFIG:Debug>:-d>"
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_VERSION_MAJOR}
         EXPORT_NAME "croupier-sdk"
@@ -361,7 +382,7 @@ endif()
 if(BUILD_STATIC_LIBS)
     add_library(croupier-sdk-static STATIC ${SDK_SOURCES} ${SDK_HEADERS})
     set_target_properties(croupier-sdk-static PROPERTIES
-        OUTPUT_NAME "croupier-sdk-static"
+        OUTPUT_NAME "croupier-sdk-static$<$<CONFIG:Debug>:-d>"
         EXPORT_NAME "croupier-sdk-static"
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
@@ -414,6 +435,17 @@ if(BUILD_STATIC_LIBS)
         PUBLIC
             CROUPIER_SDK_STATIC
     )
+
+    # Apply MSVC runtime library setting to static library target
+    if(MSVC)
+        if(CROUPIER_USE_STATIC_RUNTIME)
+            set_property(TARGET croupier-sdk-static PROPERTY
+                MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        else()
+            set_property(TARGET croupier-sdk-static PROPERTY
+                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+        endif()
+    endif()
 
     # Alias for easier usage
     add_library(croupier::sdk-static ALIAS croupier-sdk-static)
