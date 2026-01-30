@@ -108,6 +108,93 @@ int main() {
 }
 ```
 
+### 3. 游戏服务器集成（非阻塞模式）
+
+对于游戏服务器，建议使用**非阻塞连接模式**，避免因 Agent 故障导致服务器启动延迟：
+
+```cpp
+#include "croupier/sdk/croupier_client.h"
+#include <thread>
+
+using namespace croupier::sdk;
+
+class GameServer {
+    CroupierClient* m_client = nullptr;
+    std::thread m_serviceThread;
+    bool m_running = false;
+
+public:
+    bool Init() {
+        // 配置客户端 - 使用非阻塞模式
+        ClientConfig config;
+        config.game_id = "my-mmorpg";
+        config.env = "production";
+        config.agent_addr = "croupier-agent.internal:19090";
+        config.blocking_connect = false;      // 非阻塞模式
+        config.connect_timeout_seconds = 5;   // 快速超时
+        config.auto_reconnect = true;         // 自动重连
+        config.reconnect_interval_seconds = 10;
+
+        // 创建客户端
+        m_client = new CroupierClient(config);
+
+        // 注册 GM 函数
+        FunctionDescriptor desc;
+        desc.id = "player.kick";
+        desc.category = "player";
+        desc.risk = "medium";
+        m_client->RegisterFunction(desc, PlayerKickHandler);
+
+        return true;
+    }
+
+    void Start() {
+        if (!m_client) return;
+
+        m_running = true;
+
+        // 在后台线程中运行连接和服务
+        m_serviceThread = std::thread([this]() {
+            // Connect() 会立即返回，连接在后台进行
+            if (!m_client->Connect()) {
+                // 连接失败不阻塞，服务继续运行
+                // auto_reconnect 会在后台重试
+            }
+
+            // 阻塞运行，处理 GM 命令
+            m_client->Serve();
+        });
+    }
+
+    void Stop() {
+        m_running = false;
+        if (m_client) {
+            m_client->Stop();
+            m_client->Close();
+        }
+        if (m_serviceThread.joinable()) {
+            m_serviceThread.join();
+        }
+    }
+
+    bool IsGMConnected() const {
+        return m_client && m_client->IsConnected();
+    }
+
+private:
+    static std::string PlayerKickHandler(const std::string& context, const std::string& payload) {
+        // 处理踢人逻辑
+        return R"({"code":0,"message":"player kicked"})";
+    }
+};
+```
+
+**关键点：**
+- `blocking_connect = false` - `Connect()` 立即返回，不等待 Agent 响应
+- 游戏服务器秒启动，不受 Agent 状态影响
+- Agent 恢复后，`auto_reconnect` 自动建立连接
+- 可通过 `IsConnected()` 检查当前连接状态
+
 ---
 
 ## 核心概念
@@ -235,6 +322,10 @@ struct ClientConfig {
     std::string local_listen = "127.0.0.1:0";    // 本地监听地址
     bool insecure = true;                         // 是否禁用 TLS
 
+    // === 连接模式 ===
+    bool blocking_connect = true;                 // 是否阻塞等待连接
+    int connect_timeout_seconds = 5;              // 非阻塞模式超时
+
     // === 身份配置 ===
     std::string game_id;          // 游戏标识 (必填)
     std::string env = "development"; // 环境 (development/staging/production)
@@ -252,7 +343,8 @@ struct ClientConfig {
     std::map<std::string, std::string> headers; // 自定义 HTTP 头
 
     // === 超时配置 ===
-    int timeout_seconds = 30;
+    int timeout_seconds = 30;             // 阻塞模式连接超时
+    int heartbeat_interval = 60;          // 心跳间隔
 
     // === 重连配置 ===
     bool auto_reconnect = true;

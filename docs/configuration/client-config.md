@@ -79,13 +79,44 @@ config.service_id = "backend-" + GetHostname();
 
 ### timeout_seconds
 
-网络操作超时时间（秒）。
+网络操作超时时间（秒），用于阻塞连接模式。
 
 ```cpp
 config.timeout_seconds = 30;   // 默认
 config.timeout_seconds = 60;   // 长操作
 config.timeout_seconds = 300;  // 非常长的操作
 ```
+
+### blocking_connect
+
+**连接模式**：是否阻塞等待连接建立。
+
+```cpp
+config.blocking_connect = true;   // 阻塞模式（默认）：Connect() 等待连接成功或超时
+config.blocking_connect = false;  // 非阻塞模式：Connect() 立即返回，连接在后台进行
+```
+
+**何时使用非阻塞模式：**
+- 游戏服务器：避免因 Agent 不可达而延迟服务器启动
+- 微服务：快速启动，依赖服务通过重连机制异步建立
+- 容器化部署：缩短启动时间，提高健康检查通过率
+
+**非阻塞模式行为：**
+- `Connect()` 立即返回 `true`
+- 连接建立过程在后台进行
+- 通过 `auto_reconnect` 机制自动重试
+- `IsConnected()` 在连接建立前返回 `false`
+
+### connect_timeout_seconds
+
+非阻塞模式下初始连接尝试的超时时间（秒）。
+
+```cpp
+config.connect_timeout_seconds = 5;   // 默认：5 秒快速超时
+config.connect_timeout_seconds = 10;  // 较宽松的超时
+```
+
+此值通常小于 `timeout_seconds`，因为非阻塞模式下重试会在后台进行。
 
 ### insecure
 
@@ -210,6 +241,27 @@ config.auth.headers = {
 }
 ```
 
+### 游戏服务器（非阻塞模式）
+
+```json
+{
+  "game_id": "my-mmorpg",
+  "env": "production",
+  "service_id": "game-server-01",
+  "agent_addr": "croupier-agent.internal:19090",
+  "blocking_connect": false,
+  "connect_timeout_seconds": 5,
+  "auto_reconnect": true,
+  "reconnect_interval_seconds": 10,
+  "insecure": false
+}
+```
+
+**关键配置说明：**
+- `blocking_connect: false` - 避免因 Agent 故障导致游戏服务器启动延迟
+- `connect_timeout_seconds: 5` - 快速超时，避免阻塞启动
+- `auto_reconnect: true` - Agent 恢复后自动重连
+
 ## 默认值
 
 | 字段 | 默认值 |
@@ -218,6 +270,8 @@ config.auth.headers = {
 | `env` | `development` |
 | `service_id` | `cpp-service` |
 | `timeout_seconds` | `30` |
+| `blocking_connect` | `true` |
+| `connect_timeout_seconds` | `5` |
 | `insecure` | `true` |
 | `auto_reconnect` | `true` |
 | `reconnect_interval_seconds` | `5` |

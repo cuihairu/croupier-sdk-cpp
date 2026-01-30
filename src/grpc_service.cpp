@@ -73,26 +73,39 @@ bool GrpcClientManager::Connect() {
         agent_channel_ = CreateChannel();
         if (!agent_channel_) {
             HandleError("Failed to create gRPC channel");
+            state_ = ConnectionState::FAILED;
             return false;
         }
 
         // Create client stub
         agent_stub_ = std::make_unique<LocalControlServiceStub>(agent_channel_);
 
-        // Validate connection
-        if (!ValidateConnection()) {
-            HandleError("Failed to validate connection to agent");
-            return false;
-        }
-
-        // Start local server
+        // Start local server first (needed for both blocking and non-blocking modes)
         if (!StartLocalServer()) {
             HandleError("Failed to start local gRPC server");
+            state_ = ConnectionState::FAILED;
             return false;
         }
 
-        state_ = ConnectionState::CONNECTED;
-        std::cout << "✅ Successfully connected to Agent: " << config_.agent_addr << std::endl;
+        // Connection mode: blocking vs non-blocking
+        if (config_.blocking_connect) {
+            // Blocking mode: wait for connection to be established
+            if (!ValidateConnection()) {
+                HandleError("Failed to validate connection to agent");
+                state_ = ConnectionState::FAILED;
+                // Local server remains running for potential reconnect
+                return false;
+            }
+            state_ = ConnectionState::CONNECTED;
+            std::cout << "✅ Successfully connected to Agent: " << config_.agent_addr << std::endl;
+        } else {
+            // Non-blocking mode: return immediately, connection proceeds in background
+            // The auto-reconnect mechanism will complete the connection
+            std::cout << "🔄 Non-blocking connect mode: connection to " << config_.agent_addr
+                      << " proceeding in background" << std::endl;
+            // Don't set CONNECTED state yet - will be set by reconnect/heartbeat mechanism
+            // StartLocalServer is already running, which handles incoming requests
+        }
 
         return true;
 
