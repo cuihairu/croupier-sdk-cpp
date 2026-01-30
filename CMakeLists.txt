@@ -3,6 +3,25 @@ cmake_minimum_required(VERSION 3.20)
 # Load version configuration
 include(VERSION.cmake)
 
+# ========== MSVC Runtime Library Settings (must be before project()) ==========
+if(MSVC)
+    # Enable CMP0091 policy to allow setting MSVC runtime library
+    if(POLICY CMP0091)
+        cmake_policy(SET CMP0091 NEW)
+    endif()
+
+    # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
+    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
+
+    if(CROUPIER_USE_STATIC_RUNTIME)
+        # Use static runtime: MT for Release, MTd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+        # Use dynamic runtime: MD for Release, MDd for Debug
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+    endif()
+endif()
+
 project(croupier-cpp-sdk
     VERSION ${CROUPIER_SDK_VERSION}
     DESCRIPTION "${CROUPIER_SDK_DESCRIPTION}"
@@ -172,27 +191,6 @@ if(ENABLE_LUA_BINDING)
     endif()
 endif()
 
-endif()
-
-# ========== MSVC Runtime Library Settings ==========
-if(MSVC)
-    # Enable CMP0091 policy to allow setting MSVC runtime library
-    if(POLICY CMP0091)
-        cmake_policy(SET CMP0091 NEW)
-    endif()
-
-    # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
-    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
-
-    if(CROUPIER_USE_STATIC_RUNTIME)
-        # Use static runtime: MT for Release, MTd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-        message(STATUS "Croupier SDK: Using static runtime library (MT/MTd)")
-    else()
-        # Use dynamic runtime: MD for Release, MDd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
-        message(STATUS "Croupier SDK: Using dynamic runtime library (MD/MDd)")
-    endif()
 endif()
 
 # ========== Compiler Settings ==========
