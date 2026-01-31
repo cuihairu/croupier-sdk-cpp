@@ -625,6 +625,7 @@ if(BUILD_TESTS)
             tests/test_config_merge.cpp
             tests/test_config_profiles.cpp
             tests/test_config_defaults.cpp
+            tests/test_client_initialization.cpp
         )
 
         if(TARGET GTest::gtest_main)
