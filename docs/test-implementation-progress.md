@@ -828,10 +828,72 @@
 
 ---
 
+#### ✅ 已完成：test_grpc_registration.cpp
+
+**Commit:** `ec478b6`
+**测试用例数：** 9 个
+**代码行数：** ~287 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**基本注册测试（4个）：**
+1. ✅ `RegisterService` - 注册服务到 agent
+2. ✅ `RegisterFunctionToService` - 注册函数到服务
+3. ✅ `RegisterVirtualObjectToService` - 注册虚拟对象到服务
+4. ✅ `RegisterComponentToService` - 注册组件到服务
+
+**高级功能测试（3个）：**
+5. ✅ `BatchRegistration` - 批量注册多个函数
+6. ✅ `UnregisterService` - 注销服务
+7. ✅ `GetRegistrationStatus` - 获取注册状态
+
+**异常处理测试（2个）：**
+8. ✅ `RegistrationValidation` - 注册验证（缺少必填字段）
+9. ✅ `DuplicateRegistrationHandling` - 重复注册处理
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证注册功能
+- ✅ 覆盖正常和异常场景
+- ✅ 测试注册生命周期
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `GrpcRegistrationTest` 管理测试环境
+- 辅助方法创建函数/虚拟对象/组件描述符
+- 测试 `RegisterFunction()` / `RegisterVirtualObject()` / `RegisterComponent()` API
+- 测试注册验证逻辑
+- 测试批量注册
+- 验证注册状态查询
+
+**注册配置验证：**
+- **service_id:** 服务标识符
+- **game_id:** 游戏标识符
+- **FunctionDescriptor:** 函数描述符（id, version, category, risk, entity, operation）
+- **VirtualObjectDescriptor:** 虚拟对象描述符（id, version, name, description）
+- **ComponentDescriptor:** 组件描述符（id, version, name, description, type）
+
+**关键验证点：**
+- 服务信息正确设置
+- 函数注册成功
+- 虚拟对象注册成功
+- 组件注册成功
+- 批量注册支持
+- 注销服务流程正常
+- 缺少必填字段导致注册失败
+- 重复注册可以正确处理
+- 可以查询注册状态
+
+**预期覆盖率贡献：**
+- gRPC Service: ~12% → 24% (+12%)
+
+---
+
 ### gRPC Service 测试（7 个文件，68 个测试用例）
 
 1. ✅ **test_grpc_connection.cpp** (10 个测试) - 已完成
-2. ⏳ **test_grpc_registration.cpp** (9 个测试)
+2. ✅ **test_grpc_registration.cpp** (9 个测试) - 已完成
 3. ⏳ **test_grpc_heartbeat.cpp** (10 个测试)
 4. ⏳ **test_grpc_reconnect.cpp** (10 个测试)
 5. ⏳ **test_grpc_local_server.cpp** (9 个测试)
@@ -848,14 +910,14 @@
 |------|---------|--------|--------|------|
 | **Config Loader** | 7 | 7 | 0 | 100% ✅ |
 | **CroupierClient** | 6 | 6 | 0 | 100% ✅ |
-| **gRPC Service** | 7 | 1 | 6 | 14% |
-| **总计** | 20 | 14 | 6 | 70% |
+| **gRPC Service** | 7 | 2 | 5 | 29% |
+| **总计** | 20 | 15 | 5 | 75% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 14 | 20 | 70% |
-| 测试用例数 | 152 | 189 | 80% ✅ |
-| 整体覆盖率 | ~72% | 80%+ | - |
+| 测试文件数 | 15 | 20 | 75% |
+| 测试用例数 | 161 | 189 | 85% ✅ |
+| 整体覆盖率 | ~74% | 80%+ | - |
 
 ---
 
@@ -893,7 +955,7 @@
    - gRPC 连接管理
    - 预计工作量：3-4 小时
 
-2. ⏳ **test_grpc_registration.cpp** (9 个测试)
+2. ✅ **test_grpc_registration.cpp** (9 个测试) - 已完成
    - 服务注册
    - 预计工作量：3-4 小时
 
@@ -901,8 +963,12 @@
    - 心跳机制
    - 预计工作量：3-4 小时
 
-4-7. ⏳ **其他 gRPC 测试**（39 个测试）
-   - 预计工作量：11-13 小时
+4. ⏳ **test_grpc_reconnect.cpp** (10 个测试)
+   - 重连机制
+   - 预计工作量：3-4 小时
+
+5-7. ⏳ **其他 gRPC 测试**（29 个测试）
+   - 预计工作量：8-10 小时
 
 **小计：** 68 个测试用例，预计工作量：20-25 小时
 
@@ -911,12 +977,12 @@
 **已完成模块：** 2/3 (67%)
 - Config Loader: 100% ✅
 - CroupierClient: 100% ✅
-- gRPC Service: 14% (1/7)
+- gRPC Service: 29% (2/7)
 
 **整体进度：**
-- 测试文件数：14/20 (70%)
-- 测试用例数：152/189 (80%) ✅ **已达标！**
-- 整体覆盖率：~72%
+- 测试文件数：15/20 (75%)
+- 测试用例数：161/189 (85%) ✅ **已超标！**
+- 整体覆盖率：~74%
 
 ---
 
