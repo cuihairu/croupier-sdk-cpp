@@ -623,6 +623,7 @@ if(BUILD_TESTS)
             tests/test_config_environment.cpp
             tests/test_config_security.cpp
             tests/test_config_merge.cpp
+            tests/test_config_profiles.cpp
         )
 
         if(TARGET GTest::gtest_main)
