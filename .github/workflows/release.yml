@@ -53,29 +53,43 @@ jobs:
     needs: version
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 4
       matrix:
         include:
+          # Windows - MD (动态 CRT，推荐)
           - os: windows-latest
             arch: x64
-            vcpkg_triplet: x64-windows
-            artifact_name: windows-x64
+            vcpkg_triplet: x64-windows-static-md
+            artifact_name: windows-x64-md
+            display_name: "Windows x64 (MD)"
 
+          # Windows - MT (静态 CRT，独立应用)
+          - os: windows-latest
+            arch: x64
+            vcpkg_triplet: x64-windows-static-mt
+            artifact_name: windows-x64-mt
+            display_name: "Windows x64 (MT)"
 
+          # Linux
           - os: ubuntu-latest
             arch: x64
             vcpkg_triplet: x64-linux
             artifact_name: linux-x64
+            display_name: "Linux x64"
 
+          # macOS Intel
           - os: macos-latest
             arch: x64
             vcpkg_triplet: x64-osx
             artifact_name: macos-x64
+            display_name: "macOS x64"
 
+          # macOS ARM64
           - os: macos-latest
             arch: arm64
             vcpkg_triplet: arm64-osx
             artifact_name: macos-arm64
+            display_name: "macOS ARM64"
 
     runs-on: ${{ matrix.os }}
 
@@ -136,7 +150,7 @@ jobs:
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
       run: |
-        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}" -DCROUPIER_USE_STATIC_RUNTIME=OFF
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
@@ -193,7 +207,7 @@ jobs:
         cp -r package-install/include package-dynamic/ 2>/dev/null || true
         cp -r package-install/share package-static/ 2>/dev/null || true
         cp -r package-install/share package-dynamic/ 2>/dev/null || true
-        cp -r package-install/bin package-static/ 2>/dev/null || true
+        # 静态包不需要 bin 目录（示例程序和 DLL 只在动态包中）
         cp -r package-install/bin package-dynamic/ 2>/dev/null || true
 
         mkdir -p package-static/lib package-dynamic/lib
