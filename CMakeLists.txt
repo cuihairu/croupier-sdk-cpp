@@ -632,6 +632,7 @@ if(BUILD_TESTS)
             tests/test_client_connection.cpp
             tests/test_client_lifecycle.cpp
             tests/test_grpc_connection.cpp
+            tests/test_grpc_registration.cpp
         )
 
         if(TARGET GTest::gtest_main)
