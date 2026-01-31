@@ -630,6 +630,7 @@ if(BUILD_TESTS)
             tests/test_client_virtual_objects.cpp
             tests/test_client_components.cpp
             tests/test_client_connection.cpp
+            tests/test_client_lifecycle.cpp
         )
 
         if(TARGET GTest::gtest_main)
