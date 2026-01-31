@@ -1,0 +1,21 @@
+version: v2
+deps:
+  # 固定 protobuf 依赖版本以确保与 vcpkg 中的 protobuf 4.25.x 兼容
+  - buf.build/google/protobuf:v25.1
+  # 固定 gRPC 依赖版本
+  - buf.build/grpc/grpc:v1.71.0
+
+lint:
+  use:
+    - DEFAULT
+  except:
+    - PACKAGE_VERSION_SUFFIX
+  ignore_only:
+    PACKAGE_DIRECTORY_MATCH:
+      - croupier/options/v1
+    PACKAGE_NO_IMPORT_CYCLE:
+      - croupier/agent/local/v1
+
+breaking:
+  use:
+    - FILE

@@ -84,8 +84,8 @@ out/
 generated/
 
 # Buf configuration files (generated dynamically)
-proto/buf.yaml
-buf.gen.yaml
+# buf.lock is the only dynamically generated file
+# proto/buf.yaml and buf.gen.yaml are version-controlled for reproducibility
 buf.lock
 
 # Keep VuePress config
