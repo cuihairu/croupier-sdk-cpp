@@ -128,7 +128,7 @@ jobs:
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
       run: |
-        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
+        cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}" -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
