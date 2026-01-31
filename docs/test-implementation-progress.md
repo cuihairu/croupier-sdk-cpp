@@ -759,9 +759,78 @@
 
 ---
 
+#### ✅ 已完成：test_grpc_connection.cpp
+
+**Commit:** `0fba759`
+**测试用例数：** 10 个
+**代码行数：** ~270 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**基本连接测试（3个）：**
+1. ✅ `EstablishGrpcConnection` - 建立 gRPC 连接
+2. ✅ `CheckConnectionStatus` - 检查连接状态
+3. ✅ `CloseGrpcConnection` - 关闭 gRPC 连接
+
+**安全连接测试（4个）：**
+4. ✅ `ConnectionWithTls` - TLS 连接
+5. ✅ `ConnectionWithInsecure` - 不安全连接
+6. ✅ `ConnectionWithAuthToken` - 带认证令牌的连接
+7. ✅ `ConnectionFailureHandling` - 连接失败处理
+
+**高级功能测试（3个）：**
+8. ✅ `ConnectionTimeout` - 连接超时
+9. ✅ `MultipleConnectionAttempts` - 多次连接尝试
+10. ✅ `ConnectionRecovery` - 连接恢复
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证 gRPC 连接功能
+- ✅ 覆盖正常和异常场景
+- ✅ 测试连接管理和恢复
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `GrpcConnectionTest` 管理测试环境
+- 测试 `Connect()` / `IsConnected()` / `Close()` API
+- 验证 TLS 配置（cert_file, key_file, ca_file, server_name）
+- 测试不安全连接模式
+- 测试认证令牌传递
+- 测试超时和重连机制
+- 验证连接失败处理
+
+**连接配置验证：**
+- **insecure:** true/false - 不安全/TLS 模式
+- **cert_file:** 客户端证书路径
+- **key_file:** 客户端私钥路径
+- **ca_file:** CA 证书路径
+- **server_name:** TLS 服务器名称
+- **auth_token:** Bearer 认证令牌
+- **timeout_seconds:** 连接超时
+- **auto_reconnect:** 自动重连开关
+- **reconnect_interval_seconds:** 重连间隔
+- **reconnect_max_attempts:** 最大重连次数
+
+**关键验证点：**
+- Connect() API 可以正常调用
+- IsConnected() 正确反映连接状态
+- Close() 断开连接
+- TLS 配置正确应用
+- 认证令牌正确传递
+- 超时机制生效
+- 自动重连可配置
+- 连接失败可以正确处理
+- 支持多次连接尝试
+
+**预期覆盖率贡献：**
+- gRPC Service: ~0% → 12% (+12%)
+
+---
+
 ### gRPC Service 测试（7 个文件，68 个测试用例）
 
-1. ⏳ **test_grpc_connection.cpp** (10 个测试)
+1. ✅ **test_grpc_connection.cpp** (10 个测试) - 已完成
 2. ⏳ **test_grpc_registration.cpp** (9 个测试)
 3. ⏳ **test_grpc_heartbeat.cpp** (10 个测试)
 4. ⏳ **test_grpc_reconnect.cpp** (10 个测试)
@@ -779,14 +848,14 @@
 |------|---------|--------|--------|------|
 | **Config Loader** | 7 | 7 | 0 | 100% ✅ |
 | **CroupierClient** | 6 | 6 | 0 | 100% ✅ |
-| **gRPC Service** | 7 | 0 | 7 | 0% |
-| **总计** | 20 | 13 | 7 | 65% |
+| **gRPC Service** | 7 | 1 | 6 | 14% |
+| **总计** | 20 | 14 | 6 | 70% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 13 | 20 | 65% |
-| 测试用例数 | 142 | 189 | 75% ✅ |
-| 整体覆盖率 | ~70% | 75%+ | - |
+| 测试文件数 | 14 | 20 | 70% |
+| 测试用例数 | 152 | 189 | 80% ✅ |
+| 整体覆盖率 | ~72% | 80%+ | - |
 
 ---
 
@@ -820,7 +889,7 @@
 
 **优先级：** 中（核心服务功能）
 
-1. ⏳ **test_grpc_connection.cpp** (10 个测试)
+1. ✅ **test_grpc_connection.cpp** (10 个测试) - 已完成
    - gRPC 连接管理
    - 预计工作量：3-4 小时
 
@@ -842,12 +911,12 @@
 **已完成模块：** 2/3 (67%)
 - Config Loader: 100% ✅
 - CroupierClient: 100% ✅
-- gRPC Service: 0%
+- gRPC Service: 14% (1/7)
 
 **整体进度：**
-- 测试文件数：13/20 (65%)
-- 测试用例数：142/189 (75%) ✅ **已达标！**
-- 整体覆盖率：~70%
+- 测试文件数：14/20 (70%)
+- 测试用例数：152/189 (80%) ✅ **已达标！**
+- 整体覆盖率：~72%
 
 ---
 
