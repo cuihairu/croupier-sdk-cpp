@@ -376,16 +376,80 @@
 
 ---
 
-### CroupierClient 测试（6 个文件，54 个测试用例）
+#### ✅ 已完成：test_client_initialization.cpp
 
-1. ⏳ **test_client_initialization.cpp** (11 个测试)
+**Commit:** `74b3c7a`
+**测试用例数：** 11 个
+**代码行数：** ~279 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**基本初始化测试（3个）：**
+1. ✅ `InitializeClientDefaultConfig` - 使用默认配置初始化
+2. ✅ `InitializeClientCustomConfig` - 使用自定义配置初始化
+3. ✅ `InitializeClientConfigFile` - 从配置文件初始化
+
+**错误处理测试（3个）：**
+4. ✅ `InitializeClientMultipleTimesProtection` - 多次初始化保护
+5. ✅ `InitializeClientInvalidConfig` - 无效配置初始化失败
+6. ✅ `InitializeClientMissingRequiredField` - 缺少必填字段
+
+**状态管理测试（5个）：**
+7. ✅ `GetInitializationState` - 获取初始化状态
+8. ✅ `IsInitializedAfterSuccess` - 成功创建后的状态
+9. ✅ `IsInitializedAfterFailure` - 失败后的状态处理
+10. ✅ `CleanupAfterInitialization` - 初始化后的清理
+11. ✅ `ReinitializeAfterCleanup` - 清理后重新初始化
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证客户端初始化逻辑
+- ✅ 覆盖正常和异常场景
+- ✅ 测试客户端生命周期管理
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `ClientInitializationTest` 管理测试环境
+- 辅助方法 `CreateDefaultConfig()` / `CreateCustomConfig()`
+- 测试客户端对象创建和销毁
+- 验证 `IsConnected()` / `GetLocalAddress()` / `Close()` API
+
+**关键验证点：**
+- 客户端构造函数接受配置
+- 初始状态为未连接（`IsConnected() = false`）
+- 配置验证在加载时执行
+- 多个客户端实例可以独立创建
+- 析构函数正确清理资源
+
+**预期覆盖率贡献：**
+- CroupierClient: ~0% → 15% (+15%)
+
+---
+
+### CroupierClient 测试（剩余 5 个文件）
+
+1. ✅ **test_client_initialization.cpp** (11 个测试) - 已完成
 2. ⏳ **test_client_function_registration.cpp** (8 个测试)
+   - 函数注册和元数据
+   - 注册验证
+   - 预计工作量：2-3 小时
 3. ⏳ **test_client_virtual_objects.cpp** (9 个测试)
+   - 虚拟对象创建
+   - 对象生命周期
+   - 预计工作量：3-4 小时
 4. ⏳ **test_client_components.cpp** (9 个测试)
+   - 组件注册
+   - 组件依赖
+   - 预计工作量：3-4 小时
 5. ⏳ **test_client_connection.cpp** (10 个测试)
+   - 连接管理
+   - 预计工作量：3-4 小时
 6. ⏳ **test_client_lifecycle.cpp** (7 个测试)
+   - 启动/停止
+   - 预计工作量：2-3 小时
 
-**小计：** 54 个测试用例
+**小计：** 43 个测试用例 (剩余)
 
 ---
 
@@ -408,15 +472,15 @@
 | 模块 | 测试文件 | 已完成 | 待完成 | 进度 |
 |------|---------|--------|--------|------|
 | **Config Loader** | 7 | 7 | 0 | 100% ✅ |
-| **CroupierClient** | 6 | 0 | 6 | 0% |
+| **CroupierClient** | 6 | 1 | 5 | 17% |
 | **gRPC Service** | 7 | 0 | 7 | 0% |
-| **总计** | 20 | 7 | 13 | 35% |
+| **总计** | 20 | 8 | 12 | 40% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 7 | 20 | 35% |
-| 测试用例数 | 88 | 189 | 47% |
-| 整体覆盖率 | ~52% | 75%+ | - |
+| 测试文件数 | 8 | 20 | 40% |
+| 测试用例数 | 99 | 189 | 52% |
+| 整体覆盖率 | ~55% | 75%+ | - |
 
 ---
 
@@ -430,47 +494,33 @@
 **代码行数：** ~1,942 行
 **估计覆盖率：** ~95%
 
-### 下一步任务 - CroupierClient 模块
+### 🟡 进行中 - CroupierClient 模块
 
-**模块优先级：** 高（核心客户端功能）
+**模块进度：** 1/6 文件完成 (17%)
 
-1. ⏳ **test_client_initialization.cpp** (11 个测试)
-   - 客户端初始化
-   - 配置加载和验证
-   - 默认参数设置
-   - 预计工作量：3-4 小时
-
+1. ✅ **test_client_initialization.cpp** (11 个测试) - 已完成
 2. ⏳ **test_client_function_registration.cpp** (8 个测试)
-   - 函数注册
-   - 函数元数据
+   - 函数注册和元数据
    - 注册验证
-   - 预计工作量：2-3 小时
+   - **预计工作量：** 2-3 小时
 
 3. ⏳ **test_client_virtual_objects.cpp** (9 个测试)
-   - 虚拟对象创建
-   - 对象生命周期管理
-   - 对象方法调用
-   - 预计工作量：3-4 小时
+   - 虚拟对象创建和生命周期
+   - **预计工作量：** 3-4 小时
 
 4. ⏳ **test_client_components.cpp** (9 个测试)
-   - 组件注册
-   - 组件依赖管理
-   - 组件生命周期
-   - 预计工作量：3-4 小时
+   - 组件注册和依赖
+   - **预计工作量：** 3-4 小时
 
 5. ⏳ **test_client_connection.cpp** (10 个测试)
-   - 连接建立
-   - 连接断开
-   - 连接状态管理
-   - 预计工作量：3-4 小时
+   - 连接管理
+   - **预计工作量：** 3-4 小时
 
 6. ⏳ **test_client_lifecycle.cpp** (7 个测试)
-   - 客户端启动/停止
-   - 资源清理
-   - 状态转换
-   - 预计工作量：2-3 小时
+   - 启动/停止
+   - **预计工作量：** 2-3 小时
 
-**小计：** 54 个测试用例，预计工作量：16-22 小时
+**小计：** 43 个测试用例剩余，预计工作量：13-18 小时
 
 ---
 
