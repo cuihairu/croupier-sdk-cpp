@@ -115,6 +115,11 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 - nlohmann/json 3.12.x (通过 vcpkg)
 
 > **⚠️ 重要提示**：Protobuf 版本已固定为 **4.25.x** 系列以确保与 gRPC 1.71.x 的兼容性。请勿擅自升级到 5.x 版本，否则可能导致 ABI 不兼容问题。
+>
+> 📖 **详细版本管理策略**：查看 [`proto/README.md`](proto/README.md) 了解完整的版本固定策略和升级流程。版本在三个层面保持一致：
+> - `vcpkg.json` - C++ 编译库版本
+> - `proto/buf.yaml` - Buf 依赖管理版本
+> - `buf.gen.yaml` - 代码生成插件版本
 
 ### 一键构建
 
