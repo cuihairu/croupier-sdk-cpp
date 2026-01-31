@@ -3,8 +3,8 @@
 ## 📊 总体目标
 
 **目标覆盖率：** 核心功能 80%+
-**当前覆盖率：** ~40%
-**新增测试文件数：** 4/20 (20% 完成)
+**当前覆盖率：** ~45%
+**新增测试文件数：** 5/20 (25% 完成)
 
 ## ✅ 已完成阶段
 
@@ -198,32 +198,128 @@
 
 ---
 
+#### ✅ 已完成：test_config_profiles.cpp
+
+**Commit:** `d122dad`
+**测试用例数：** 8 个
+**代码行数：** ~246 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**Profile 加载测试（3个）：**
+1. ✅ `LoadProfileDevelopment` - 加载开发环境profile
+2. ✅ `LoadProfileStaging` - 加载预发布环境profile
+3. ✅ `LoadProfileProduction` - 加载生产环境profile
+
+**配置合并测试（1个）：**
+4. ✅ `LoadProfileWithBaseMerge` - base.json + profile.json 合并
+
+**异常处理测试（3个）：**
+5. ✅ `LoadProfileCustomPath` - 自定义配置文件路径
+6. ✅ `LoadProfileNotFound` - profile文件不存在抛出异常
+7. ✅ `LoadProfileInvalidJson` - 无效JSON格式
+
+**配置覆盖测试（1个）：**
+8. ✅ `LoadProfileOverrideDefaults` - profile覆盖默认配置
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证profile配置功能
+- ✅ 使用测试夹具管理配置文件创建和清理
+- ✅ 覆盖正常和异常场景
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `ConfigProfileTest` 管理测试环境
+- 辅助方法 `CreateBaseConfigFile()` / `CreateProfileConfigFile()`
+- 测试不同环境（development/staging/production）配置
+- 验证配置合并逻辑
+
+**环境Profile配置：**
+- **development：** insecure=true, localhost地址
+- **staging：** insecure=false + 完整TLS配置
+- **production：** insecure=false + TLS + auth_token + 更长超时
+
+**预期覆盖率贡献：**
+- Config Loader: ~85% → 90% (+5%)
+
+---
+
+#### ✅ 已完成：test_config_merge.cpp
+
+**Commit:** `cae8c05`
+**测试用例数：** 15 个
+**代码行数：** ~343 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**基本合并测试（5个）：**
+1. ✅ `MergeConfigsBasic` - 基本配置合并
+2. ✅ `MergeConfigsOverlayPriority` - overlay 优先级验证
+3. ✅ `MergeConfigsPartialOverride` - 部分字段覆盖
+4. ✅ `MergeConfigsEmptyBase` - 空 base 配置
+5. ✅ `MergeConfigsEmptyOverlay` - 空 overlay 配置
+
+**复杂类型测试（6个）：**
+6. ✅ `MergeConfigsHeaders` - headers map 合并
+7. ✅ `MergeConfigsSecurityConfig` - 安全配置合并
+8. ✅ `MergeConfigsAuthConfig` - 认证配置合并
+9. ✅ `MergeConfigsComplexTypes` - 复杂类型合并
+10. ✅ `MergeConfigsNumericValues` - 数值型配置合并
+11. ✅ `MergeConfigsMultipleOverlays` - 链式合并测试
+
+**边界情况测试（4个）：**
+12. ✅ `MergeConfigsAllEmptyFields` - 所有字段为空
+13. ✅ `MergeConfigsPreservesBaseDefaults` - 保留 base 默认值
+14. ✅ （其他边界情况已在上述测试中覆盖）
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试合并逻辑正确性
+- ✅ 辅助函数提高测试可读性
+- ✅ 覆盖正常和边界情况
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `ConfigMergeTest` 管理配置对象
+- 辅助方法 `CreateBaseConfig()` / `CreateOverlayConfig()`
+- 链式合并测试（多次调用）
+
+**配置合并规则验证：**
+- **字符串字段：** 非空 overlay 值覆盖 base
+- **布尔字段：** 总是应用 overlay 值
+- **数值字段：** > 0 才覆盖（避免 0 覆盖有效值）
+- **headers map：** overlay 覆盖/添加到 base
+
+**重要发现：**
+- `timeout_seconds = 0` 时不覆盖（保留 base 的有效值）
+- 布尔值总是应用（无论是 true 还是 false）
+- headers map 完全合并（overlay 的 key 覆盖 base）
+
+**预期覆盖率贡献：**
+- Config Loader: ~80% → 85% (+5%)
+
+---
+
 ## 📋 待实施测试文件
 
-### Config Loader 测试（剩余 3 个文件）
+### Config Loader 测试（剩余 1 个文件）
 
 1. ✅ **test_config_loading.cpp** (7 个测试用例) - 已完成
 2. ✅ **test_config_network.cpp** (13 个测试用例) - 已完成
 3. ✅ **test_config_environment.cpp** (15 个测试用例) - 已完成
 4. ✅ **test_config_security.cpp** (20 个测试用例) - 已完成
-5. ⏳ **test_config_merge.cpp** (9 个测试用例)
-   - 配置合并逻辑
-   - 覆盖优先级
-   - 复杂类型处理
-   - 优先级：中
-
-6. ⏳ **test_config_profiles.cpp** (8 个测试用例)
-   - 开发/预发布/生产配置
-   - 配置文件加载
-   - 优先级：中
-
+5. ✅ **test_config_merge.cpp** (15 个测试用例) - 已完成
+6. ✅ **test_config_profiles.cpp** (8 个测试用例) - 已完成
 7. ⏳ **test_config_defaults.cpp** (10 个测试用例)
    - 默认配置创建
    - 必填字段验证
    - 边界值测试
    - 优先级：中
 
-**小计：** 27 个测试用例 (剩余)
+**小计：** 10 个测试用例 (剩余)
 
 ---
 
@@ -258,16 +354,16 @@
 
 | 模块 | 测试文件 | 已完成 | 待完成 | 进度 |
 |------|---------|--------|--------|------|
-| **Config Loader** | 7 | 4 | 3 | 57% |
+| **Config Loader** | 7 | 6 | 1 | 86% |
 | **CroupierClient** | 6 | 0 | 6 | 0% |
 | **gRPC Service** | 7 | 0 | 7 | 0% |
-| **总计** | 20 | 4 | 16 | 20% |
+| **总计** | 20 | 6 | 14 | 30% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 4 | 20 | 20% |
-| 测试用例数 | 55 | 189 | 29% |
-| 整体覆盖率 | ~40% | 75%+ | - |
+| 测试文件数 | 6 | 20 | 30% |
+| 测试用例数 | 78 | 189 | 41% |
+| 整体覆盖率 | ~48% | 75%+ | - |
 
 ---
 
@@ -279,31 +375,22 @@
 2. ✅ **已完成** - test_config_network.cpp (13 个测试)
 3. ✅ **已完成** - test_config_environment.cpp (15 个测试)
 4. ✅ **已完成** - test_config_security.cpp (20 个测试)
-5. ⏳ **下一个任务** - test_config_merge.cpp
-   - 配置合并逻辑
+5. ✅ **已完成** - test_config_merge.cpp (15 个测试)
+6. ✅ **已完成** - test_config_profiles.cpp (8 个测试)
+7. ⏳ **下一个任务** - test_config_defaults.cpp
+   - 默认配置创建
+   - 必填字段验证
+   - 边界值测试
    - 预计工作量：2-3 小时
-   - 预计测试用例：9 个
-
-6. ⏳ **后续任务** - test_config_profiles.cpp
-   - TLS 配置验证
-   - 认证配置验证
-   - 文件路径检查
-   - 预计工作量：3-4 小时
-   - 预计测试用例：12 个
-
-5. ⏳ **后续任务** - test_config_merge.cpp
-   - 配置合并逻辑
-   - 预计工作量：2-3 小时
-   - 预计测试用例：9 个
+   - 预计测试用例：10 个
 
 ### 下周计划
 
-- test_config_security.cpp（高优先级）
-- test_config_merge.cpp
-- test_config_profiles.cpp
-- test_config_defaults.cpp
+**里程碑：** 完成 Config Loader 所有测试（7 个文件，88 个测试用例）
 
-**里程碑：** 完成 Config Loader 所有测试（7 个文件，67 个测试用例）
+后续模块：
+- CroupierClient 测试（6 个文件，54 个测试用例）
+- gRPC Service 测试（7 个文件，68 个测试用例）
 
 ---
 
