@@ -133,7 +133,7 @@ TEST_F(IntegrationTest, ConnectionAttempt) {
     client->RegisterFunction(desc, handler);
 
     // 尝试连接（在没有真实Agent的情况下会失败，这是正常的）
-    bool connected = client->Connect();
+    [[maybe_unused]] bool connected = client->Connect();
 
     // 在集成测试环境中，我们可能没有真实的Agent运行
     // 所以连接失败是正常的，但gRPC管理器应该正确处理这种情况

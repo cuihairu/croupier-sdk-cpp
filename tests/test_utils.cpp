@@ -159,7 +159,7 @@ TEST_F(UtilsTest, FunctionDescriptorCreation) {
 TEST_F(UtilsTest, RelationshipValidation) {
     std::vector<std::string> valid_types = {"one-to-one", "one-to-many", "many-to-one", "many-to-many"};
 
-    for (const auto& type : valid_types) {
+    for ([[maybe_unused]] const auto& type : valid_types) {
         RelationshipDef rel;
         rel.type = type;
         rel.entity = "related_entity";

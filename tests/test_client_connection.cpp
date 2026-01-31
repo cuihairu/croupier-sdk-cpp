@@ -38,7 +38,7 @@ TEST_F(ClientConnectionTest, ConnectToAgent) {
     EXPECT_FALSE(client->IsConnected());
 
     // 尝试连接（非阻塞模式）
-    bool success = client->Connect();
+    [[maybe_unused]] bool success = client->Connect();
 
     // 在没有真实 agent 的情况下，连接可能失败
     // 这里我们测试 Connect() API 可以正常调用而不崩溃
@@ -56,7 +56,7 @@ TEST_F(ClientConnectionTest, IsConnectedStatus) {
     client->Connect();
 
     // 检查连接状态（可能仍然是 false，因为没有 agent）
-    bool connected_after_attempt = client->IsConnected();
+    [[maybe_unused]] bool connected_after_attempt = client->IsConnected();
 
     // 验证 IsConnected() API 可以正常调用
     SUCCEED();
@@ -97,7 +97,7 @@ TEST_F(ClientConnectionTest, BlockingConnect) {
     EXPECT_TRUE(blocking_config.blocking_connect);
 
     // 尝试阻塞连接（如果没有 agent，会在超时后返回）
-    bool success = blocking_client.Connect();
+    [[maybe_unused]] bool success = blocking_client.Connect();
 
     // 测试完成后关闭
     blocking_client.Close();
@@ -119,7 +119,7 @@ TEST_F(ClientConnectionTest, NonBlockingConnect) {
     EXPECT_FALSE(non_blocking_config.blocking_connect);
 
     // 非阻塞连接应该立即返回
-    bool success = non_blocking_client.Connect();
+    [[maybe_unused]] bool success = non_blocking_client.Connect();
 
     // 验证 API 可以正常调用
     SUCCEED();
@@ -175,19 +175,19 @@ TEST_F(ClientConnectionTest, AutoReconnect) {
 TEST_F(ClientConnectionTest, MultipleConnectionAttempts) {
     // RED: 测试多次连接尝试
     // 第一次连接
-    bool first_attempt = client->Connect();
+    [[maybe_unused]] bool first_attempt = client->Connect();
 
     // 关闭
     client->Close();
 
     // 第二次连接
-    bool second_attempt = client->Connect();
+    [[maybe_unused]] bool second_attempt = client->Connect();
 
     // 再次关闭
     client->Close();
 
     // 第三次连接
-    bool third_attempt = client->Connect();
+    [[maybe_unused]] bool third_attempt = client->Connect();
 
     // 最后关闭
     client->Close();
@@ -206,7 +206,7 @@ TEST_F(ClientConnectionTest, ConnectionStateChanges) {
 
     // 尝试连接：连接中/已连接/连接失败
     client->Connect();
-    bool state2 = client->IsConnected();
+    [[maybe_unused]] bool state2 = client->IsConnected();
 
     // 关闭连接：回到未连接状态
     client->Close();

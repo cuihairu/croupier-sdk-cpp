@@ -109,7 +109,7 @@ TEST_F(GrpcJobsTest, BatchJobProcessing) {
 
     // 批量处理任务
     // 注意：这里取决于 SDK 是否支持批量任务处理
-    for (const auto& type : job_types) {
+    for ([[maybe_unused]] const auto& type : job_types) {
         // 创建任务
         // std::string job_id = client->CreateJob(type, "{}");
     }
@@ -126,7 +126,7 @@ TEST_F(GrpcJobsTest, JobPriority) {
     // 测试优先级：high, medium, low
     std::vector<std::string> priorities = {"high", "medium", "low"};
 
-    for (const auto& priority : priorities) {
+    for ([[maybe_unused]] const auto& priority : priorities) {
         // 创建带优先级的任务
         // std::string job_id = client->CreateJob("test.job", "{}", priority);
     }

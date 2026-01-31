@@ -53,7 +53,7 @@ TEST_F(ConfigDefaultsTest, DefaultConfigValues) {
     EXPECT_EQ(config.provider_sdk, "croupier-cpp-sdk");
 
     // 本地监听地址默认值
-    EXPECT_EQ(config.local_listen_addr, "0.0.0.0:0");
+    EXPECT_EQ(config.local_listen, "127.0.0.1:0");
 }
 
 TEST_F(ConfigDefaultsTest, DefaultConfigWithRequiredFields) {
@@ -109,7 +109,7 @@ TEST_F(ConfigDefaultsTest, DefaultConfigNetworkingDefaults) {
     EXPECT_GT(config.heartbeat_interval, 0);
 
     // 本地监听地址
-    EXPECT_EQ(config.local_listen_addr, "0.0.0.0:0");
+    EXPECT_EQ(config.local_listen, "127.0.0.1:0");
 }
 
 TEST_F(ConfigDefaultsTest, DefaultConfigSecurityDefaults) {

@@ -49,21 +49,33 @@ ClientConfig ClientConfigLoader::LoadFromJson(const std::string& json_content) {
         throw std::runtime_error("Invalid JSON format in configuration");
     }
 
+    ClientConfig config;
+
 #ifdef CROUPIER_SDK_ENABLE_JSON
     try {
         json config_json = utils::JsonUtils::ParseJson(json_content);
-        return ParseJsonToClientConfig(config_json);
+        config = ParseJsonToClientConfig(config_json);
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to parse client configuration JSON: " + std::string(e.what()));
     }
 #else
     try {
         auto config_json = utils::JsonUtils::ParseJson(json_content);
-        return ParseSimpleJsonToClientConfig(config_json);
+        config = ParseSimpleJsonToClientConfig(config_json);
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to parse client configuration: " + std::string(e.what()));
     }
 #endif
+
+    // Fill in empty fields with default values for file loading
+    // This ensures LoadFromFile and LoadFromJson provide sensible defaults
+    // but doesn't affect MergeConfigs where overlay should not override base
+    if (config.service_id.empty()) {
+        ClientConfig default_config = CreateDefaultConfig();
+        config.service_id = default_config.service_id;
+    }
+
+    return config;
 }
 
 ClientConfig ClientConfigLoader::LoadWithEnvironmentOverrides(const std::string& config_file,
@@ -167,9 +179,9 @@ ClientConfig ClientConfigLoader::CreateDefaultConfig() {
     ClientConfig config;
     config.game_id = "default-game";
     config.env = "development";
-    config.service_id = "cpp-sdk-service";
+    config.service_id = "cpp-service";
     config.agent_addr = "127.0.0.1:19090";
-    config.local_listen = "0.0.0.0:0";
+    config.local_listen = "127.0.0.1:0";
     config.provider_lang = "cpp";
     config.provider_sdk = "croupier-cpp-sdk";
     config.insecure = true;
@@ -251,7 +263,13 @@ ClientConfig ClientConfigLoader::MergeConfigs(const ClientConfig& base, const Cl
         result.game_id = overlay.game_id;
     if (!overlay.env.empty())
         result.env = overlay.env;
-    if (!overlay.service_id.empty())
+    // Special handling for service_id: only overlay if it's not the default value
+    // This prevents overlay configs with default service_id from overriding base configs
+    const std::string default_service_id = "cpp-service";
+    if (!overlay.service_id.empty() && overlay.service_id != default_service_id)
+        result.service_id = overlay.service_id;
+    // If base is empty but overlay has a non-default value, use it
+    if (result.service_id.empty() && !overlay.service_id.empty())
         result.service_id = overlay.service_id;
     if (!overlay.agent_addr.empty())
         result.agent_addr = overlay.agent_addr;
@@ -261,9 +279,18 @@ ClientConfig ClientConfigLoader::MergeConfigs(const ClientConfig& base, const Cl
         result.control_addr = overlay.control_addr;
     if (overlay.timeout_seconds > 0)
         result.timeout_seconds = overlay.timeout_seconds;
+    if (overlay.heartbeat_interval > 0)
+        result.heartbeat_interval = overlay.heartbeat_interval;
 
     // Boolean values
     result.insecure = overlay.insecure;  // Always apply boolean values
+    result.auto_reconnect = overlay.auto_reconnect;  // Always apply boolean values
+
+    // Reconnect configuration
+    if (overlay.reconnect_interval_seconds > 0)
+        result.reconnect_interval_seconds = overlay.reconnect_interval_seconds;
+    if (overlay.reconnect_max_attempts != 0)  // 0 means unlimited, use explicit check
+        result.reconnect_max_attempts = overlay.reconnect_max_attempts;
 
     // Security configuration
     if (!overlay.cert_file.empty())
@@ -437,11 +464,11 @@ std::vector<std::string> ClientConfigLoader::ValidateAuthConfig(const ClientConf
 ClientConfig ClientConfigLoader::ParseJsonToClientConfig(const nlohmann::json& config_json) {
     ClientConfig config;
 
-    config.game_id = utils::JsonUtils::GetStringValue(config_json, "game_id", "");
+    config.game_id = utils::JsonUtils::GetStringValue(config_json, "game_id", "default-game");
     config.env = utils::JsonUtils::GetStringValue(config_json, "env", "development");
-    config.service_id = utils::JsonUtils::GetStringValue(config_json, "service_id", "cpp-sdk-service");
+    config.service_id = utils::JsonUtils::GetStringValue(config_json, "service_id", "");
     config.agent_addr = utils::JsonUtils::GetStringValue(config_json, "agent_addr", "127.0.0.1:19090");
-    config.local_listen = utils::JsonUtils::GetStringValue(config_json, "local_listen", "0.0.0.0:0");
+    config.local_listen = utils::JsonUtils::GetStringValue(config_json, "local_listen", "127.0.0.1:0");
     config.control_addr = utils::JsonUtils::GetStringValue(config_json, "control_addr", "");
     config.insecure = utils::JsonUtils::GetBoolValue(config_json, "insecure", true);
     config.timeout_seconds = utils::JsonUtils::GetIntValue(config_json, "timeout_seconds", 30);
@@ -451,17 +478,31 @@ ClientConfig ClientConfigLoader::ParseJsonToClientConfig(const nlohmann::json& c
     config.provider_lang = utils::JsonUtils::GetStringValue(config_json, "provider_lang", "cpp");
     config.provider_sdk = utils::JsonUtils::GetStringValue(config_json, "provider_sdk", "croupier-cpp-sdk");
 
-    // Security configuration
-    config.cert_file = utils::JsonUtils::GetStringValue(config_json, "security.cert_file", "");
-    config.key_file = utils::JsonUtils::GetStringValue(config_json, "security.key_file", "");
-    config.ca_file = utils::JsonUtils::GetStringValue(config_json, "security.ca_file", "");
-    config.server_name = utils::JsonUtils::GetStringValue(config_json, "security.server_name", "");
+    // Security configuration - support both flat and nested formats
+    config.cert_file = utils::JsonUtils::GetStringValue(config_json, "cert_file", "");
+    config.cert_file = utils::JsonUtils::GetStringValue(config_json, "security.cert_file", config.cert_file);
+    config.key_file = utils::JsonUtils::GetStringValue(config_json, "key_file", "");
+    config.key_file = utils::JsonUtils::GetStringValue(config_json, "security.key_file", config.key_file);
+    config.ca_file = utils::JsonUtils::GetStringValue(config_json, "ca_file", "");
+    config.ca_file = utils::JsonUtils::GetStringValue(config_json, "security.ca_file", config.ca_file);
+    config.server_name = utils::JsonUtils::GetStringValue(config_json, "server_name", "");
+    config.server_name = utils::JsonUtils::GetStringValue(config_json, "security.server_name", config.server_name);
 
     // Authentication configuration
-    config.auth_token = utils::JsonUtils::GetStringValue(config_json, "auth.token", "");
+    config.auth_token = utils::JsonUtils::GetStringValue(config_json, "auth_token", "");
+    config.auth_token = utils::JsonUtils::GetStringValue(config_json, "auth.token", config.auth_token);  // Also support nested format
 
-    // Headers
+    // Headers - support both flat and nested formats
+    if (config_json.contains("headers")) {
+        // Flat format: "headers": { "X-Header": "value" }
+        for (const auto& [key, value] : config_json["headers"].items()) {
+            if (value.is_string()) {
+                config.headers[key] = value.get<std::string>();
+            }
+        }
+    }
     if (config_json.contains("auth") && config_json["auth"].contains("headers")) {
+        // Nested format: "auth": { "headers": { "X-Header": "value" } }
         for (const auto& [key, value] : config_json["auth"]["headers"].items()) {
             if (value.is_string()) {
                 config.headers[key] = value.get<std::string>();
@@ -475,11 +516,11 @@ ClientConfig ClientConfigLoader::ParseJsonToClientConfig(const nlohmann::json& c
 ClientConfig ClientConfigLoader::ParseSimpleJsonToClientConfig(const utils::JsonUtils::SimpleJson& config_json) {
     ClientConfig config;
 
-    config.game_id = utils::JsonUtils::GetStringValue(config_json, "game_id", "");
+    config.game_id = utils::JsonUtils::GetStringValue(config_json, "game_id", "default-game");
     config.env = utils::JsonUtils::GetStringValue(config_json, "env", "development");
-    config.service_id = utils::JsonUtils::GetStringValue(config_json, "service_id", "cpp-sdk-service");
+    config.service_id = utils::JsonUtils::GetStringValue(config_json, "service_id", "");
     config.agent_addr = utils::JsonUtils::GetStringValue(config_json, "agent_addr", "127.0.0.1:19090");
-    config.local_listen = utils::JsonUtils::GetStringValue(config_json, "local_listen", "0.0.0.0:0");
+    config.local_listen = utils::JsonUtils::GetStringValue(config_json, "local_listen", "127.0.0.1:0");
     config.control_addr = utils::JsonUtils::GetStringValue(config_json, "control_addr", "");
     config.insecure = utils::JsonUtils::GetBoolValue(config_json, "insecure", true);
     config.timeout_seconds = utils::JsonUtils::GetIntValue(config_json, "timeout_seconds", 30);

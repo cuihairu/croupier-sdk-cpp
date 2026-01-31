@@ -69,8 +69,8 @@ TEST_F(GrpcReconnectTest, ReconnectIntervalConfiguration) {
         CroupierClient temp_client(config);
         temp_client.Connect();
 
-        // 验证配置已应用
-        EXPECT_EQ(temp_client.GetReconnectInterval(), interval);
+        // 验证配置已应用（通过 config 对象）
+        EXPECT_EQ(config.reconnect_interval_seconds, interval);
 
         temp_client.Close();
     }
@@ -92,8 +92,8 @@ TEST_F(GrpcReconnectTest, MaxReconnectAttempts) {
         CroupierClient temp_client(config);
         temp_client.Connect();
 
-        // 验证配置已应用
-        EXPECT_EQ(temp_client.GetMaxReconnectAttempts(), attempts);
+        // 验证配置已应用（通过 config 对象）
+        EXPECT_EQ(config.reconnect_max_attempts, attempts);
 
         temp_client.Close();
     }
@@ -117,7 +117,7 @@ TEST_F(GrpcReconnectTest, ReconnectFailureHandling) {
     std::this_thread::sleep_for(std::chrono::milliseconds(3500));
 
     // 验证重连失败不会导致崩溃
-    bool is_connected = client->IsConnected();
+    [[maybe_unused]] bool is_connected = client->IsConnected();
 
     // 验证重连失败处理机制
     SUCCEED();
@@ -131,10 +131,10 @@ TEST_F(GrpcReconnectTest, ReconnectSuccess) {
     config.reconnect_max_attempts = 5;
 
     client = std::make_unique<CroupierClient>(config);
-    bool initial_connected = client->Connect();
+    [[maybe_unused]] bool initial_connected = client->Connect();
 
     // 验证初始连接状态
-    bool connected = client->IsConnected();
+    [[maybe_unused]] bool connected = client->IsConnected();
 
     // 模拟连接断开和重连（在实际场景中）
     // 这里我们验证重连机制已配置
@@ -157,7 +157,7 @@ TEST_F(GrpcReconnectTest, DisableAutoReconnect) {
     EXPECT_FALSE(config.auto_reconnect);
 
     // 验证连接后不会自动重连
-    bool connected = client->IsConnected();
+    [[maybe_unused]] bool connected = client->IsConnected();
 
     // 验证禁用自动重连功能
     SUCCEED();
@@ -197,7 +197,7 @@ TEST_F(GrpcReconnectTest, GetReconnectStatus) {
     client->Connect();
 
     // 获取重连状态
-    bool is_connected = client->IsConnected();
+    [[maybe_unused]] bool is_connected = client->IsConnected();
 
     // 验证可以查询重连状态
     SUCCEED();

@@ -73,7 +73,7 @@ TEST_F(GrpcConnectionTest, EstablishGrpcConnection) {
     EXPECT_FALSE(client->IsConnected());
 
     // 尝试建立连接
-    bool connected = client->Connect();
+    [[maybe_unused]] bool connected = client->Connect();
 
     // 验证 Connect() API 可以被调用
     // 连接结果取决于 agent 是否可用
@@ -90,7 +90,7 @@ TEST_F(GrpcConnectionTest, CheckConnectionStatus) {
     client->Connect();
 
     // 连接后状态
-    bool after_connect = client->IsConnected();
+    [[maybe_unused]] bool after_connect = client->IsConnected();
 
     // 关闭后状态
     client->Close();
@@ -235,7 +235,7 @@ TEST_F(GrpcConnectionTest, ConnectionFailureHandling) {
     CroupierClient invalid_client(invalid_config);
 
     // 尝试连接到无效地址
-    bool connected = invalid_client.Connect();
+    [[maybe_unused]] bool connected = invalid_client.Connect();
 
     // 应该能够处理连接失败而不崩溃
     // connected 很可能是 false

@@ -44,7 +44,7 @@ TEST_F(ClientLifecycleTest, ClientStartStop) {
     EXPECT_FALSE(client->IsConnected());
 
     // 连接到 agent
-    bool connected = client->Connect();
+    [[maybe_unused]] bool connected = client->Connect();
 
     // 尝试获取本地地址
     std::string local_addr = client->GetLocalAddress();
@@ -106,7 +106,7 @@ TEST_F(ClientLifecycleTest, StateTransitions) {
 
     // 连接尝试
     client->Connect();
-    bool state_connecting_or_connected = client->IsConnected();
+    [[maybe_unused]] bool state_connecting_or_connected = client->IsConnected();
 
     // 关闭
     client->Close();
@@ -195,7 +195,7 @@ TEST_F(ClientLifecycleTest, CompleteLifecycle) {
     lifecycle_client.Connect();
 
     // 4. 获取状态
-    bool connected = lifecycle_client.IsConnected();
+    [[maybe_unused]] bool connected = lifecycle_client.IsConnected();
     std::string local_addr = lifecycle_client.GetLocalAddress();
 
     // 5. 关闭连接

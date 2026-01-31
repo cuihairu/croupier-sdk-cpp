@@ -90,7 +90,7 @@ TEST_F(GrpcRegistrationTest, RegisterService) {
     EXPECT_EQ(config.game_id, "test-game");
 
     // 验证可以连接（服务信息会发送到 agent）
-    bool connected = service_client.IsConnected();
+    [[maybe_unused]] bool connected = service_client.IsConnected();
 
     // 清理
     service_client.Close();
@@ -127,7 +127,8 @@ TEST_F(GrpcRegistrationTest, RegisterVirtualObjectToService) {
     VirtualObjectDescriptor obj_desc = CreateBasicObjectDescriptor("test.object");
 
     // 注册虚拟对象
-    bool registered = client->RegisterVirtualObject(obj_desc);
+    std::map<std::string, FunctionHandler> handlers;  // 空的 handlers map
+    bool registered = client->RegisterVirtualObject(obj_desc, handlers);
 
     // 验证虚拟对象注册成功
     EXPECT_TRUE(registered);
@@ -203,7 +204,7 @@ TEST_F(GrpcRegistrationTest, UnregisterService) {
     client->Connect();
 
     // 验证可以重新连接
-    bool reconnected = client->IsConnected();
+    [[maybe_unused]] bool reconnected = client->IsConnected();
 
     // 验证注销和重新注册流程可以正常执行
     SUCCEED();
@@ -249,7 +250,7 @@ TEST_F(GrpcRegistrationTest, DuplicateRegistrationHandling) {
         return "{\"result\":\"handler2\"}";
     };
 
-    bool second_registered = client->RegisterFunction(func_desc, handler2);
+    [[maybe_unused]] bool second_registered = client->RegisterFunction(func_desc, handler2);
 
     // 验证第二次注册的结果（根据 SDK 设计，可能是覆盖或拒绝）
     // 这里我们验证 API 可以正常调用
