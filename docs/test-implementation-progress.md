@@ -4,7 +4,7 @@
 
 **目标覆盖率：** 核心功能 80%+
 **当前覆盖率：** ~22%
-**新增测试文件数：** 1/17 (已开始)
+**新增测试文件数：** 2/20 (10% 完成)
 
 ## ✅ 已完成阶段
 
@@ -53,16 +53,51 @@
 
 ---
 
+#### ✅ 已完成：test_config_network.cpp
+
+**Commit:** `18d0edd`
+**测试用例数：** 13 个
+**代码行数：** ~225 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+1. ✅ `ValidAgentAddress` - 有效的 IPv4 地址
+2. ✅ `ValidAgentAddressWithHostname` - 主机名格式
+3. ✅ `ValidAgentAddressWithDomain` - 域名格式
+4. ✅ `InvalidAgentAddressEmpty` - 空地址验证错误
+5. ✅ `InvalidAgentAddressNoPort` - 缺少端口验证错误
+6. ✅ `InvalidAgentAddressInvalidPort` - 无效端口验证错误
+7. ✅ `InvalidAgentAddressInvalidHost` - 无效主机验证错误
+8. ✅ `ValidLocalListenAddress` - 有效的本地监听地址
+9. ✅ `ValidLocalListenAddressAnyPort` - 任意端口
+10. ✅ `InvalidLocalListenAddress` - 无效本地地址验证错误
+11. ✅ `PortRangeValidation` - 端口范围边界测试 (1-65535)
+12. ✅ `LocalhostAddressValidation` - localhost 地址验证
+13. ✅ `IPv4AddressValidation` - 多种 IPv4 格式测试
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证网络地址格式需求
+- ✅ 使用 `ValidateConfig()` API 验证错误场景
+- ✅ 参数化测试多种地址格式
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `ConfigNetworkTest` 管理共享设置
+- 错误验证使用 `std::any_of` 检查错误消息
+- 边界值测试（端口范围 1-65535）
+- 参数化测试（多种 IPv4 地址格式）
+
+**预期覆盖率贡献：**
+- Config Loader: ~35% → 50% (+15%)
+
+---
+
 ## 📋 待实施测试文件
 
-### Config Loader 测试（剩余 6 个文件）
+### Config Loader 测试（剩余 5 个文件）
 
-1. ⏳ **test_config_network.cpp** (10 个测试用例)
-   - 网络地址验证（IP、端口、域名）
-   - IPv6 支持
-   - 端口范围验证
-   - 优先级：高
-
+1. ✅ **test_config_network.cpp** (13 个测试用例) - 已完成
 2. ⏳ **test_config_environment.cpp** (9 个测试用例)
    - 环境变量覆盖
    - 自定义前缀
@@ -93,7 +128,7 @@
    - 边界值测试
    - 优先级：中
 
-**小计：** 58 个测试用例
+**小计：** 48 个测试用例 (剩余)
 
 ---
 
@@ -128,16 +163,16 @@
 
 | 模块 | 测试文件 | 已完成 | 待完成 | 进度 |
 |------|---------|--------|--------|------|
-| **Config Loader** | 7 | 1 | 6 | 14% |
+| **Config Loader** | 7 | 2 | 5 | 29% |
 | **CroupierClient** | 6 | 0 | 6 | 0% |
 | **gRPC Service** | 7 | 0 | 7 | 0% |
-| **总计** | 20 | 1 | 19 | 5% |
+| **总计** | 20 | 2 | 18 | 10% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 1 | 20 | 5% |
-| 测试用例数 | 7 | 189 | 4% |
-| 整体覆盖率 | ~22% | 75%+ | - |
+| 测试文件数 | 2 | 20 | 10% |
+| 测试用例数 | 20 | 189 | 11% |
+| 整体覆盖率 | ~27% | 75%+ | - |
 
 ---
 
@@ -145,18 +180,19 @@
 
 ### 立即开始（本周）
 
-1. ✅ **已完成** - test_config_loading.cpp
-2. ⏳ **下一个任务** - test_config_network.cpp
-   - 网络地址验证测试
-   - IP 地址、端口、域名验证
-   - 预计工作量：2-3 小时
-   - 预计测试用例：10 个
-
-3. ⏳ **后续任务** - test_config_environment.cpp
+1. ✅ **已完成** - test_config_loading.cpp (7 个测试)
+2. ✅ **已完成** - test_config_network.cpp (13 个测试)
+3. ⏳ **下一个任务** - test_config_environment.cpp
    - 环境变量覆盖测试
    - Mock 环境变量
    - 预计工作量：2-3 小时
    - 预计测试用例：9 个
+
+4. ⏳ **后续任务** - test_config_security.cpp
+   - TLS 配置验证
+   - 认证配置验证
+   - 预计工作量：3-4 小时
+   - 预计测试用例：12 个
 
 ### 下周计划
 
