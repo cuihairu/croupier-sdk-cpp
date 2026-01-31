@@ -611,6 +611,7 @@ if(BUILD_TESTS)
     # Targets are available either from `find_package(GTest)` (vcpkg/system) or FetchContent.
     if(TARGET GTest::gtest_main OR TARGET gtest_main)
         add_executable(croupier-sdk-tests
+            tests/mock/mock_agent.cpp
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
             tests/test_integration.cpp
@@ -638,6 +639,11 @@ if(BUILD_TESTS)
             tests/test_grpc_local_server.cpp
             tests/test_grpc_function_service.cpp
             tests/test_grpc_jobs.cpp
+        )
+
+        # Add mock directory to include path
+        target_include_directories(croupier-sdk-tests PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/mock
         )
 
         if(TARGET GTest::gtest_main)

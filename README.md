@@ -110,9 +110,11 @@ Croupier C++ SDK 是 [Croupier](https://github.com/cuihairu/croupier) 游戏后�
 
 ### 依赖库（自动安装）
 
-- gRPC (通过 vcpkg)
-- Protobuf 5.29.x LTS (通过 vcpkg)
-- nlohmann/json (通过 vcpkg)
+- gRPC 1.71.x (通过 vcpkg)
+- **Protobuf 4.25.x** (通过 vcpkg) - **版本固定以确保 ABI 兼容性**
+- nlohmann/json 3.12.x (通过 vcpkg)
+
+> **⚠️ 重要提示**：Protobuf 版本已固定为 **4.25.x** 系列以确保与 gRPC 1.71.x 的兼容性。请勿擅自升级到 5.x 版本，否则可能导致 ABI 不兼容问题。
 
 ### 一键构建
 
@@ -165,9 +167,9 @@ cmake --build build --parallel
 ./build/bin/croupier-virtual-object-demo
 ```
 
-### VS Code (CMake Tools) 使用 vcpkg（固定 Protobuf 5.29.5）
+### VS Code (CMake Tools) 使用 vcpkg（固定 Protobuf 4.25.x）
 
-`CMake Tools` 本身不会“自动使用 vcpkg”，它只会按你当前的 CMake 配置去 `find_package()`。
+`CMake Tools` 本身不会"自动使用 vcpkg"，它只会按你当前的 CMake 配置去 `find_package()`。
 如果你本机装过 Homebrew 的 `protobuf/grpc`，而 CMake 没用 vcpkg toolchain，就会误用系统 protobuf，进而报：
 `Protobuf C++ gencode is built with an incompatible version of Protobuf C++ headers/runtime`。
 

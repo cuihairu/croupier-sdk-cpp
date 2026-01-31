@@ -86,9 +86,11 @@ cmake --install build --prefix /usr/local
 
 SDK 会自动安装以下依赖（通过 vcpkg）：
 
-- **gRPC** - RPC 通信框架
-- **Protobuf 5.29.x LTS** - 协议缓冲区
-- **nlohmann/json** - JSON 处理库
+- **gRPC 1.71.x** - RPC 通信框架
+- **Protobuf 4.25.x** - 协议缓冲区（**版本固定以确保 ABI 兼容性**）
+- **nlohmann/json 3.12.x** - JSON 处理库
+
+> **⚠️ 重要提示**：Protobuf 版本已固定为 **4.25.x** 系列以确保与 gRPC 1.71.x 的兼容性。请勿擅自升级到 5.x 版本，否则可能导致 ABI 不兼容问题。
 
 ## VS Code 配置
 

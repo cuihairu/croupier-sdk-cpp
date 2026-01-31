@@ -1,27 +1,36 @@
 #include <gtest/gtest.h>
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/config/client_config_loader.h"
+#include "mock_agent.h"
 #include <thread>
 #include <chrono>
 
 using namespace croupier::sdk;
 using namespace croupier::sdk::config;
+using namespace croupier::test;
 
 // 测试夹具：gRPC 本地服务器测试
 class GrpcLocalServerTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        // 启动 Mock Agent
+        mock_agent = std::make_unique<MockAgent>("127.0.0.1:19090");
+        ASSERT_TRUE(mock_agent->Start()) << "Failed to start mock agent";
+
+        // 等待 Agent 启动
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         loader = std::make_unique<ClientConfigLoader>();
 
         // 基本配置 - 不安全模式用于测试
         config = loader->CreateDefaultConfig();
         config.insecure = true;
         config.agent_addr = "127.0.0.1:19090";
-        config.blocking_connect = false;
+        config.blocking_connect = true;  // 使用阻塞连接模式以确保连接成功
         config.auto_reconnect = false;
 
         // 本地服务器配置
-        config.local_listen_addr = "127.0.0.1:0";  // 0 = 自动分配端口
+        config.local_listen = "127.0.0.1:0";  // 0 = 自动分配端口
 
         client = std::make_unique<CroupierClient>(config);
     }
@@ -34,8 +43,38 @@ protected:
                 // 忽略关闭时的异常
             }
         }
+
+        // 停止 Mock Agent
+        if (mock_agent) {
+            mock_agent->Stop();
+        }
     }
 
+    // 等待连接完成（非阻塞模式需要）
+    void WaitForConnection(int max_wait_ms = 2000) {
+        WaitForConnection(client.get(), max_wait_ms);
+    }
+
+    // 等待指定客户端连接完成
+    static void WaitForConnection(CroupierClient* client_ptr, int max_wait_ms = 2000) {
+        auto start = std::chrono::steady_clock::now();
+        while (!client_ptr->IsConnected()) {
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - start).count();
+
+            if (elapsed > max_wait_ms) {
+                // 超时
+                return;
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        // 额外等待，确保注册完成
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+
+    std::unique_ptr<MockAgent> mock_agent;
     std::unique_ptr<ClientConfigLoader> loader;
     ClientConfig config;
     std::unique_ptr<CroupierClient> client;
@@ -46,7 +85,10 @@ protected:
 TEST_F(GrpcLocalServerTest, StartLocalServer) {
     // RED: 测试启动本地服务器
     // 连接到 agent（会启动本地服务器）
-    bool connected = client->Connect();
+    [[maybe_unused]] bool connected = client->Connect();
+
+    // 等待连接完成
+    WaitForConnection();
 
     // 验证连接成功
     // 注意：连接结果取决于 agent 是否可用
@@ -65,6 +107,9 @@ TEST_F(GrpcLocalServerTest, StopLocalServer) {
     // RED: 测试停止本地服务器
     // 先连接
     client->Connect();
+
+    // 等待连接完成
+    WaitForConnection();
 
     // 获取本地地址
     std::string addr_before = client->GetLocalAddress();
@@ -91,10 +136,13 @@ TEST_F(GrpcLocalServerTest, LocalServerAddressConfiguration) {
     };
 
     for (const auto& addr : addresses) {
-        config.local_listen_addr = addr;
+        config.local_listen = addr;
 
         CroupierClient temp_client(config);
         temp_client.Connect();
+
+        // 等待连接完成
+        WaitForConnection(&temp_client);
 
         // 验证配置已应用
         std::string local_addr = temp_client.GetLocalAddress();
@@ -112,10 +160,13 @@ TEST_F(GrpcLocalServerTest, LocalServerAddressConfiguration) {
 TEST_F(GrpcLocalServerTest, LocalServerPortAllocation) {
     // RED: 测试本地服务器端口分配
     // 使用自动端口分配（端口 0）
-    config.local_listen_addr = "127.0.0.1:0";
+    config.local_listen = "127.0.0.1:0";
 
     CroupierClient temp_client(config);
     temp_client.Connect();
+
+    // 等待连接完成
+    WaitForConnection(&temp_client);
 
     // 获取分配的地址
     std::string allocated_addr = temp_client.GetLocalAddress();
@@ -138,8 +189,11 @@ TEST_F(GrpcLocalServerTest, LocalServerStatusQuery) {
     // 连接并启动本地服务器
     client->Connect();
 
+    // 等待连接完成
+    WaitForConnection();
+
     // 查询本地服务器状态
-    bool is_connected = client->IsConnected();
+    [[maybe_unused]] bool is_connected = client->IsConnected();
     std::string local_addr = client->GetLocalAddress();
 
     // 验证可以查询服务器状态
@@ -156,10 +210,13 @@ TEST_F(GrpcLocalServerTest, LocalServerConcurrentConnections) {
     std::vector<std::unique_ptr<CroupierClient>> clients;
 
     for (int i = 0; i < 3; ++i) {
-        config.local_listen_addr = "127.0.0.1:0";
+        config.local_listen = "127.0.0.1:0";
 
         auto temp_client = std::make_unique<CroupierClient>(config);
         temp_client->Connect();
+
+        // 等待连接完成
+        WaitForConnection(temp_client.get());
 
         std::string local_addr = temp_client->GetLocalAddress();
         EXPECT_FALSE(local_addr.empty());
@@ -179,12 +236,12 @@ TEST_F(GrpcLocalServerTest, LocalServerConcurrentConnections) {
 TEST_F(GrpcLocalServerTest, LocalServerErrorHandling) {
     // RED: 测试本地服务器错误处理
     // 测试使用无效地址
-    config.local_listen_addr = "invalid.address:99999";
+    config.local_listen = "invalid.address:99999";
 
     CroupierClient temp_client(config);
 
     // 尝试连接（应该处理错误）
-    bool connected = temp_client.Connect();
+    [[maybe_unused]] bool connected = temp_client.Connect();
 
     // 验证错误不会导致崩溃
     // 连接可能失败，但不应该抛出未捕获的异常
@@ -198,14 +255,15 @@ TEST_F(GrpcLocalServerTest, LocalServerConfigurationValidation) {
     // 测试各种配置组合
 
     // 测试 1：有效配置
-    config.local_listen_addr = "127.0.0.1:0";
+    config.local_listen = "127.0.0.1:0";
     CroupierClient client1(config);
     client1.Connect();
+    WaitForConnection(&client1);
     EXPECT_FALSE(client1.GetLocalAddress().empty());
     client1.Close();
 
     // 测试 2：空地址（使用默认）
-    config.local_listen_addr = "";
+    config.local_listen = "";
     CroupierClient client2(config);
     client2.Connect();
     // 应该使用默认地址
@@ -213,7 +271,7 @@ TEST_F(GrpcLocalServerTest, LocalServerConfigurationValidation) {
     client2.Close();
 
     // 测试 3：IPv6 地址（如果支持）
-    config.local_listen_addr = "[::1]:0";
+    config.local_listen = "[::1]:0";
     CroupierClient client3(config);
     client3.Connect();
     SUCCEED();
@@ -229,6 +287,7 @@ TEST_F(GrpcLocalServerTest, LocalServerLifecycle) {
 
     // 第一次启动
     client->Connect();
+    WaitForConnection();
     std::string addr1 = client->GetLocalAddress();
     EXPECT_FALSE(addr1.empty());
 
@@ -238,6 +297,7 @@ TEST_F(GrpcLocalServerTest, LocalServerLifecycle) {
 
     // 第二次启动（重新连接）
     client->Connect();
+    WaitForConnection();
     std::string addr2 = client->GetLocalAddress();
     EXPECT_FALSE(addr2.empty());
 
