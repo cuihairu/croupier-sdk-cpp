@@ -620,6 +620,7 @@ if(BUILD_TESTS)
             tests/test_main_thread_dispatcher.cpp
             tests/test_config_loading.cpp
             tests/test_config_network.cpp
+            tests/test_config_environment.cpp
         )
 
         if(TARGET GTest::gtest_main)
