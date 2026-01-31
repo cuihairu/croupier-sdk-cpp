@@ -953,12 +953,77 @@
 
 ---
 
+#### ✅ 已完成：test_grpc_reconnect.cpp
+
+**Commit:** `320bf8f`
+**测试用例数：** 10 个
+**代码行数：** ~253 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+
+**基本重连测试（3个）：**
+1. ✅ `AutoReconnectTrigger` - 自动重连触发
+2. ✅ `GetReconnectStatus` - 获取重连状态
+3. ✅ `ManualReconnect` - 手动重连
+
+**配置测试（3个）：**
+4. ✅ `ReconnectIntervalConfiguration` - 重连间隔配置（1, 2, 5, 10秒）
+5. ✅ `MaxReconnectAttempts` - 最大重连次数（1, 3, 5, 0无限）
+6. ✅ `DisableAutoReconnect` - 禁用自动重连
+
+**故障处理测试（2个）：**
+7. ✅ `ReconnectFailureHandling` - 重连失败处理
+8. ✅ `ReconnectSuccess` - 重连成功
+
+**高级功能测试（2个）：**
+9. ✅ `ReconnectStatistics` - 重连统计
+10. ✅ `ReconnectCallback` - 重连回调
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试先行验证重连机制
+- ✅ 覆盖正常和异常场景
+- ✅ 测试重连配置灵活性
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `GrpcReconnectTest` 管理测试环境
+- 使用 `std::this_thread::sleep_for()` 等待重连尝试
+- 测试不同重连间隔和最大尝试次数
+- 测试自动和手动重连模式
+- 验证重连统计和回调功能
+
+**重连配置验证：**
+- **auto_reconnect:** 自动重连开关
+- **reconnect_interval_seconds:** 重连间隔秒数
+- **reconnect_max_attempts:** 最大重连次数（0 = 无限）
+- 支持禁用自动重连
+- 支持手动重连控制
+
+**关键验证点：**
+- 自动重连可以正确触发
+- 重连间隔可以被正确配置
+- 最大重连次数可以被正确配置
+- 重连失败可以被正确处理
+- 重连成功可以正常恢复连接
+- 可以禁用自动重连
+- 可以手动触发重连
+- 重连状态可以被查询
+- 重连统计可以被收集
+- 重连回调机制可以工作
+
+**预期覆盖率贡献：**
+- gRPC Service: ~36% → 48% (+12%)
+
+---
+
 ### gRPC Service 测试（7 个文件，68 个测试用例）
 
 1. ✅ **test_grpc_connection.cpp** (10 个测试) - 已完成
 2. ✅ **test_grpc_registration.cpp** (9 个测试) - 已完成
 3. ✅ **test_grpc_heartbeat.cpp** (10 个测试) - 已完成
-4. ⏳ **test_grpc_reconnect.cpp** (10 个测试)
+4. ✅ **test_grpc_reconnect.cpp** (10 个测试) - 已完成
 5. ⏳ **test_grpc_local_server.cpp** (9 个测试)
 6. ⏳ **test_grpc_function_service.cpp** (10 个测试)
 7. ⏳ **test_grpc_jobs.cpp** (10 个测试)
@@ -973,14 +1038,14 @@
 |------|---------|--------|--------|------|
 | **Config Loader** | 7 | 7 | 0 | 100% ✅ |
 | **CroupierClient** | 6 | 6 | 0 | 100% ✅ |
-| **gRPC Service** | 7 | 3 | 4 | 43% |
-| **总计** | 20 | 16 | 4 | 80% |
+| **gRPC Service** | 7 | 4 | 3 | 57% |
+| **总计** | 20 | 17 | 3 | 85% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 16 | 20 | 80% |
-| 测试用例数 | 171 | 189 | 90% ✅ |
-| 整体覆盖率 | ~76% | 80%+ | - |
+| 测试文件数 | 17 | 20 | 85% |
+| 测试用例数 | 181 | 189 | 96% ✅ |
+| 整体覆盖率 | ~78% | 80%+ | - |
 
 ---
 
@@ -1015,27 +1080,20 @@
 **优先级：** 中（核心服务功能）
 
 1. ✅ **test_grpc_connection.cpp** (10 个测试) - 已完成
-   - gRPC 连接管理
-   - 预计工作量：3-4 小时
-
 2. ✅ **test_grpc_registration.cpp** (9 个测试) - 已完成
-   - 服务注册
-   - 预计工作量：3-4 小时
-
 3. ✅ **test_grpc_heartbeat.cpp** (10 个测试) - 已完成
-   - 心跳机制
-   - 预计工作量：3-4 小时
-
-4. ⏳ **test_grpc_reconnect.cpp** (10 个测试)
-   - 重连机制
-   - 预计工作量：3-4 小时
-
+4. ✅ **test_grpc_reconnect.cpp** (10 个测试) - 已完成
 5. ⏳ **test_grpc_local_server.cpp** (9 个测试)
    - 本地服务器
    - 预计工作量：3-4 小时
 
-6-7. ⏳ **其他 gRPC 测试**（20 个测试）
-   - 预计工作量：6-8 小时
+6. ⏳ **test_grpc_function_service.cpp** (10 个测试)
+   - 函数服务
+   - 预计工作量：3-4 小时
+
+7. ⏳ **test_grpc_jobs.cpp** (10 个测试)
+   - 任务管理
+   - 预计工作量：3-4 小时
 
 **小计：** 68 个测试用例，预计工作量：20-25 小时
 
@@ -1044,12 +1102,12 @@
 **已完成模块：** 2/3 (67%)
 - Config Loader: 100% ✅
 - CroupierClient: 100% ✅
-- gRPC Service: 43% (3/7)
+- gRPC Service: 57% (4/7)
 
 **整体进度：**
-- 测试文件数：16/20 (80%)
-- 测试用例数：171/189 (90%) ✅ **已超标！**
-- 整体覆盖率：~76%
+- 测试文件数：17/20 (85%)
+- 测试用例数：181/189 (96%) ✅ **已超标！**
+- 整体覆盖率：~78%
 
 ---
 
