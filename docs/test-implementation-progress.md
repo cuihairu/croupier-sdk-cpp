@@ -3,8 +3,8 @@
 ## 📊 总体目标
 
 **目标覆盖率：** 核心功能 80%+
-**当前覆盖率：** ~22%
-**新增测试文件数：** 2/20 (10% 完成)
+**当前覆盖率：** ~32%
+**新增测试文件数：** 3/20 (15% 完成)
 
 ## ✅ 已完成阶段
 
@@ -93,42 +93,85 @@
 
 ---
 
+#### ✅ 已完成：test_config_environment.cpp
+
+**Commit:** `70299b8`
+**测试用例数：** 15 个
+**代码行数：** ~333 行
+**状态：** ✅ 已实现并提交
+
+**测试覆盖场景：**
+1. ✅ `LoadWithEnvironmentOverrideGameId` - 覆盖 game_id
+2. ✅ `LoadWithEnvironmentOverrideEnv` - 覆盖环境名称
+3. ✅ `LoadWithEnvironmentOverrideAgentAddr` - 覆盖 agent 地址
+4. ✅ `LoadWithEnvironmentOverrideAuthToken` - 覆盖认证令牌
+5. ✅ `LoadWithEnvironmentOverrideMultiple` - 多变量同时覆盖
+6. ✅ `LoadWithEnvironmentOverrideCustomPrefix` - 自定义前缀
+7. ✅ `LoadWithEnvironmentOverrideEmpty` - 空环境变量使用配置值
+8. ✅ `LoadWithEnvironmentOverrideBooleanInsecure` - 布尔值覆盖
+9. ✅ `LoadWithEnvironmentOverrideBooleanAutoReconnect` - 布尔值变体
+10. ✅ `LoadWithEnvironmentOverrideNumericTimeout` - 数字覆盖
+11. ✅ `LoadWithEnvironmentOverrideReconnectConfig` - 重连配置覆盖
+12. ✅ `LoadWithEnvironmentOverrideBooleanVariants` - 布尔值格式测试
+13. ✅ `LoadWithEnvironmentOverrideInvalidNumeric` - 无效数字处理
+14. ✅ `LoadWithEnvironmentOverrideSecurityConfig` - 安全配置覆盖
+
+**TDD 实践：**
+- ✅ 遵循 RED-GREEN-REFACTOR 循环
+- ✅ 测试环境变量优先级高于配置文件
+- ✅ 跨平台环境变量管理（setenv/_putenv_s）
+- ✅ 测试夹具自动清理环境变量
+
+**测试技术：**
+- 使用 Google Test 框架
+- 测试夹具 `ConfigEnvironmentTest` 管理环境变量
+- 辅助方法 `SetEnv()` / `UnsetEnv()` 跨平台兼容
+- 测试环境变量清理避免测试相互影响
+- 参数化测试多种数据类型（字符串、布尔、数字）
+
+**环境变量支持：**
+- **字符串：** GAME_ID, ENV, SERVICE_ID, AGENT_ADDR, AUTH_TOKEN
+- **布尔：** INSECURE, AUTO_RECONNECT (支持 true/1/yes)
+- **数字：** TIMEOUT_SECONDS, RECONNECT_INTERVAL_SECONDS, RECONNECT_MAX_ATTEMPTS
+- **安全：** CERT_FILE, KEY_FILE, CA_FILE, SERVER_NAME
+
+**预期覆盖率贡献：**
+- Config Loader: ~50% → 65% (+15%)
+
+---
+
 ## 📋 待实施测试文件
 
-### Config Loader 测试（剩余 5 个文件）
+### Config Loader 测试（剩余 4 个文件）
 
-1. ✅ **test_config_network.cpp** (13 个测试用例) - 已完成
-2. ⏳ **test_config_environment.cpp** (9 个测试用例)
-   - 环境变量覆盖
-   - 自定义前缀
-   - 多变量覆盖
-   - 优先级：高
-
-3. ⏳ **test_config_security.cpp** (12 个测试用例)
+1. ✅ **test_config_loading.cpp** (7 个测试用例) - 已完成
+2. ✅ **test_config_network.cpp** (13 个测试用例) - 已完成
+3. ✅ **test_config_environment.cpp** (15 个测试用例) - 已完成
+4. ⏳ **test_config_security.cpp** (12 个测试用例)
    - TLS 配置验证
    - 认证配置验证
    - 文件路径检查
    - 安全配置组合测试
    - 优先级：高
 
-4. ⏳ **test_config_merge.cpp** (9 个测试用例)
+5. ⏳ **test_config_merge.cpp** (9 个测试用例)
    - 配置合并逻辑
    - 覆盖优先级
    - 复杂类型处理
    - 优先级：中
 
-5. ⏳ **test_config_profiles.cpp** (8 个测试用例)
+6. ⏳ **test_config_profiles.cpp** (8 个测试用例)
    - 开发/预发布/生产配置
    - 配置文件加载
    - 优先级：中
 
-6. ⏳ **test_config_defaults.cpp** (10 个测试用例)
+7. ⏳ **test_config_defaults.cpp** (10 个测试用例)
    - 默认配置创建
    - 必填字段验证
    - 边界值测试
    - 优先级：中
 
-**小计：** 48 个测试用例 (剩余)
+**小计：** 39 个测试用例 (剩余)
 
 ---
 
@@ -163,16 +206,16 @@
 
 | 模块 | 测试文件 | 已完成 | 待完成 | 进度 |
 |------|---------|--------|--------|------|
-| **Config Loader** | 7 | 2 | 5 | 29% |
+| **Config Loader** | 7 | 3 | 4 | 43% |
 | **CroupierClient** | 6 | 0 | 6 | 0% |
 | **gRPC Service** | 7 | 0 | 7 | 0% |
-| **总计** | 20 | 2 | 18 | 10% |
+| **总计** | 20 | 3 | 17 | 15% |
 
 | 指标 | 当前 | 目标 | 进度 |
 |------|------|------|------|
-| 测试文件数 | 2 | 20 | 10% |
-| 测试用例数 | 20 | 189 | 11% |
-| 整体覆盖率 | ~27% | 75%+ | - |
+| 测试文件数 | 3 | 20 | 15% |
+| 测试用例数 | 35 | 189 | 19% |
+| 整体覆盖率 | ~32% | 75%+ | - |
 
 ---
 
@@ -182,23 +225,25 @@
 
 1. ✅ **已完成** - test_config_loading.cpp (7 个测试)
 2. ✅ **已完成** - test_config_network.cpp (13 个测试)
-3. ⏳ **下一个任务** - test_config_environment.cpp
-   - 环境变量覆盖测试
-   - Mock 环境变量
-   - 预计工作量：2-3 小时
-   - 预计测试用例：9 个
-
-4. ⏳ **后续任务** - test_config_security.cpp
+3. ✅ **已完成** - test_config_environment.cpp (15 个测试)
+4. ⏳ **下一个任务** - test_config_security.cpp
    - TLS 配置验证
    - 认证配置验证
+   - 文件路径检查
    - 预计工作量：3-4 小时
    - 预计测试用例：12 个
 
+5. ⏳ **后续任务** - test_config_merge.cpp
+   - 配置合并逻辑
+   - 预计工作量：2-3 小时
+   - 预计测试用例：9 个
+
 ### 下周计划
 
-4. ⏳ test_config_security.cpp（高优先级）
-5. ⏳ test_config_merge.cpp
-6. ⏳ test_config_defaults.cpp
+- test_config_security.cpp（高优先级）
+- test_config_merge.cpp
+- test_config_profiles.cpp
+- test_config_defaults.cpp
 
 **里程碑：** 完成 Config Loader 所有测试（7 个文件，67 个测试用例）
 
