@@ -635,6 +635,7 @@ if(BUILD_TESTS)
             tests/test_grpc_registration.cpp
             tests/test_grpc_heartbeat.cpp
             tests/test_grpc_reconnect.cpp
+            tests/test_grpc_local_server.cpp
         )
 
         if(TARGET GTest::gtest_main)
