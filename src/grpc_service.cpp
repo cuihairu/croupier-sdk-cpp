@@ -37,7 +37,7 @@ std::string ReadFileContent(const std::string& path) {
 }  // namespace
 
 namespace localv1 = ::croupier::agent::local::v1;
-namespace functionv1 = ::croupier::function::v1;
+namespace sdkv1 = ::croupier::sdk::v1;
 
 //==============================================================================
 // GrpcClientManager Implementation
@@ -526,7 +526,7 @@ std::shared_ptr<grpc::ServerCredentials> GrpcClientManager::CreateServerCredenti
 struct LocalFunctionServiceImpl::JobState {
     std::mutex mutex;
     std::condition_variable cv;
-    std::deque<functionv1::JobEvent> queue;
+    std::deque<sdkv1::JobEvent> queue;
     std::atomic<bool> finished{false};
 };
 
@@ -623,7 +623,7 @@ void LocalFunctionServiceImpl::FinishJob(const std::string& job_id) {
     }
 }
 
-void LocalFunctionServiceImpl::EnqueueEvent(const std::shared_ptr<JobState>& state, functionv1::JobEvent&& event,
+void LocalFunctionServiceImpl::EnqueueEvent(const std::shared_ptr<JobState>& state, sdkv1::JobEvent&& event,
                                             bool mark_finished) {
     {
         std::lock_guard<std::mutex> lock(state->mutex);
@@ -638,7 +638,7 @@ void LocalFunctionServiceImpl::EnqueueEvent(const std::shared_ptr<JobState>& sta
     state->cv.notify_all();
 }
 
-bool LocalFunctionServiceImpl::DequeueEvent(const std::shared_ptr<JobState>& state, functionv1::JobEvent* event) {
+bool LocalFunctionServiceImpl::DequeueEvent(const std::shared_ptr<JobState>& state, sdkv1::JobEvent* event) {
     std::unique_lock<std::mutex> lock(state->mutex);
     state->cv.wait(lock, [&]() { return !state->queue.empty() || state->finished.load(); });
 
@@ -677,8 +677,8 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
 }
 
 ::grpc::Status LocalFunctionServiceImpl::Invoke(::grpc::ServerContext* context,
-                                                const functionv1::InvokeRequest* request,
-                                                functionv1::InvokeResponse* response) {
+                                                const sdkv1::InvokeRequest* request,
+                                                sdkv1::InvokeResponse* response) {
     (void)context;
     if (!request || request->function_id().empty()) {
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, "function_id is required");
@@ -698,8 +698,8 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
 }
 
 ::grpc::Status LocalFunctionServiceImpl::StartJob(::grpc::ServerContext* context,
-                                                  const functionv1::InvokeRequest* request,
-                                                  functionv1::StartJobResponse* response) {
+                                                  const sdkv1::InvokeRequest* request,
+                                                  sdkv1::StartJobResponse* response) {
     (void)context;
     if (!request || request->function_id().empty()) {
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, "function_id is required");
@@ -721,7 +721,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
     const std::string job_id = NextJobId(request->function_id());
     auto state = CreateJob(job_id);
 
-    functionv1::JobEvent started;
+    sdkv1::JobEvent started;
     started.set_type("started");
     started.set_message("job started");
     EnqueueEvent(state, std::move(started), false);
@@ -736,7 +736,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
                 FinishJob(job_id);
                 return;
             }
-            functionv1::JobEvent completed;
+            sdkv1::JobEvent completed;
             completed.set_type("completed");
             completed.set_message("job completed");
             completed.set_payload(result);
@@ -746,7 +746,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
                 FinishJob(job_id);
                 return;
             }
-            functionv1::JobEvent error_evt;
+            sdkv1::JobEvent error_evt;
             error_evt.set_type("error");
             error_evt.set_message(e.what());
             EnqueueEvent(state, std::move(error_evt), true);
@@ -759,8 +759,8 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
 }
 
 ::grpc::Status LocalFunctionServiceImpl::StreamJob(::grpc::ServerContext* context,
-                                                   const functionv1::JobStreamRequest* request,
-                                                   ::grpc::ServerWriter<functionv1::JobEvent>* writer) {
+                                                   const sdkv1::JobStreamRequest* request,
+                                                   ::grpc::ServerWriter<sdkv1::JobEvent>* writer) {
     (void)context;
     if (!request || request->job_id().empty()) {
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, "job_id is required");
@@ -774,7 +774,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
         return ::grpc::Status(::grpc::StatusCode::NOT_FOUND, "job not found");
     }
 
-    functionv1::JobEvent event;
+    sdkv1::JobEvent event;
     while (DequeueEvent(state, &event)) {
         if (!writer->Write(event)) {
             return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "stream closed by peer");
@@ -785,8 +785,8 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
 }
 
 ::grpc::Status LocalFunctionServiceImpl::CancelJob(::grpc::ServerContext* context,
-                                                   const functionv1::CancelJobRequest* request,
-                                                   functionv1::StartJobResponse* response) {
+                                                   const sdkv1::CancelJobRequest* request,
+                                                   sdkv1::StartJobResponse* response) {
     (void)context;
     if (!request || request->job_id().empty()) {
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, "job_id is required");
@@ -800,7 +800,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
         return ::grpc::Status(::grpc::StatusCode::NOT_FOUND, "job not found");
     }
 
-    functionv1::JobEvent cancelled;
+    sdkv1::JobEvent cancelled;
     cancelled.set_type("cancelled");
     cancelled.set_message("job cancelled by requester");
     EnqueueEvent(state, std::move(cancelled), true);
