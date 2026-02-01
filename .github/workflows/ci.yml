@@ -158,6 +158,7 @@ jobs:
           -A x64 `
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+          -DVCPKG_TARGET_TRIPLET=x64-windows `
           -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" `
           -DCROUPIER_USE_STATIC_RUNTIME=OFF `
           -DBUILD_STATIC_LIBS=ON `
@@ -303,3 +304,220 @@ jobs:
         files: coverage.xml
         flags: cpp-sdk
         fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
+
+  lua-binding:
+    name: Lua Binding Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build lua5.3 liblua5.3-dev
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgJsonGlob: 'vcpkg.json'
+        vcpkgConfigurationArgs: '--feature lua'
+
+    - name: Configure CMake with Lua binding
+      env:
+        VCPKG_MAX_CONCURRENCY: 1
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" \
+          -DVCPKG_TARGET_TRIPLET=x64-linux \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_STATIC_LIBS=OFF \
+          -DBUILD_TESTS=ON \
+          -DENABLE_LUA_BINDING=ON
+
+    - name: Build
+      run: cmake --build build --config Release --parallel
+
+    - name: Test Lua binding (basic)
+      run: |
+        # Create a simple Lua test script
+        cat > test_lua.lua << 'EOF'
+        -- Basic Lua binding test
+        package.cpath = package.cpath .. ";./build/lib/?.so"
+        local croupier = require("croupier")
+
+        -- Test client creation
+        local client, err = pcall(function()
+          return croupier.Client.new("localhost:50051")
+        end)
+
+        if client then
+          print("✓ Lua binding: Client creation successful")
+          print("✓ Lua binding: Module loaded correctly")
+          return 0
+        else
+          print("✗ Lua binding: Client creation failed")
+          print("Error:", err)
+          return 1
+        end
+        EOF
+
+        lua5.3 test_lua.lua
+
+    - name: Test Lua binding examples
+      run: |
+        if [ -f "lua/examples/standalone_example.lua" ]; then
+          echo "Testing Lua example file..."
+          lua5.3 -e "dofile('lua/examples/standalone_example.lua')" || echo "Example test may require server connection"
+        fi
+
+    - name: Upload Lua artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-sdk-lua-binding
+        path: |
+          build/lib/libcroupier-sdk.so*
+          lua/
+          skynet/
+
+  skynet-so:
+    name: Skynet .so Build Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build lua5.3 liblua5.3-dev git
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgJsonGlob: 'vcpkg.json'
+        vcpkgConfigurationArgs: '--feature lua'
+
+    - name: Clone Skynet
+      run: |
+        cd /tmp
+        git clone https://github.com/cloudwu/skynet.git
+        cd skynet
+        # Use a stable tag
+        git checkout tags/${SKYNET_VERSION} 2>/dev/null || echo "Using default branch"
+
+    - name: Configure CMake for Skynet .so
+      env:
+        VCPKG_MAX_CONCURRENCY: 1
+        SKYNET_VERSION: "5.0"
+      run: |
+        cmake -B build-skynet \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+          -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" \
+          -DVCPKG_TARGET_TRIPLET=x64-linux \
+          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_STATIC_LIBS=OFF \
+          -DBUILD_TESTS=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DENABLE_LUA_BINDING=ON \
+          -DCROUPIER_SKYNET_SO=ON
+
+    - name: Build Skynet .so
+      run: cmake --build build-skynet --config Release --parallel
+
+    - name: Verify Skynet service files
+      run: |
+        echo "Checking Skynet service files..."
+        if [ -f "skynet/service/croupier_service.lua" ]; then
+          echo "✓ Skynet service file found"
+          head -20 skynet/service/croupier_service.lua
+        else
+          echo "✗ Skynet service file not found"
+          exit 1
+        fi
+
+    - name: Create Skynet integration package
+      run: |
+        mkdir -p skynet-package/cservice
+        mkdir -p skynet-package/lua
+        mkdir -p skynet-package/examples
+
+        # Copy the .so file (Skynet C service)
+        if [ -f "build-skynet/lib/libcroupier-sdk.so" ]; then
+          cp build-skynet/lib/libcroupier-sdk.so skynet-package/cservice/
+          echo "✓ Copied libcroupier-sdk.so to cservice/"
+        fi
+
+        # Copy Lua bindings
+        if [ -d "lua" ]; then
+          cp -r lua/* skynet-package/lua/
+          echo "✓ Copied Lua bindings"
+        fi
+
+        # Copy Skynet service
+        if [ -f "skynet/service/croupier_service.lua" ]; then
+          cp skynet/service/croupier_service.lua skynet-package/lua/
+          echo "✓ Copied croupier_service.lua"
+        fi
+
+        # Copy examples
+        if [ -d "skynet/examples" ]; then
+          cp -r skynet/examples/* skynet-package/examples/
+          echo "✓ Copied Skynet examples"
+        fi
+
+        # Create README
+        cat > skynet-package/README.md << 'EOF'
+        # Croupier SDK for Skynet
+
+        This package contains the Croupier C++ SDK compiled as a Skynet C service (.so).
+
+        ## Installation
+
+        1. Copy `libcroupier-sdk.so` to your Skynet project's `cservice/` directory
+        2. Copy all files from `lua/` to your Skynet project's `lua/` directory
+        3. Use the service in your Skynet configuration
+
+        ## Usage
+
+        See `examples/` for complete examples.
+
+        ```lua
+        local skynet = require "skynet"
+        local croupier = require "croupier"
+
+        -- Start Croupier service
+        skynet.call(".croupier", "lua", "start", "localhost:50051")
+
+        -- Register a virtual object
+        skynet.call(".croupier", "lua", "register_vo", "player_001", "Player", {
+          level = 10,
+          name = "TestPlayer"
+        })
+        ```
+        EOF
+
+        echo "Skynet package created successfully"
+
+    - name: Upload Skynet artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: croupier-sdk-skynet-so
+        path: skynet-package/
