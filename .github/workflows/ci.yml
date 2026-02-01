@@ -158,7 +158,7 @@ jobs:
           -A x64 `
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
-          -DVCPKG_TARGET_TRIPLET=x64-windows `
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
           -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" `
           -DCROUPIER_USE_STATIC_RUNTIME=OFF `
           -DBUILD_STATIC_LIBS=ON `
