@@ -59,7 +59,7 @@ jobs:
           # Windows - MT (静态 CRT，独立应用)
           - os: windows-latest
             arch: x64
-            vcpkg_triplet: x64-windows-static-mt
+            vcpkg_triplet: x64-windows-static
             artifact_name: windows-x64-mt
             display_name: "Windows x64 (MT)"
 
