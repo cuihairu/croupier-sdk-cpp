@@ -139,6 +139,8 @@ jobs:
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: ON  # Force vcpkg to use system tools
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
