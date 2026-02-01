@@ -79,9 +79,10 @@ jobs:
       uses: lukka/run-vcpkg@v11
       env:
         VCPKG_FORCE_SYSTEM_BINARIES: 1
+        VCPKG_DEFAULT_TRIPLET: x64-linux
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgGitCommitId: '6d7bf7ef2193e2d1c5798a5ff8811d533104c861'
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: false  # 启用缓存以避免重复构建
 
@@ -135,12 +136,13 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgGitCommitId: '6d7bf7ef2193e2d1c5798a5ff8811d533104c861'
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
       env:
         VCPKG_FORCE_SYSTEM_BINARIES: ON  # Force vcpkg to use system tools
+        VCPKG_DEFAULT_TRIPLET: x64-windows-static  # Set default triplet to avoid x86-windows-v120
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
@@ -275,7 +277,7 @@ jobs:
         VCPKG_FORCE_SYSTEM_BINARIES: 1
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgGitCommitId: '6d7bf7ef2193e2d1c5798a5ff8811d533104c861'
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: false
 
@@ -339,7 +341,7 @@ jobs:
         VCPKG_FORCE_SYSTEM_BINARIES: 1
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgGitCommitId: '6d7bf7ef2193e2d1c5798a5ff8811d533104c861'
         vcpkgJsonGlob: 'vcpkg.json'
         vcpkgConfigurationArgs: '--feature lua'
 
@@ -423,7 +425,7 @@ jobs:
         VCPKG_FORCE_SYSTEM_BINARIES: 1
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
+        vcpkgGitCommitId: '6d7bf7ef2193e2d1c5798a5ff8811d533104c861'
         vcpkgJsonGlob: 'vcpkg.json'
         vcpkgConfigurationArgs: '--feature lua'
 
