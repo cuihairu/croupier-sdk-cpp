@@ -23,7 +23,7 @@
 // Only include gRPC headers when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 #include "croupier/agent/local/v1/local.grpc.pb.h"
-#include "croupier/function/v1/function.grpc.pb.h"
+#include "croupier/sdk/v1/invoker.grpc.pb.h"
 
 #include <google/protobuf/map.h>
 
@@ -140,7 +140,7 @@ private:
  * @brief 本地函数服务实现
  * 接收来自 Agent 的函数调用请求
  */
-class LocalFunctionServiceImpl : public croupier::function::v1::FunctionService::Service {
+class LocalFunctionServiceImpl : public croupier::sdk::v1::InvokerService::Service {
 public:
     explicit LocalFunctionServiceImpl(const std::map<std::string, FunctionHandler>& handlers);
 
@@ -157,14 +157,14 @@ public:
     size_t GetHandlerCount() const;
 
     // gRPC 服务方法
-    ::grpc::Status Invoke(::grpc::ServerContext* context, const croupier::function::v1::InvokeRequest* request,
-                          croupier::function::v1::InvokeResponse* response) override;
-    ::grpc::Status StartJob(::grpc::ServerContext* context, const croupier::function::v1::InvokeRequest* request,
-                            croupier::function::v1::StartJobResponse* response) override;
-    ::grpc::Status StreamJob(::grpc::ServerContext* context, const croupier::function::v1::JobStreamRequest* request,
-                             ::grpc::ServerWriter<croupier::function::v1::JobEvent>* writer) override;
-    ::grpc::Status CancelJob(::grpc::ServerContext* context, const croupier::function::v1::CancelJobRequest* request,
-                             croupier::function::v1::StartJobResponse* response) override;
+    ::grpc::Status Invoke(::grpc::ServerContext* context, const croupier::sdk::v1::InvokeRequest* request,
+                          croupier::sdk::v1::InvokeResponse* response) override;
+    ::grpc::Status StartJob(::grpc::ServerContext* context, const croupier::sdk::v1::InvokeRequest* request,
+                            croupier::sdk::v1::StartJobResponse* response) override;
+    ::grpc::Status StreamJob(::grpc::ServerContext* context, const croupier::sdk::v1::JobStreamRequest* request,
+                             ::grpc::ServerWriter<croupier::sdk::v1::JobEvent>* writer) override;
+    ::grpc::Status CancelJob(::grpc::ServerContext* context, const croupier::sdk::v1::CancelJobRequest* request,
+                             croupier::sdk::v1::StartJobResponse* response) override;
 
 private:
     struct JobState;
@@ -189,9 +189,9 @@ private:
     std::shared_ptr<JobState> CreateJob(const std::string& job_id);
     std::shared_ptr<JobState> FindJob(const std::string& job_id) const;
     void FinishJob(const std::string& job_id);
-    void EnqueueEvent(const std::shared_ptr<JobState>& state, croupier::function::v1::JobEvent&& event,
+    void EnqueueEvent(const std::shared_ptr<JobState>& state, croupier::sdk::v1::JobEvent&& event,
                       bool mark_finished);
-    bool DequeueEvent(const std::shared_ptr<JobState>& state, croupier::function::v1::JobEvent* event);
+    bool DequeueEvent(const std::shared_ptr<JobState>& state, croupier::sdk::v1::JobEvent* event);
 };
 
 /**

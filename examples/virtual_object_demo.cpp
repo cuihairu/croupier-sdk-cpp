@@ -130,14 +130,14 @@ void DemoVirtualObject() {
     VirtualObjectDescriptor wallet_desc;
     wallet_desc.id = "wallet.entity";
     wallet_desc.version = "1.0.0";
-    wallet_desc.name = "钱包实体";
-    wallet_desc.description = "玩家钱包管理虚拟对象";
+    wallet_desc.name = "钱包Entity";
+    wallet_desc.description = "Player钱包ManagementVirtual Object";
 
     // Define schema
     wallet_desc.schema["type"] = "object";
     wallet_desc.schema["properties"] = R"({
         "wallet_id": {"type": "string", "title": "钱包ID"},
-        "player_id": {"type": "string", "title": "玩家ID"},
+        "player_id": {"type": "string", "title": "PlayerID"},
         "balance": {"type": "string", "pattern": "^[0-9]+\\.?[0-9]*$", "title": "余额"},
         "currency": {"type": "string", "title": "货币类型"}
     })";
@@ -186,8 +186,8 @@ void DemoComponent() {
     VirtualObjectDescriptor wallet_entity;
     wallet_entity.id = "wallet.entity";
     wallet_entity.version = "1.0.0";
-    wallet_entity.name = "钱包实体";
-    wallet_entity.description = "玩家钱包管理";
+    wallet_entity.name = "钱包Entity";
+    wallet_entity.description = "Player钱包Management";
     wallet_entity.operations["read"] = "wallet.get";
     wallet_entity.operations["transfer"] = "wallet.transfer";
     wallet_entity.operations["deposit"] = "wallet.deposit";
@@ -196,8 +196,8 @@ void DemoComponent() {
     VirtualObjectDescriptor currency_entity;
     currency_entity.id = "currency.entity";
     currency_entity.version = "1.0.0";
-    currency_entity.name = "货币实体";
-    currency_entity.description = "游戏货币管理";
+    currency_entity.name = "货币Entity";
+    currency_entity.description = "游戏货币Management";
     currency_entity.operations["read"] = "currency.get";
     currency_entity.operations["create"] = "currency.create";
 
@@ -205,8 +205,8 @@ void DemoComponent() {
     ComponentDescriptor economy_comp;
     economy_comp.id = "economy-system";
     economy_comp.version = "1.0.0";
-    economy_comp.name = "经济系统组件";
-    economy_comp.description = "完整的游戏经济管理系统";
+    economy_comp.name = "经济系统Component";
+    economy_comp.description = "完整的游戏经济Management系统";
 
     // Add entities to component
     economy_comp.entities.push_back(wallet_entity);
@@ -219,8 +219,8 @@ void DemoComponent() {
     economy_comp.functions.push_back(market_trade);
 
     // Add resource configuration
-    economy_comp.resources["wallet_panel"] = "钱包管理面板";
-    economy_comp.resources["currency_panel"] = "货币管理面板";
+    economy_comp.resources["wallet_panel"] = "钱包Management面板";
+    economy_comp.resources["currency_panel"] = "货币Management面板";
 
     // Register component
     if (client.RegisterComponent(economy_comp)) {
@@ -266,8 +266,8 @@ void DemoSerialization() {
     VirtualObjectDescriptor sample_obj;
     sample_obj.id = "sample.entity";
     sample_obj.version = "1.0.0";
-    sample_obj.name = "示例实体";
-    sample_obj.description = "这是一个序列化演示实体";
+    sample_obj.name = "SampleEntity";
+    sample_obj.description = "这是一个序列化DemoEntity";
     sample_obj.operations["read"] = "sample.get";
     sample_obj.operations["create"] = "sample.create";
 

@@ -94,30 +94,30 @@ Metrics g_metrics;
 // ==================== Configuration ====================
 
 struct ProductionConfig {
-    // Croupier SDK 配置
+    // Croupier SDK Configuration
     ClientConfig sdk_config;
 
-    // 健康检查配置
+    // 健康检查Configuration
     int health_check_port = 8080;
     std::string health_check_path = "/health";
 
-    // 日志配置
+    // 日志Configuration
     std::string log_level = "INFO";
 
-    // 监控配置
+    // 监控Configuration
     bool enable_metrics = true;
     int metrics_port = 9090;
 
     static ProductionConfig FromEnvironment() {
         ProductionConfig config;
 
-        // SDK 基础配置
+        // SDK 基础Configuration
         config.sdk_config.game_id = GetEnv("CROUPIER_GAME_ID", "default-game");
         config.sdk_config.env = GetEnv("CROUPIER_ENV", "production");
         config.sdk_config.service_id = GetEnv("CROUPIER_SERVICE_ID", "game-service");
         config.sdk_config.agent_addr = GetEnv("CROUPIER_AGENT_ADDR", "127.0.0.1:19090");
 
-        // TLS 配置
+        // TLS Configuration
         std::string insecure = GetEnv("CROUPIER_INSECURE", "false");
         config.sdk_config.insecure = (insecure == "true" || insecure == "1");
 
@@ -128,15 +128,15 @@ struct ProductionConfig {
             config.sdk_config.server_name = GetEnv("CROUPIER_SERVER_NAME", "");
         }
 
-        // 重连配置
+        // 重连Configuration
         config.sdk_config.auto_reconnect = GetEnv("CROUPIER_AUTO_RECONNECT", "true") == "true";
         config.sdk_config.reconnect_interval_seconds = std::stoi(GetEnv("CROUPIER_RECONNECT_INTERVAL_SECONDS", "5"));
         config.sdk_config.reconnect_max_attempts = std::stoi(GetEnv("CROUPIER_RECONNECT_MAX_ATTEMPTS", "0"));
 
-        // 健康检查配置
+        // 健康检查Configuration
         config.health_check_port = std::stoi(GetEnv("HEALTH_CHECK_PORT", "8080"));
 
-        // 日志配置
+        // 日志Configuration
         config.log_level = GetEnv("LOG_LEVEL", "INFO");
 
         return config;
@@ -159,13 +159,13 @@ void SetupSignalHandlers() {
             exit(1);
         }
 
-        std::cout << "\n收到信号 " << signal << "，开始优雅关闭...\n";
+        std::cout << "\n收到信号 " << signal << "，开始优雅Close...\n";
         g_running = false;
 
-        // 设置 30 秒超时后强制退出
+        // Set 30 秒超时后强制退出
         std::thread([]() {
             std::this_thread::sleep_for(std::chrono::seconds(30));
-            std::cerr << "关闭超时，强制退出\n";
+            std::cerr << "Close超时，强制退出\n";
             exit(1);
         }).detach();
     };
@@ -238,17 +238,17 @@ private:
         struct sockaddr_in address;
         int opt = 1;
 
-        // 创建 socket
+        // Create socket
         if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-            std::cerr << "Socket 创建失败\n";
+            std::cerr << "Socket CreateFailed\n";
             return;
         }
 
         server_fd_ = server_fd;
 
-        // 设置 socket 选项
+        // Set socket 选项
         if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
-            std::cerr << "setsockopt 失败\n";
+            std::cerr << "setsockopt Failed\n";
             return;
         }
 
@@ -258,17 +258,17 @@ private:
 
         // 绑定
         if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-            std::cerr << "绑定失败: port " << port_ << '\n';
+            std::cerr << "绑定Failed: port " << port_ << '\n';
             return;
         }
 
         // 监听
         if (listen(server_fd, 3) < 0) {
-            std::cerr << "监听失败\n";
+            std::cerr << "监听Failed\n";
             return;
         }
 
-        std::cout << "健康检查服务启动在端口 " << port_ << '\n';
+        std::cout << "健康检查ServiceStart在端口 " << port_ << '\n';
 
         while (running_) {
             fd_set read_fds;
@@ -409,9 +409,9 @@ std::string PlayerBanHandler(const std::string& context, const std::string& payl
     g_metrics.RecordRequest();
 
     try {
-        CROUPIER_LOG_INFO("PlayerBanHandler", std::string("处理玩家封禁请求: ") + payload);
+        CROUPIER_LOG_INFO("PlayerBanHandler", std::string("HandlerPlayerBan请求: ") + payload);
 
-        // 模拟处理
+        // SimulateHandler
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         g_metrics.RecordSuccess();
@@ -420,7 +420,7 @@ std::string PlayerBanHandler(const std::string& context, const std::string& payl
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        CROUPIER_LOG_ERROR("PlayerBanHandler", std::string("玩家封禁处理失败: ") + e.what());
+        CROUPIER_LOG_ERROR("PlayerBanHandler", std::string("PlayerBanHandlerFailed: ") + e.what());
         throw;
     }
 }
@@ -429,10 +429,10 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
     g_metrics.RecordRequest();
 
     try {
-        CROUPIER_LOG_INFO("PlayerGetHandler", std::string("获取玩家信息: ") + payload);
+        CROUPIER_LOG_INFO("PlayerGetHandler", std::string("GetPlayerInfo: ") + payload);
 
-        // 实际业务逻辑 - 从数据库查询玩家信息
-        // 这里返回模拟数据
+        // 实际业务逻辑 - 从数据库QueryPlayerInfo
+        // 这里返回Simulate数据
 
         g_metrics.RecordSuccess();
 
@@ -450,7 +450,7 @@ std::string PlayerGetHandler(const std::string& context, const std::string& payl
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        CROUPIER_LOG_ERROR("PlayerGetHandler", std::string("获取玩家信息失败: ") + e.what());
+        CROUPIER_LOG_ERROR("PlayerGetHandler", std::string("GetPlayerInfoFailed: ") + e.what());
         throw;
     }
 }
@@ -459,14 +459,14 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
     g_metrics.RecordRequest();
 
     try {
-        CROUPIER_LOG_INFO("WalletTransferHandler", std::string("处理钱包转账: ") + payload);
+        CROUPIER_LOG_INFO("WalletTransferHandler", std::string("Handler钱包转账: ") + payload);
 
         // 解析 payload
         // 实际场景应使用 JSON 库解析
         // {"from":"player_123","to":"player_456","amount":100,"currency":"gold"}
 
-        // 执行转账逻辑（带事务）
-        // 1. 验证发送者余额
+        // Execute转账逻辑（带事务）
+        // 1. Validation发送者余额
         // 2. 扣除发送者余额
         // 3. 增加接收者余额
         // 4. 记录交易日志
@@ -485,7 +485,7 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
 
     } catch (const std::exception& e) {
         g_metrics.RecordFailure();
-        CROUPIER_LOG_ERROR("WalletTransferHandler", std::string("钱包转账失败: ") + e.what());
+        CROUPIER_LOG_ERROR("WalletTransferHandler", std::string("钱包转账Failed: ") + e.what());
         throw;
     }
 }
@@ -494,28 +494,28 @@ std::string WalletTransferHandler(const std::string& context, const std::string&
 
 int main(int argc, char* argv[]) {
     std::cout << "=============================================\n";
-    std::cout << "Croupier C++ SDK 生产环境示例\n";
+    std::cout << "Croupier C++ SDK 生产环境Sample\n";
     std::cout << "=============================================\n\n";
 
-    // 1. 加载配置
+    // 1. LoadConfiguration
     ProductionConfig config = ProductionConfig::FromEnvironment();
 
-    std::cout << "配置加载完成:\n";
+    std::cout << "ConfigurationLoadComplete:\n";
     std::cout << "  游戏 ID: " << config.sdk_config.game_id << '\n';
     std::cout << "  环境: " << config.sdk_config.env << '\n';
-    std::cout << "  Agent 地址: " << config.sdk_config.agent_addr << '\n';
+    std::cout << "  Agent Address: " << config.sdk_config.agent_addr << '\n';
     std::cout << "  TLS: " << (config.sdk_config.insecure ? "禁用" : "启用") << '\n';
     std::cout << "  健康检查端口: " << config.health_check_port << '\n';
     std::cout << '\n';
 
-    // 2. 设置信号处理
+    // 2. Set信号Handler
     SetupSignalHandlers();
 
-    // 3. 创建客户端
+    // 3. CreateClient
     g_client = std::make_unique<CroupierClient>(config.sdk_config);
 
-    // 4. 注册函数
-    std::cout << "注册游戏函数...\n";
+    // 4. RegisterFunction
+    std::cout << "Register游戏Function...\n";
 
     FunctionDescriptor banDesc;
     banDesc.id = "player.ban";
@@ -525,7 +525,7 @@ int main(int argc, char* argv[]) {
     banDesc.enabled = true;
 
     if (!g_client->RegisterFunction(banDesc, PlayerBanHandler)) {
-        std::cerr << "注册 player.ban 失败\n";
+        std::cerr << "Register player.ban Failed\n";
         return 1;
     }
     std::cout << "  ✓ player.ban\n";
@@ -538,7 +538,7 @@ int main(int argc, char* argv[]) {
     getDesc.enabled = true;
 
     if (!g_client->RegisterFunction(getDesc, PlayerGetHandler)) {
-        std::cerr << "注册 player.get 失败\n";
+        std::cerr << "Register player.get Failed\n";
         return 1;
     }
     std::cout << "  ✓ player.get\n";
@@ -551,46 +551,46 @@ int main(int argc, char* argv[]) {
     transferDesc.enabled = true;
 
     if (!g_client->RegisterFunction(transferDesc, WalletTransferHandler)) {
-        std::cerr << "注册 wallet.transfer 失败\n";
+        std::cerr << "Register wallet.transfer Failed\n";
         return 1;
     }
     std::cout << "  ✓ wallet.transfer\n\n";
 
-    // 5. 启动健康检查服务
+    // 5. Start健康检查Service
     HealthCheckServer health_server(config.health_check_port);
     if (!health_server.Start()) {
-        std::cerr << "启动健康检查服务失败\n";
+        std::cerr << "Start健康检查ServiceFailed\n";
         return 1;
     }
 
-    // 6. 连接到 Agent
-    std::cout << "连接到 Agent...\n";
+    // 6. Connect到 Agent
+    std::cout << "Connect到 Agent...\n";
     if (!g_client->Connect()) {
-        std::cerr << "连接失败，检查 Agent 是否运行\n";
+        std::cerr << "ConnectFailed，检查 Agent 是否运行\n";
         health_server.Stop();
         return 1;
     }
-    std::cout << "  ✓ 已连接\n";
-    std::cout << "  本地地址: " << g_client->GetLocalAddress() << "\n\n";
+    std::cout << "  ✓ 已Connect\n";
+    std::cout << "  LocalAddress: " << g_client->GetLocalAddress() << "\n\n";
 
-    // 7. 启动服务（在单独线程中）
-    std::cout << "启动服务...\n";
+    // 7. StartService（在单独线程中）
+    std::cout << "StartService...\n";
     std::thread service_thread([]() {
         try {
             g_client->Serve();
         } catch (const std::exception& e) {
-            std::cerr << "服务异常: " << e.what() << '\n';
+            std::cerr << "ServiceException: " << e.what() << '\n';
         }
     });
 
     std::cout << "\n=============================================\n";
-    std::cout << "服务已启动，等待请求...\n";
+    std::cout << "Service已Start，等待请求...\n";
     std::cout << "健康检查: http://localhost:" << config.health_check_port << "/health\n";
     std::cout << "指标端点: http://localhost:" << config.health_check_port << "/metrics\n";
-    std::cout << "按 Ctrl+C 优雅关闭\n";
+    std::cout << "按 Ctrl+C 优雅Close\n";
     std::cout << "=============================================\n\n";
 
-    // 8. 主循环 - 等待关闭信号
+    // 8. 主循环 - 等待Close信号
     while (g_running) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -602,25 +602,25 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // 9. 优雅关闭
-    std::cout << "\n开始优雅关闭...\n";
+    // 9. 优雅Close
+    std::cout << "\n开始优雅Close...\n";
 
-    std::cout << "  停止客户端服务...\n";
+    std::cout << "  StopClientService...\n";
     g_client->Stop();
 
-    std::cout << "  等待服务线程结束...\n";
+    std::cout << "  等待Service线程结束...\n";
     if (service_thread.joinable()) {
         service_thread.join();
     }
 
-    std::cout << "  停止健康检查服务...\n";
+    std::cout << "  Stop健康检查Service...\n";
     health_server.Stop();
 
-    std::cout << "  关闭客户端...\n";
+    std::cout << "  CloseClient...\n";
     g_client->Close();
 
     std::cout << "\n=============================================\n";
-    std::cout << "服务已关闭\n";
+    std::cout << "Service已Close\n";
     std::cout << "最终指标: " << g_metrics.ToJson() << '\n';
     std::cout << "=============================================\n";
 

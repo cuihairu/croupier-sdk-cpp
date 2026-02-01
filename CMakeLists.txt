@@ -146,6 +146,7 @@ if(nlohmann_json_FOUND)
 else()
     message(STATUS "nlohmann_json not found, using built-in JSON utilities")
     set(JSON_LIBRARY "")
+endif()
 
 # ========== Lua Binding ==========
 if(ENABLE_LUA_BINDING)
@@ -170,8 +171,6 @@ if(ENABLE_LUA_BINDING)
     else()
         message(FATAL_ERROR "ENABLE_LUA_BINDING=ON but Lua 5.3+ was not found. Install Lua-devel/lua-dev")
     endif()
-endif()
-
 endif()
 
 # ========== MSVC Runtime Library Settings ==========

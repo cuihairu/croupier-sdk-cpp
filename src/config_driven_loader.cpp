@@ -11,15 +11,15 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
-#include <dlfcn.h>  // Unix 动态库加载
+#include <dlfcn.h>  // Unix 动态库Load
 #endif
 
-// 简单的 JSON 解析器 (生产环境建议使用 nlohmann/json)
+// 简单的 JSON 解析器 (生产Environment建议使用 nlohmann/json)
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 #else
-// 简化版 JSON 解析 (仅支持基础功能)
+// 简化版 JSON 解析 (仅支持基础Feature)
 namespace simple_json {
 struct JsonValue {
     std::string str_value;
@@ -38,9 +38,9 @@ public:
         JsonValue result;
         result.type = JsonValue::Type::OBJECT;
 
-        // 示例：解析基本组件配置
+        // 示例：解析基本ComponentConfiguration
         if (content.find("\"component\"") != std::string::npos) {
-            // 解析组件基础信息
+            // 解析Component基础Info
             JsonValue comp;
             comp.type = JsonValue::Type::OBJECT;
             comp.object_value["id"] = JsonValue("demo-component");
@@ -61,7 +61,7 @@ namespace croupier {
 namespace sdk {
 
 ConfigDrivenLoader::ConfigDrivenLoader() {
-    // 设置默认的动态库加载器
+    // Set默认的动态库Load器
     dynamic_lib_loader_ = [this](const std::string& lib_path, const std::string& function_name) -> FunctionHandler {
         return LoadFromDynamicLib(lib_path, function_name);
     };
@@ -71,38 +71,38 @@ ConfigDrivenLoader::~ConfigDrivenLoader() {
     // 清理资源（如果有动态库句柄需要清理）
 }
 
-// ========== 处理器注册机制 ==========
+// ========== Handler器Register机制 ==========
 
 void ConfigDrivenLoader::RegisterHandlerFactory(const std::string& prefix, HandlerFactory factory) {
-    std::cout << "📝 注册处理器工厂: " << prefix << '\n';
+    std::cout << "📝 RegisterHandler器工厂: " << prefix << '\n';
     handler_factories_[prefix] = std::move(factory);
 }
 
 void ConfigDrivenLoader::RegisterHandler(const std::string& function_id, FunctionHandler handler) {
-    std::cout << "📝 注册函数处理器: " << function_id << '\n';
+    std::cout << "📝 RegisterFunctionHandler器: " << function_id << '\n';
     registered_handlers_[function_id] = std::move(handler);
 }
 
 void ConfigDrivenLoader::SetDynamicLibLoader(DynamicLibLoader loader) {
-    std::cout << "📝 设置动态库加载器" << '\n';
+    std::cout << "📝 Set动态库Load器" << '\n';
     dynamic_lib_loader_ = std::move(loader);
 }
 
-// ========== 配置文件加载 ==========
+// ========== ConfigurationFileLoad ==========
 
 ComponentDescriptor ConfigDrivenLoader::LoadComponentFromFile(const std::string& config_file) {
-    std::cout << "📂 从文件加载组件配置: " << config_file << '\n';
+    std::cout << "📂 从FileLoadComponentConfiguration: " << config_file << '\n';
 
     std::string content = LoadFileContent(config_file);
     if (content.empty()) {
-        throw std::runtime_error("无法读取配置文件: " + config_file);
+        throw std::runtime_error("Unable to读取ConfigurationFile: " + config_file);
     }
 
     return LoadComponentFromJson(content);
 }
 
 ComponentDescriptor ConfigDrivenLoader::LoadComponentFromJson(const std::string& json_content) {
-    std::cout << "🔄 解析 JSON 配置..." << '\n';
+    std::cout << "🔄 解析 JSON Configuration..." << '\n';
 
     try {
 #ifdef CROUPIER_SDK_ENABLE_JSON
@@ -113,18 +113,18 @@ ComponentDescriptor ConfigDrivenLoader::LoadComponentFromJson(const std::string&
         return ParseJsonToComponent(json_content);
 #endif
     } catch (const std::exception& e) {
-        throw std::runtime_error("JSON 解析失败: " + std::string(e.what()));
+        throw std::runtime_error("JSON 解析Failed: " + std::string(e.what()));
     }
 }
 
 bool ConfigDrivenLoader::LoadAndRegisterComponent(CroupierClient& client, const std::string& config_file) {
-    std::cout << "🎯 加载并注册组件: " << config_file << '\n';
+    std::cout << "🎯 Load并RegisterComponent: " << config_file << '\n';
 
     try {
-        // 1. 加载组件描述符
+        // 1. LoadComponent描述符
         ComponentDescriptor component = LoadComponentFromFile(config_file);
 
-        // 2. 解析函数处理器
+        // 2. 解析FunctionHandler器
         auto handlers = ResolveHandlers(component);
 
         // 3. Register handlers with client directly since ComponentDescriptor doesn't store handlers
@@ -142,57 +142,57 @@ bool ConfigDrivenLoader::LoadAndRegisterComponent(CroupierClient& client, const 
         bool success = client.RegisterComponent(component);
 
         if (success) {
-            std::cout << "✅ 组件注册成功: " << component.id << '\n';
+            std::cout << "✅ ComponentRegisterSuccess: " << component.id << '\n';
         } else {
-            std::cout << "❌ 组件注册失败: " << component.id << '\n';
+            std::cout << "❌ ComponentRegisterFailed: " << component.id << '\n';
         }
 
         return success;
     } catch (const std::exception& e) {
-        std::cerr << "💥 加载组件失败: " << e.what() << '\n';
+        std::cerr << "💥 LoadComponentFailed: " << e.what() << '\n';
         return false;
     }
 }
 
-// ========== 处理器查找 ==========
+// ========== Handler器查找 ==========
 
 FunctionHandler ConfigDrivenLoader::GetHandler(const std::string& function_id,
                                                const std::map<std::string, std::string>& config) {
-    std::cout << "🔍 查找处理器: " << function_id << '\n';
+    std::cout << "🔍 查找Handler器: " << function_id << '\n';
 
-    // 1. 首先检查直接注册的处理器
+    // 1. 首先Check直接Register的Handler器
     auto direct_it = registered_handlers_.find(function_id);
     if (direct_it != registered_handlers_.end()) {
-        std::cout << "✅ 找到直接注册的处理器: " << function_id << '\n';
+        std::cout << "✅ 找到直接Register的Handler器: " << function_id << '\n';
         return direct_it->second;
     }
 
-    // 2. 尝试通过工厂创建处理器
+    // 2. 尝试通过工厂CreateHandler器
     for (const auto& [prefix, factory] : handler_factories_) {
-        if (function_id.find(prefix) == 0) {  // 检查前缀匹配
-            std::cout << "🏭 使用工厂创建处理器: " << prefix << " -> " << function_id << '\n';
+        if (function_id.find(prefix) == 0) {  // Check前缀匹配
+            std::cout << "🏭 使用工厂CreateHandler器: " << prefix << " -> " << function_id << '\n';
             return factory(function_id, config);
         }
     }
 
-    // 3. 尝试从配置中创建处理器
+    // 3. 尝试从Configuration中CreateHandler器
     auto handler = CreateHandlerFromConfig(function_id, config);
     if (handler) {
-        std::cout << "⚙️ 从配置创建处理器: " << function_id << '\n';
+        std::cout << "⚙️ 从ConfigurationCreateHandler器: " << function_id << '\n';
         return handler;
     }
 
-    std::cout << "❌ 未找到处理器: " << function_id << '\n';
+    std::cout << "❌ 未找到Handler器: " << function_id << '\n';
     return nullptr;
 }
 
 bool ConfigDrivenLoader::HasHandler(const std::string& function_id) const {
-    // 检查直接注册的处理器
+    // Check直接Register的Handler器
     if (registered_handlers_.find(function_id) != registered_handlers_.end()) {
         return true;
     }
 
-    // 检查工厂前缀匹配
+    // Check工厂前缀匹配
     for (const auto& [prefix, _] : handler_factories_) {
         if (function_id.find(prefix) == 0) {
             return true;
@@ -206,7 +206,7 @@ std::vector<std::string> ConfigDrivenLoader::GetRegisteredHandlers() const {
     std::vector<std::string> result;
     result.reserve(registered_handlers_.size() + handler_factories_.size());
 
-    // 添加直接注册的处理器
+    // 添加直接Register的Handler器
     for (const auto& [id, _] : registered_handlers_) {
         result.push_back(id);
     }
@@ -219,28 +219,28 @@ std::vector<std::string> ConfigDrivenLoader::GetRegisteredHandlers() const {
     return result;
 }
 
-// ========== 配置验证 ==========
+// ========== ConfigurationValidate ==========
 
 bool ConfigDrivenLoader::ValidateConfigFile(const std::string& config_file) {
-    std::cout << "✅ 验证配置文件: " << config_file << '\n';
+    std::cout << "✅ ValidateConfigurationFile: " << config_file << '\n';
 
     try {
         std::string content = LoadFileContent(config_file);
         return ValidateJsonConfig(content);
     } catch (const std::exception& e) {
-        std::cerr << "❌ 文件验证失败: " << e.what() << '\n';
+        std::cerr << "❌ FileValidateFailed: " << e.what() << '\n';
         return false;
     }
 }
 
 bool ConfigDrivenLoader::ValidateJsonConfig(const std::string& json_content) {
-    std::cout << "✅ 验证 JSON 配置..." << '\n';
+    std::cout << "✅ Validate JSON Configuration..." << '\n';
 
     try {
 #ifdef CROUPIER_SDK_ENABLE_JSON
         json config = json::parse(json_content);
 
-        // 基础结构验证
+        // 基础结构Validate
         if (!config.contains("component")) {
             std::cerr << "❌ 缺少 'component' 字段" << '\n';
             return false;
@@ -248,15 +248,15 @@ bool ConfigDrivenLoader::ValidateJsonConfig(const std::string& json_content) {
 
         auto comp = config["component"];
         if (!comp.contains("id") || !comp.contains("version")) {
-            std::cerr << "❌ 组件缺少必需字段 (id, version)" << '\n';
+            std::cerr << "❌ Component缺少必需字段 (id, version)" << '\n';
             return false;
         }
 
-        // 验证函数定义
+        // ValidateFunctionDefinition
         if (config.contains("functions")) {
             for (const auto& func : config["functions"]) {
                 if (!func.contains("id") || !func.contains("handler")) {
-                    std::cerr << "❌ 函数定义缺少必需字段" << '\n';
+                    std::cerr << "❌ FunctionDefinition缺少必需字段" << '\n';
                     return false;
                 }
             }
@@ -264,7 +264,7 @@ bool ConfigDrivenLoader::ValidateJsonConfig(const std::string& json_content) {
 
         return true;
 #else
-        // 简化验证：检查基本 JSON 结构
+        // 简化Validate：Check基本 JSON 结构
         if (json_content.find("component") == std::string::npos) {
             std::cerr << "❌ 缺少 'component' 字段" << '\n';
             return false;
@@ -273,7 +273,7 @@ bool ConfigDrivenLoader::ValidateJsonConfig(const std::string& json_content) {
         return true;
 #endif
     } catch (const std::exception& e) {
-        std::cerr << "❌ JSON 验证失败: " << e.what() << '\n';
+        std::cerr << "❌ JSON ValidateFailed: " << e.what() << '\n';
         return false;
     }
 }
@@ -283,7 +283,7 @@ bool ConfigDrivenLoader::ValidateJsonConfig(const std::string& json_content) {
 std::string ConfigDrivenLoader::LoadFileContent(const std::string& file_path) {
     std::ifstream file(file_path);
     if (!file.is_open()) {
-        throw std::runtime_error("无法打开文件: " + file_path);
+        throw std::runtime_error("Unable to打开File: " + file_path);
     }
 
     std::stringstream buffer;
@@ -307,7 +307,7 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const std::string& 
         component.description = comp.value("description", "");
     }
 
-    // 解析实体（虚拟对象），兼容键名 "entities" 和老的 "virtual_objects"
+    // 解析Entity（Virtual Object），兼容键名 "entities" 和老的 "virtual_objects"
     auto parse_entities_array = [&](const nlohmann::json& arr) {
         for (const auto& obj_config : arr) {
             VirtualObjectDescriptor obj;
@@ -315,7 +315,7 @@ ComponentDescriptor ConfigDrivenLoader::ParseJsonToComponent(const std::string& 
             obj.version = obj_config.value("version", "1.0.0");
             obj.name = obj_config.value("name", "");
 
-            // 解析操作
+            // 解析Operation
             if (obj_config.contains("operations")) {
                 for (const auto& [key, value] : obj_config["operations"].items()) {
                     obj.operations[key] = value.get<std::string>();
@@ -375,7 +375,7 @@ VirtualObjectDescriptor ConfigDrivenLoader::ParseJsonToVirtualObject(const std::
     obj.version = obj_config.value("version", "1.0.0");
     obj.name = obj_config.value("name", "");
 
-    // 解析操作
+    // 解析Operation
     if (obj_config.contains("operations")) {
         for (const auto& [key, value] : obj_config["operations"].items()) {
             obj.operations[key] = value.get<std::string>();
@@ -417,10 +417,10 @@ std::map<std::string, FunctionHandler> ConfigDrivenLoader::ResolveHandlers(const
             auto handler = GetHandler(function_id);
             if (handler) {
                 handlers[function_id] = handler;
-                std::cout << "    ✅ 找到处理器: " << function_id << '\n';
+                std::cout << "    ✅ 找到Handler器: " << function_id << '\n';
             } else {
-                std::cout << "    ⚠️ 未找到处理器: " << function_id << "，将使用默认处理器" << '\n';
-                // 创建默认处理器
+                std::cout << "    ⚠️ 未找到Handler器: " << function_id << "，将使用默认Handler器" << '\n';
+                // Create默认Handler器
                 handlers[function_id] = CreateDefaultHandler(function_id);
             }
         }
@@ -445,7 +445,7 @@ FunctionHandler ConfigDrivenLoader::CreateHandlerFromConfig(const std::string& f
         return BasicHandlerFactory::CreateEchoHandler(config);
     } else if (handler_type == "error") {
         auto msg_it = config.find("message");
-        std::string message = (msg_it != config.end()) ? msg_it->second : "处理器错误";
+        std::string message = (msg_it != config.end()) ? msg_it->second : "Handler器Error";
         return BasicHandlerFactory::CreateErrorHandler(message);
     } else if (handler_type == "proxy") {
         auto url_it = config.find("target_url");
@@ -489,13 +489,13 @@ FunctionHandler ConfigDrivenLoader::CreateDefaultHandler(const std::string& func
 }
 
 FunctionHandler ConfigDrivenLoader::LoadFromDynamicLib(const std::string& lib_path, const std::string& function_name) {
-    std::cout << "📚 从动态库加载函数: " << lib_path << "::" << function_name << '\n';
+    std::cout << "📚 从动态库LoadFunction: " << lib_path << "::" << function_name << '\n';
 
 #ifdef _WIN32
-    // Windows 动态库加载
+    // Windows 动态库Load
     HMODULE handle = LoadLibraryA(lib_path.c_str());
     if (!handle) {
-        std::cerr << "❌ 无法加载动态库: " << lib_path << '\n';
+        std::cerr << "❌ Unable toLoad动态库: " << lib_path << '\n';
         return nullptr;
     }
 
@@ -510,37 +510,37 @@ FunctionHandler ConfigDrivenLoader::LoadFromDynamicLib(const std::string& lib_pa
 #pragma GCC diagnostic pop
 #endif
     if (!func) {
-        std::cerr << "❌ 无法找到函数: " << function_name << '\n';
+        std::cerr << "❌ Unable to找到Function: " << function_name << '\n';
         FreeLibrary(handle);
         return nullptr;
     }
 #else
-    // Unix 动态库加载
+    // Unix 动态库Load
     void* handle = dlopen(lib_path.c_str(), RTLD_LAZY);
     if (!handle) {
-        std::cerr << "❌ 无法加载动态库: " << lib_path << " - " << dlerror() << '\n';
+        std::cerr << "❌ Unable toLoad动态库: " << lib_path << " - " << dlerror() << '\n';
         return nullptr;
     }
 
     typedef const char* (*HandlerFunc)(const char* context, const char* payload);
     HandlerFunc func = (HandlerFunc)dlsym(handle, function_name.c_str());
     if (!func) {
-        std::cerr << "❌ 无法找到函数: " << function_name << " - " << dlerror() << '\n';
+        std::cerr << "❌ Unable to找到Function: " << function_name << " - " << dlerror() << '\n';
         dlclose(handle);
         return nullptr;
     }
 #endif
 
-    std::cout << "✅ 成功加载动态库函数: " << function_name << '\n';
+    std::cout << "✅ SuccessLoad动态库Function: " << function_name << '\n';
 
-    // 创建包装器，将 C 风格函数包装成 std::function
+    // Create包装器，将 C 风格Function包装成 std::function
     return [func](const std::string& context, const std::string& payload) -> std::string {
         const char* result = func(context.c_str(), payload.c_str());
         return result ? std::string(result) : "{}";
     };
 }
 
-// ========== 预定义的处理器工厂 ==========
+// ========== 预Definition的Handler器工厂 ==========
 
 FunctionHandler BasicHandlerFactory::CreateEchoHandler(const std::map<std::string, std::string>& config) {
     return [config](const std::string& context, const std::string& payload) -> std::string {

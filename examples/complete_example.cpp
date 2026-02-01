@@ -7,23 +7,23 @@
 
 using namespace croupier::sdk;
 
-// 全局变量用于信号处理
+// 全局变量用于信号Handler
 std::unique_ptr<CroupierClient> g_client;
 
-// 信号处理函数
+// 信号HandlerFunction
 void signalHandler(int /* signal */) {
-    std::cout << "\n🛑 接收到停止信号，正在优雅关闭..." << std::endl;
+    std::cout << "\n🛑 接收到Stop信号，正在优雅Close..." << std::endl;
     if (g_client) {
         g_client->Stop();
     }
     exit(0);
 }
 
-// 钱包相关的处理器
+// 钱包相关的Handler器
 std::string WalletGetHandler(const std::string& /* context */, const std::string& payload) {
-    std::cout << "💰 执行钱包查询: " << payload << std::endl;
+    std::cout << "💰 Execute钱包Query: " << payload << std::endl;
 
-    // 模拟业务逻辑
+    // Simulate业务逻辑
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // 返回JSON结果
@@ -37,9 +37,9 @@ std::string WalletGetHandler(const std::string& /* context */, const std::string
 }
 
 std::string WalletTransferHandler(const std::string& /* context */, const std::string& payload) {
-    std::cout << "💸 执行钱包转账: " << payload << std::endl;
+    std::cout << "💸 Execute钱包转账: " << payload << std::endl;
 
-    // 模拟转账处理
+    // Simulate转账Handler
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     return R"({
@@ -54,9 +54,9 @@ std::string WalletTransferHandler(const std::string& /* context */, const std::s
     })";
 }
 
-// 玩家管理处理器
+// PlayerManagementHandler器
 std::string PlayerCreateHandler(const std::string& /* context */, const std::string& payload) {
-    std::cout << "👤 创建新玩家: " << payload << std::endl;
+    std::cout << "👤 Create新Player: " << payload << std::endl;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
@@ -71,7 +71,7 @@ std::string PlayerCreateHandler(const std::string& /* context */, const std::str
 }
 
 std::string PlayerGetHandler(const std::string& /* context */, const std::string& payload) {
-    std::cout << "👤 查询玩家信息: " << payload << std::endl;
+    std::cout << "👤 QueryPlayerInfo: " << payload << std::endl;
 
     return R"({
         "player_id": "player_67890",
@@ -85,9 +85,9 @@ std::string PlayerGetHandler(const std::string& /* context */, const std::string
     })";
 }
 
-// 商店系统处理器
+// 商店系统Handler器
 std::string ShopListItemsHandler(const std::string& /* context */, const std::string& payload) {
-    std::cout << "🛒 查询商店物品: " << payload << std::endl;
+    std::cout << "🛒 Query商店物品: " << payload << std::endl;
 
     return R"({
         "items": [
@@ -122,57 +122,57 @@ std::string ShopListItemsHandler(const std::string& /* context */, const std::st
 }
 
 int main(int /* argc */, char* /* argv */[]) {
-    std::cout << "🎮 Croupier C++ SDK 完整示例" << std::endl;
+    std::cout << "🎮 Croupier C++ SDK 完整Sample" << std::endl;
     std::cout << "===============================================" << std::endl;
 
-    // 设置信号处理
+    // Set信号Handler
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
 
     try {
-        // 1. 配置客户端
+        // 1. ConfigurationClient
         ClientConfig config;
         config.game_id = "example-mmorpg";
         config.env = "development";
         config.service_id = "game-backend";
         config.agent_addr = "127.0.0.1:19090";
         config.local_listen = "127.0.0.1:0";  // 自动分配端口
-        config.insecure = true;               // 开发环境使用非安全连接
+        config.insecure = true;               // 开发环境使用非安全Connect
 
-        std::cout << "🔧 配置客户端:" << std::endl;
+        std::cout << "🔧 ConfigurationClient:" << std::endl;
         std::cout << "   - 游戏 ID: " << config.game_id << std::endl;
         std::cout << "   - 环境: " << config.env << std::endl;
-        std::cout << "   - Agent 地址: " << config.agent_addr << std::endl;
+        std::cout << "   - Agent Address: " << config.agent_addr << std::endl;
 
-        // 2. 创建客户端
+        // 2. CreateClient
         g_client = std::make_unique<CroupierClient>(config);
 
-        // 3. 定义虚拟对象 - 钱包系统
+        // 3. DefinitionVirtual Object - 钱包系统
         VirtualObjectDescriptor wallet;
         wallet.id = "economy.wallet";
         wallet.version = "1.0.0";
-        wallet.name = "玩家钱包";
-        wallet.description = "管理玩家虚拟货币和交易";
+        wallet.name = "Player钱包";
+        wallet.description = "ManagementPlayer虚拟货币和交易";
         wallet.operations["get"] = "wallet.get";
         wallet.operations["transfer"] = "wallet.transfer";
 
-        // 钱包与玩家的关系
+        // 钱包与Player的关系
         RelationshipDef player_rel;
         player_rel.type = "many-to-one";
         player_rel.entity = "player";
         player_rel.foreign_key = "player_id";
         wallet.relationships["owner"] = player_rel;
 
-        // 4. 定义虚拟对象 - 玩家系统
+        // 4. DefinitionVirtual Object - Player系统
         VirtualObjectDescriptor player;
         player.id = "game.player";
         player.version = "1.0.0";
-        player.name = "游戏玩家";
-        player.description = "玩家账户和属性管理";
+        player.name = "游戏Player";
+        player.description = "Player账户和属性Management";
         player.operations["create"] = "player.create";
         player.operations["get"] = "player.get";
 
-        // 5. 定义虚拟对象 - 商店系统
+        // 5. DefinitionVirtual Object - 商店系统
         VirtualObjectDescriptor shop;
         shop.id = "economy.shop";
         shop.version = "1.0.0";
@@ -180,73 +180,73 @@ int main(int /* argc */, char* /* argv */[]) {
         shop.description = "物品销售和购买系统";
         shop.operations["list"] = "shop.list_items";
 
-        // 6. 注册钱包系统
+        // 6. Register钱包系统
         std::map<std::string, FunctionHandler> wallet_handlers;
         wallet_handlers["wallet.get"] = WalletGetHandler;
         wallet_handlers["wallet.transfer"] = WalletTransferHandler;
 
-        std::cout << "\n💰 注册钱包系统..." << std::endl;
+        std::cout << "\n💰 Register钱包系统..." << std::endl;
         if (!g_client->RegisterVirtualObject(wallet, wallet_handlers)) {
-            std::cerr << "❌ 钱包系统注册失败!" << std::endl;
+            std::cerr << "❌ 钱包系统RegisterFailed!" << std::endl;
             return 1;
         }
 
-        // 7. 注册玩家系统
+        // 7. RegisterPlayer系统
         std::map<std::string, FunctionHandler> player_handlers;
         player_handlers["player.create"] = PlayerCreateHandler;
         player_handlers["player.get"] = PlayerGetHandler;
 
-        std::cout << "👤 注册玩家系统..." << std::endl;
+        std::cout << "👤 RegisterPlayer系统..." << std::endl;
         if (!g_client->RegisterVirtualObject(player, player_handlers)) {
-            std::cerr << "❌ 玩家系统注册失败!" << std::endl;
+            std::cerr << "❌ Player系统RegisterFailed!" << std::endl;
             return 1;
         }
 
-        // 8. 注册商店系统
+        // 8. Register商店系统
         std::map<std::string, FunctionHandler> shop_handlers;
         shop_handlers["shop.list_items"] = ShopListItemsHandler;
 
-        std::cout << "🛒 注册商店系统..." << std::endl;
+        std::cout << "🛒 Register商店系统..." << std::endl;
         if (!g_client->RegisterVirtualObject(shop, shop_handlers)) {
-            std::cerr << "❌ 商店系统注册失败!" << std::endl;
+            std::cerr << "❌ 商店系统RegisterFailed!" << std::endl;
             return 1;
         }
 
-        // 9. 展示注册的系统
+        // 9. 展示Register的系统
         auto registered_objects = g_client->GetRegisteredObjects();
-        std::cout << "\n📋 已注册的虚拟对象 (" << registered_objects.size() << " 个):" << std::endl;
+        std::cout << "\n📋 已Register的Virtual Object (" << registered_objects.size() << " 个):" << std::endl;
         for (const auto& obj : registered_objects) {
             std::cout << "   ✓ " << obj.id << " v" << obj.version << " - " << obj.name << std::endl;
-            std::cout << "     操作: ";
+            std::cout << "     Operation: ";
             for (const auto& op : obj.operations) {
                 std::cout << op.first << " ";
             }
             std::cout << std::endl;
         }
 
-        // 10. 连接到 Agent
-        std::cout << "\n🔌 连接到 Croupier Agent..." << std::endl;
+        // 10. Connect到 Agent
+        std::cout << "\n🔌 Connect到 Croupier Agent..." << std::endl;
         if (!g_client->Connect()) {
-            std::cerr << "❌ 无法连接到 Agent!" << std::endl;
+            std::cerr << "❌ 无法Connect到 Agent!" << std::endl;
             std::cerr << "💡 请确保 Croupier Agent 正在运行在: " << config.agent_addr << std::endl;
             return 1;
         }
 
-        std::cout << "✅ 成功连接到 Agent!" << std::endl;
+        std::cout << "✅ SuccessConnect到 Agent!" << std::endl;
 
-        // 11. 启动服务
-        std::cout << "\n🚀 启动服务，等待函数调用..." << std::endl;
-        std::cout << "💡 提示: 使用 Ctrl+C 优雅停止服务" << std::endl;
+        // 11. StartService
+        std::cout << "\n🚀 StartService，等待FunctionInvoke..." << std::endl;
+        std::cout << "💡 提示: 使用 Ctrl+C 优雅StopService" << std::endl;
         std::cout << "===============================================" << std::endl;
 
-        // 启动服务 (阻塞调用)
+        // StartService (阻塞Invoke)
         g_client->Serve();
 
     } catch (const std::exception& e) {
-        std::cerr << "💥 程序异常: " << e.what() << std::endl;
+        std::cerr << "💥 程序Exception: " << e.what() << std::endl;
         return 1;
     }
 
-    std::cout << "\n👋 示例程序已结束" << std::endl;
+    std::cout << "\n👋 Sample程序已结束" << std::endl;
     return 0;
 }

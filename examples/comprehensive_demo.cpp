@@ -23,23 +23,23 @@ using namespace croupier::sdk;
 std::atomic<bool> g_shutdown(false);
 
 void signalHandler(int signal) {
-    std::cout << "\n🛑 收到停止信号 (" << signal << "), 开始优雅关闭..." << '\n';
+    std::cout << "\n🛑 Received shutdown signal (" << signal << "), Starting graceful shutdown..." << '\n';
     g_shutdown = true;
 }
 
 // ==================== Function Handlers ====================
 
 std::string playerBanHandler(const std::string& context, const std::string& payload) {
-    std::cout << "🔨 执行玩家封禁 - Context: " << context << ", Payload: " << payload << '\n';
+    std::cout << "🔨 Executing player ban - Context: " << context << ", Payload: " << payload << '\n';
 
-    // 模拟处理时间
+    // SimulateHandlerTime
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     return R"({"status":"success","action":"ban","player_id":"player_123","reason":"违规行为"})";
 }
 
 std::string itemCreateHandler(const std::string& context, const std::string& payload) {
-    std::cout << "📦 创建游戏道具 - Context: " << context << ", Payload: " << payload << '\n';
+    std::cout << "📦 Creating game item - Context: " << context << ", Payload: " << payload << '\n';
 
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
@@ -48,26 +48,26 @@ std::string itemCreateHandler(const std::string& context, const std::string& pay
 }
 
 std::string playerGetHandler(const std::string& context, const std::string& payload) {
-    std::cout << "👤 获取玩家信息 - Context: " << context << ", Payload: " << payload << '\n';
+    std::cout << "👤 Getting player info - Context: " << context << ", Payload: " << payload << '\n';
     return R"({"status":"success","player_id":"player_123","level":50,"exp":125000})";
 }
 
 std::string playerUpdateHandler(const std::string& context, const std::string& payload) {
-    std::cout << "✏️ 更新玩家信息 - Context: " << context << ", Payload: " << payload << '\n';
+    std::cout << "✏️ Updating player info - Context: " << context << ", Payload: " << payload << '\n';
     return R"({"status":"success","updated_fields":["level","exp"]})";
 }
 
 std::string playerDeleteHandler(const std::string& context, const std::string& payload) {
-    std::cout << "🗑️ 删除玩家信息 - Context: " << context << ", Payload: " << payload << '\n';
+    std::cout << "🗑️ Deleting player info - Context: " << context << ", Payload: " << payload << '\n';
     return R"({"status":"success","action":"delete","player_id":"player_123"})";
 }
 
 // ==================== Demo Functions ====================
 
 void demonstrateBasicFunctionRegistration(CroupierClient& client) {
-    std::cout << "\n=== 📝 基础函数注册演示 ===" << '\n';
+    std::cout << "\n=== 📝 Basic Function Registration Demo ===" << '\n';
 
-    // 1. 注册高风险管理函数
+    // 1. Register高风险ManagementFunction
     FunctionDescriptor banDesc;
     banDesc.id = "player.ban";
     banDesc.version = "1.0.0";
@@ -78,10 +78,10 @@ void demonstrateBasicFunctionRegistration(CroupierClient& client) {
     banDesc.enabled = true;
 
     if (client.RegisterFunction(banDesc, playerBanHandler)) {
-        std::cout << "✅ 成功注册玩家封禁函数" << '\n';
+        std::cout << "✅ Successfully registered player ban function" << '\n';
     }
 
-    // 2. 注册低风险物品创建函数
+    // 2. Register低风险物品CreateFunction
     FunctionDescriptor itemDesc;
     itemDesc.id = "item.create";
     itemDesc.version = "1.0.0";
@@ -92,74 +92,74 @@ void demonstrateBasicFunctionRegistration(CroupierClient& client) {
     itemDesc.enabled = true;
 
     if (client.RegisterFunction(itemDesc, itemCreateHandler)) {
-        std::cout << "✅ 成功注册道具创建函数" << '\n';
+        std::cout << "✅ Successfully registered item creation function" << '\n';
     }
 }
 
 void demonstrateVirtualObjectRegistration(CroupierClient& client) {
-    std::cout << "\n=== 🎯 虚拟对象注册演示 ===" << '\n';
+    std::cout << "\n=== 🎯 Virtual Object Registration Demo ===" << '\n';
 
-    // 创建玩家实体的完整CRUD操作
+    // CreatePlayerEntity的完整CRUDOperation
     VirtualObjectDescriptor playerObject;
     playerObject.id = "player";
     playerObject.version = "1.0.0";
-    playerObject.name = "游戏玩家实体";
-    playerObject.description = "管理玩家的完整生命周期";
+    playerObject.name = "GamePlayerEntity";
+    playerObject.description = "ManagementPlayer的完整Lifecycle";
 
-    // 设置schema
+    // Setschema
     playerObject.schema["type"] = "object";
     playerObject.schema["properties"] = R"({
-        "id": {"type": "string", "title": "玩家ID"},
-        "name": {"type": "string", "title": "玩家姓名"},
+        "id": {"type": "string", "title": "PlayerID"},
+        "name": {"type": "string", "title": "Player姓名"},
         "level": {"type": "integer", "title": "等级"},
         "exp": {"type": "integer", "title": "经验值"}
     })";
 
-    // 映射CRUD操作到函数
+    // 映射CRUDOperation到Function
     playerObject.operations["create"] = "player.create";
     playerObject.operations["read"] = "player.get";
     playerObject.operations["update"] = "player.update";
     playerObject.operations["delete"] = "player.delete";
 
-    // 设置关系
+    // Set关系
     playerObject.relationships["items"] = {"one-to-many", "item", "player_id"};
     playerObject.relationships["guild"] = {"many-to-one", "guild", "guild_id"};
 
-    // 准备处理器映射
+    // 准备Handler器映射
     std::map<std::string, FunctionHandler> playerHandlers = {
-        {"player.create", playerUpdateHandler},  // 复用更新处理器作为创建
+        {"player.create", playerUpdateHandler},  // 复用UpdateHandler器作为Create
         {"player.get", playerGetHandler},
         {"player.update", playerUpdateHandler},
         {"player.delete", playerDeleteHandler}
     };
 
     if (client.RegisterVirtualObject(playerObject, playerHandlers)) {
-        std::cout << "✅ 成功注册玩家虚拟对象 (包含4个CRUD操作)" << '\n';
+        std::cout << "✅ Successfully registered player virtual object (with 4 CRUD operations)" << '\n';
     }
 }
 
 void demonstrateComponentManagement(CroupierClient& client) {
-    std::cout << "\n=== 📦 组件管理演示 ===" << '\n';
+    std::cout << "\n=== 📦 ComponentManagementDemo ===" << '\n';
 
-    // 创建完整的游戏组件
+    // Create完整的GameComponent
     ComponentDescriptor gameComponent;
     gameComponent.id = "player-management";
     gameComponent.version = "1.0.0";
-    gameComponent.name = "玩家管理组件";
-    gameComponent.description = "包含玩家相关的所有功能";
+    gameComponent.name = "PlayerManagementComponent";
+    gameComponent.description = "IncludePlayer相关的AllFeature";
 
-    // 添加已注册的虚拟对象到组件中
-    // 注意：这里我们重复定义玩家对象，在真实场景中应该避免
+    // Add registered virtual objects to component
+    // 注意：这里我们重复DefinitionPlayerObject，在真实场景中应该避免
     VirtualObjectDescriptor componentPlayer;
     componentPlayer.id = "component_player";
     componentPlayer.version = "1.0.0";
-    componentPlayer.name = "组件内玩家实体";
-    componentPlayer.description = "组件内部的玩家定义";
+    componentPlayer.name = "Component内PlayerEntity";
+    componentPlayer.description = "Component内部的PlayerDefinition";
     componentPlayer.operations["ban"] = "player.ban";
 
     gameComponent.entities.push_back(componentPlayer);
 
-    // 添加独立函数
+    // 添加独立Function
     FunctionDescriptor utilFunc;
     utilFunc.id = "util.generate_id";
     utilFunc.version = "1.0.0";
@@ -171,165 +171,165 @@ void demonstrateComponentManagement(CroupierClient& client) {
 
     gameComponent.functions.push_back(utilFunc);
 
-    // 组件配置
+    // ComponentConfiguration
     gameComponent.resources["database"] = "player_db";
     gameComponent.resources["cache"] = "redis_cache";
     gameComponent.config["max_level"] = "100";
     gameComponent.config["exp_multiplier"] = "1.5";
 
     if (client.RegisterComponent(gameComponent)) {
-        std::cout << "✅ 成功注册玩家管理组件" << '\n';
+        std::cout << "✅ Successfully registered player management component" << '\n';
     }
 
-    // 展示已注册的对象和组件
-    std::cout << "\n--- 📋 已注册对象列表 ---" << '\n';
+    // Display registered objects and components
+    std::cout << "\n--- 📋 List of Registered Objects ---" << '\n';
     auto objects = client.GetRegisteredObjects();
     for (const auto& obj : objects) {
-        std::cout << "🎯 对象: " << obj.id << " (v" << obj.version << ") - " << obj.operations.size() << " 个操作" << '\n';
+        std::cout << "🎯 Object: " << obj.id << " (v" << obj.version << ") - " << obj.operations.size() << "  operations" << '\n';
     }
 
-    std::cout << "\n--- 📋 已注册组件列表 ---" << '\n';
+    std::cout << "\n--- 📋 List of Registered Components ---" << '\n';
     auto components = client.GetRegisteredComponents();
     for (const auto& comp : components) {
-        std::cout << "📦 组件: " << comp.id << " (v" << comp.version << ") - "
-                  << comp.entities.size() << " 个实体, "
-                  << comp.functions.size() << " 个函数" << '\n';
+        std::cout << "📦 Component: " << comp.id << " (v" << comp.version << ") - "
+                  << comp.entities.size() << "  entities, "
+                  << comp.functions.size() << "  functions" << '\n';
     }
 }
 
 void demonstrateClientLifecycle(CroupierClient& client) {
-    std::cout << "\n=== 🔄 客户端生命周期演示 ===" << '\n';
+    std::cout << "\n=== 🔄 ClientLifecycleDemo ===" << '\n';
 
-    // 连接到Agent
+    // Connect to Agent
     if (client.Connect()) {
-        std::cout << "✅ 成功连接到Agent" << '\n';
-        std::cout << "📍 本地服务地址: " << client.GetLocalAddress() << '\n';
+        std::cout << "✅ Successfully connected to Agent" << '\n';
+        std::cout << "📍 LocalServiceAddress: " << client.GetLocalAddress() << '\n';
     } else {
-        std::cout << "❌ 连接失败" << '\n';
+        std::cout << "❌ Connection failed" << '\n';
         return;
     }
 
-    // 启动服务 (在单独线程中)
-    std::cout << "🚀 启动客户端服务..." << '\n';
+    // Serve - Start local service (在单独线程中)
+    std::cout << "🚀 StartClientService..." << '\n';
     std::thread serviceThread([&client]() {
         client.Serve();
     });
 
-    // 让服务运行一段时间
-    std::cout << "⏳ 服务运行中，等待3秒..." << '\n';
+    // 让Service运行一段Time
+    std::cout << "⏳ Service运行中，等待3秒..." << '\n';
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    // 优雅停止
-    std::cout << "🛑 停止服务..." << '\n';
+    // 优雅Stop
+    std::cout << "🛑 Stop - Stop local service..." << '\n';
     client.Stop();
 
     if (serviceThread.joinable()) {
         serviceThread.join();
     }
 
-    std::cout << "✅ 服务已停止" << '\n';
+    std::cout << "✅ Service已Stop" << '\n';
 }
 
 void demonstrateInvoker() {
-    std::cout << "\n=== 📞 调用器接口演示 ===" << '\n';
+    std::cout << "\n=== 📞 Invoker InterfaceDemo ===" << '\n';
 
-    // 创建调用器配置
+    // CreateInvoke器Configuration
     InvokerConfig invokerConfig;
-    invokerConfig.address = "localhost:8080";  // 连接到服务器或代理
+    invokerConfig.address = "localhost:8080";  // Connect到Service器或代理
     invokerConfig.timeout_seconds = 30;
     invokerConfig.insecure = true;
 
     CroupierInvoker invoker(invokerConfig);
 
     try {
-        // 1. 连接
+        // 1. Connect
         if (invoker.Connect()) {
-            std::cout << "✅ 调用器连接成功" << '\n';
+            std::cout << "✅ Invoker connection successful" << '\n';
         }
 
-        // 2. 设置函数schema
+        // 2. SetFunctionschema
         std::map<std::string, std::string> banSchema = {
             {"type", "object"},
             {"properties", R"({"player_id":{"type":"string"},"reason":{"type":"string"}})"}
         };
         invoker.SetSchema("player.ban", banSchema);
-        std::cout << "✅ 设置player.ban函数的validation schema" << '\n';
+        std::cout << "✅ Set validation schema for player.ban function" << '\n';
 
-        // 3. 同步调用
+        // 3. SyncInvoke
         InvokeOptions options;
         options.idempotency_key = utils::NewIdempotencyKey();
 
         std::string payload = R"({"player_id":"player_123","reason":"违规聊天"})";
         std::string result = invoker.Invoke("player.ban", payload, options);
-        std::cout << "📞 同步调用结果: " << result << '\n';
+        std::cout << "📞 SyncInvoke结果: " << result << '\n';
 
-        // 4. 启动异步作业
+        // 4. Start async job
         std::string jobId = invoker.StartJob("item.create", R"({"type":"sword","rarity":"epic"})", options);
-        std::cout << "🚀 启动异步作业: " << jobId << '\n';
+        std::cout << "🚀 Start async job: " << jobId << '\n';
 
-        // 5. 流式获取作业事件
+        // 5. StreamGetJobevents
         auto future = invoker.StreamJob(jobId);
-        std::cout << "📡 监听作业事件..." << '\n';
+        std::cout << "📡 监听Jobevents..." << '\n';
 
         auto events = future.get();
         for (const auto& event : events) {
-            std::cout << "📋 作业事件: " << event.event_type
+            std::cout << "📋 Jobevents: " << event.event_type
                       << ", 负载: " << event.payload;
             if (event.done) {
-                std::cout << " (完成)";
+                std::cout << " (Complete)";
             }
             std::cout << '\n';
 
-            // 演示取消作业 (在progress事件时)
+            // DemoCancel job (在progressevents时)
             if (event.event_type == "progress") {
-                std::cout << "⏹️ 演示取消作业..." << '\n';
+                std::cout << "⏹️ DemoCancel job..." << '\n';
                 if (invoker.CancelJob(jobId)) {
-                    std::cout << "✅ 作业取消成功" << '\n';
+                    std::cout << "✅ Job cancellation successful" << '\n';
                 }
             }
         }
 
-        // 6. 关闭调用器
+        // 6. CloseInvoke器
         invoker.Close();
-        std::cout << "✅ 调用器已关闭" << '\n';
+        std::cout << "✅ Invoke器已Close" << '\n';
 
     } catch (const std::exception& e) {
-        std::cout << "❌ 调用器操作失败: " << e.what() << '\n';
+        std::cout << "❌ Invoker operation failed: " << e.what() << '\n';
     }
 }
 
 void demonstrateCleanup(CroupierClient& client) {
-    std::cout << "\n=== 🧹 清理演示 ===" << '\n';
+    std::cout << "\n=== 🧹 Cleanup Demo ===" << '\n';
 
-    // 取消注册虚拟对象
+    // CancelRegisterVirtualObject - Register virtual object CRUD
     if (client.UnregisterVirtualObject("player")) {
-        std::cout << "✅ 成功取消注册玩家虚拟对象" << '\n';
+        std::cout << "✅ Successfully unregistered player virtual object" << '\n';
     }
 
-    // 取消注册组件
+    // UnregisterComponent - Register complex component
     if (client.UnregisterComponent("player-management")) {
-        std::cout << "✅ 成功取消注册玩家管理组件" << '\n';
+        std::cout << "✅ Successfully unregistered player management component" << '\n';
     }
 
-    // 最终关闭客户端
+    // 最终Close client
     client.Close();
-    std::cout << "✅ 客户端已完全关闭" << '\n';
+    std::cout << "✅ Client fully stopped" << '\n';
 }
 
 void createExampleConfigFile() {
-    std::cout << "\n=== 📄 创建示例配置文件 ===" << '\n';
+    std::cout << "\n=== 📄 Create sample configuration file ===" << '\n';
 
     std::string configContent = R"({
   "id": "sample-component",
   "version": "1.0.0",
-  "name": "示例组件",
-  "description": "从文件加载的示例组件",
+  "name": "SampleComponent",
+  "description": " loaded from file: SampleComponent",
   "entities": [
     {
       "id": "sample_entity",
       "version": "1.0.0",
-      "name": "示例实体",
-      "description": "配置文件定义的实体",
+      "name": "SampleEntity",
+      "description": "ConfigurationFileDefinition的Entity",
       "schema": {
         "type": "object",
         "properties": {
@@ -368,43 +368,43 @@ void createExampleConfigFile() {
     configFile << configContent;
     configFile.close();
 
-    std::cout << "✅ 创建配置文件: sample_component.json" << '\n';
+    std::cout << "✅ CreateConfigurationFile: sample_component.json" << '\n';
 }
 
 void demonstrateFileLoading(CroupierClient& client) {
-    std::cout << "\n=== 📁 文件加载演示 ===" << '\n';
+    std::cout << "\n=== 📁 FileLoadDemo ===" << '\n';
 
     createExampleConfigFile();
 
-    // 从文件加载组件
+    // LoadComponentFromFile - Load component config from file
     if (client.LoadComponentFromFile("sample_component.json")) {
-        std::cout << "✅ 成功从文件加载组件配置" << '\n';
+        std::cout << "✅ Successfully loaded component configuration from file" << '\n';
 
-        // 显示加载的组件
+        // 显示LoadedComponent
         auto components = client.GetRegisteredComponents();
         for (const auto& comp : components) {
             if (comp.id == "sample-component") {
-                std::cout << "📦 加载的组件: " << comp.name << " - " << comp.description << '\n';
+                std::cout << "📦 LoadedComponent: " << comp.name << " - " << comp.description << '\n';
             }
         }
     } else {
-        std::cout << "❌ 从文件加载组件失败" << '\n';
+        std::cout << "❌ LoadComponentFromFile - Load component config from fileFailed" << '\n';
     }
 
-    // 清理临时文件
+    // Cleanup临时File
     std::remove("sample_component.json");
 }
 
 int main() {
-    std::cout << "🎮 Croupier C++ SDK 综合功能演示" << '\n';
+    std::cout << "🎮 Croupier C++ SDK Comprehensive Feature Demo" << '\n';
     std::cout << "===============================================" << '\n';
 
-    // 设置信号处理
+    // Set信号Handler
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
 
     try {
-        // 创建客户端配置
+        // CreateClientConfiguration
         ClientConfig config;
         config.game_id = "comprehensive-example";
         config.env = "development";
@@ -415,68 +415,68 @@ int main() {
         config.timeout_seconds = 30;
         config.insecure = true;
 
-        std::cout << "🔧 配置: 游戏=" << config.game_id
-                  << ", 环境=" << config.env
-                  << ", 服务=" << config.service_id << '\n';
+        std::cout << "🔧 Configuration: Game=" << config.game_id
+                  << ", Environment=" << config.env
+                  << ", Service=" << config.service_id << '\n';
 
-        // 创建客户端
+        // CreateClient
         CroupierClient client(config);
 
-        // ==== 演示所有客户端接口 ====
+        // ==== DemoAllClientInterface ====
 
-        // 1. 基础函数注册
+        // 1. 基础FunctionRegister
         demonstrateBasicFunctionRegistration(client);
 
-        // 2. 虚拟对象注册 (展示完整的CRUD映射)
+        // 2. Virtual ObjectRegister (展示完整的CRUD映射)
         demonstrateVirtualObjectRegistration(client);
 
-        // 3. 组件管理
+        // 3. ComponentManagement
         demonstrateComponentManagement(client);
 
-        // 4. 文件加载
+        // 4. FileLoad
         demonstrateFileLoading(client);
 
-        // 5. 客户端生命周期 (Connect, Serve, Stop)
+        // 5. ClientLifecycle (Connect, Serve, Stop)
         demonstrateClientLifecycle(client);
 
-        // ==== 演示调用器接口 ====
+        // ==== DemoInvoker Interface ====
 
-        // 6. 调用器功能演示
+        // 6. Invoke器FeatureDemo
         demonstrateInvoker();
 
-        // 7. 清理演示
+        // 7. Cleanup Demo
         demonstrateCleanup(client);
 
-        std::cout << "\n🎉 所有功能演示完成!" << '\n';
-        std::cout << "\n📊 演示统计:" << '\n';
-        std::cout << "   ✅ 客户端接口: 11/11 已演示" << '\n';
-        std::cout << "   ✅ 调用器接口: 6/6 已演示" << '\n';
-        std::cout << "   ✅ 配置管理: 完整演示" << '\n';
-        std::cout << "   ✅ 错误处理: 包含异常捕获" << '\n';
-        std::cout << "   ✅ 生命周期: 完整演示" << '\n';
+        std::cout << "\n🎉 All feature demos complete!" << '\n';
+        std::cout << "\n📊 Test Statistics:" << '\n';
+        std::cout << "   ✅ ClientInterface: 11/11  tested" << '\n';
+        std::cout << "   ✅ Invoker Interface: 6/6  tested" << '\n';
+        std::cout << "   ✅ ConfigurationManagement:  complete demo" << '\n';
+        std::cout << "   ✅ Error handling: Exception catching included" << '\n';
+        std::cout << "   ✅ Lifecycle:  complete demo" << '\n';
 
-        std::cout << "\n💡 接口覆盖详情:" << '\n';
-        std::cout << "   📝 RegisterFunction - 注册基础函数" << '\n';
-        std::cout << "   🎯 RegisterVirtualObject - 注册虚拟对象CRUD" << '\n';
-        std::cout << "   📦 RegisterComponent - 注册复杂组件" << '\n';
-        std::cout << "   📁 LoadComponentFromFile - 文件配置加载" << '\n';
-        std::cout << "   📋 GetRegisteredObjects - 查询已注册对象" << '\n';
-        std::cout << "   📋 GetRegisteredComponents - 查询已注册组件" << '\n';
-        std::cout << "   🗑️ UnregisterVirtualObject - 取消注册对象" << '\n';
-        std::cout << "   🗑️ UnregisterComponent - 取消注册组件" << '\n';
-        std::cout << "   🔌 Connect - 连接到Agent" << '\n';
-        std::cout << "   🚀 Serve - 启动服务" << '\n';
-        std::cout << "   🛑 Stop - 停止服务" << '\n';
-        std::cout << "   🔐 Close - 关闭客户端" << '\n';
-        std::cout << "   📍 GetLocalAddress - 获取本地地址" << '\n';
-        std::cout << "   📞 Invoke - 同步函数调用" << '\n';
-        std::cout << "   🚀 StartJob - 启动异步作业" << '\n';
-        std::cout << "   📡 StreamJob - 流式作业事件" << '\n';
-        std::cout << "   ⏹️ CancelJob - 取消作业" << '\n';
-        std::cout << "   📄 SetSchema - 设置验证模式" << '\n';
+        std::cout << "\n💡 Interface Coverage Details:" << '\n';
+        std::cout << "   📝 RegisterFunction - Register basic function" << '\n';
+        std::cout << "   🎯 RegisterVirtualObject - Register virtual object CRUD" << '\n';
+        std::cout << "   📦 RegisterComponent - Register complex component" << '\n';
+        std::cout << "   📁 LoadComponentFromFile - FileConfigurationLoad" << '\n';
+        std::cout << "   📋 GetRegisteredObjects - Query registered objects" << '\n';
+        std::cout << "   📋 GetRegisteredComponents - Query registered components" << '\n';
+        std::cout << "   🗑️ UnregisterVirtualObject - UnregisterVirtualObject" << '\n';
+        std::cout << "   🗑️ UnregisterComponent - Unregister complex component" << '\n';
+        std::cout << "   🔌 Connect - Connect to Agent" << '\n';
+        std::cout << "   🚀 Serve - Start local service" << '\n';
+        std::cout << "   🛑 Stop - Stop local service" << '\n';
+        std::cout << "   🔐 Close - Close client" << '\n';
+        std::cout << "   📍 GetLocalAddress - Get local address" << '\n';
+        std::cout << "   📞 Invoke - Synchronous function invocation" << '\n';
+        std::cout << "   🚀 StartJob - Start async job" << '\n';
+        std::cout << "   📡 StreamJob - Stream job events" << '\n';
+        std::cout << "   ⏹️ CancelJob - Cancel job" << '\n';
+        std::cout << "   📄 SetSchema - Set validation schema" << '\n';
 
     } catch (const std::exception& e) {
-        std::cerr << "❌ 程序异常: " << e.what() << '\n';
+        std::cerr << "❌ 程序Exception: " << e.what() << '\n';
         return 1;
     }
 

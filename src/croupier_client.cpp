@@ -166,7 +166,7 @@ public:
     std::map<std::string, VirtualObjectDescriptor> objects_;
     std::map<std::string, ComponentDescriptor> components_;
 
-    // gRPC 管理器
+    // gRPC Manager器
     std::unique_ptr<grpc_service::GrpcClientManager> grpc_manager_;
     std::string session_id_;
 
@@ -205,7 +205,7 @@ public:
         SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id << "' in '" << config_.env
                                                              << "' environment");
 
-        // 初始化 gRPC 管理器
+        // Initialize gRPC Manager器
         grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
 
         // Set error callback
@@ -438,7 +438,7 @@ public:
 
         grpc_manager_->UpdateHandlers(handlers_);
 
-        // 使用 gRPC 管理器连接
+        // 使用 gRPC Manager器Connect
         if (!grpc_manager_->Connect()) {
             SDK_LOG_ERROR("Failed to connect to Agent");
             return false;
@@ -460,7 +460,7 @@ public:
             return false;
         }
 
-        // 更新本地服务器地址
+        // UpdateLocalService器Address
         local_address_ = grpc_manager_->GetLocalServerAddress();
 
         connected_ = true;
@@ -484,20 +484,20 @@ public:
         SDK_LOG_INFO("Croupier client service started");
         SDK_LOG_INFO("Local service address: " << local_address_);
         SDK_LOG_INFO("Registered functions: " << handlers_.size());
-        std::cout << "📦 已注册虚拟对象: " << objects_.size() << " 个" << '\n';
-        std::cout << "🔧 已注册组件: " << components_.size() << " 个" << '\n';
-        std::cout << "💡 使用 Stop() 方法停止服务" << '\n';
+        std::cout << "📦 已RegisterVirtual Object: " << objects_.size() << " 个" << '\n';
+        std::cout << "🔧 已RegisterComponent: " << components_.size() << " 个" << '\n';
+        std::cout << "💡 使用 Stop() 方法StopService" << '\n';
         std::cout << "===============================================" << '\n';
 
-        // 保持服务运行，等待来自 Agent 的调用
+        // 保持Service运行，等待来自 Agent 的Invoke
         const int reconnect_interval_seconds = std::max(1, config_.reconnect_interval_seconds);
         int reconnect_attempts = 0;
 
         while (running_) {
-            // 检查连接状态
+            // CheckConnect状态
             if (!grpc_manager_->IsConnected()) {
                 connected_ = false;
-                std::cerr << "⚠️ 与 Agent 的连接已断开" << '\n';
+                std::cerr << "⚠️ 与 Agent 的Connect已断开" << '\n';
 
                 if (!config_.auto_reconnect) {
                     break;
@@ -570,7 +570,7 @@ public:
     bool IsConnected() const { return connected_; }
 
 private:
-    // 这些方法现在由 gRPC 管理器处理
+    // 这些方法现在由 gRPC Manager器Handler
 #ifdef CROUPIER_SDK_ENABLE_GRPC
     bool UploadCapabilitiesManifest();
     std::string BuildCapabilitiesManifest() const;
