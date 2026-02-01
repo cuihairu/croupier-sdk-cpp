@@ -144,8 +144,11 @@ jobs:
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
       env:
-        # 关键修复：明确指定默认 triplet，防止 vcpkg 自动检测错误
+        # 防止 VS2022 自带的 vcpkg 干扰我们的 vcpkg 检测
+        # 明确指定默认 triplet，防止 vcpkg 自动检测错误的工具集
         VCPKG_DEFAULT_TRIPLET: ${{ matrix.runtime == 'static' && 'x64-windows-static' || 'x64-windows-static-md' }}
+        # 确保 vcpkg 使用我们的实例，而不是 VS2022 自带的副本
+        VCPKG_ROOT: '${{ github.workspace }}/vcpkg'
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
