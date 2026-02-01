@@ -13,8 +13,7 @@
     {
       "name": "protobuf",
       "features": ["zlib"],
-      "version>=": "4.25.1",
-      "version<": "4.26.0"
+      "version>=": "4.25.1"
     },
     {
       "name": "nlohmann-json"
@@ -32,6 +31,15 @@
     "examples": {
       "description": "Build example programs",
       "dependencies": []
+    },
+    "lua": {
+      "description": "Enable Lua language binding (requires Lua 5.3+)",
+      "dependencies": [
+        {
+          "name": "lua",
+          "version>=": "5.3"
+        }
+      ]
     }
   }
 }
