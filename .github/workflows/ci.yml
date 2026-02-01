@@ -132,6 +132,9 @@ jobs:
       with:
         arch: x64
 
+    - name: Install Ninja
+      run: choco install ninja -y
+
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
@@ -140,9 +143,6 @@ jobs:
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: ON  # Force vcpkg to use system tools
-        VCPKG_DEFAULT_TRIPLET: x64-windows-static  # Set default triplet to avoid x86-windows-v120
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
@@ -150,7 +150,6 @@ jobs:
       run: |
         $env:CC = ''
         $env:CXX = ''
-        $env:CMAKE_GENERATOR = "Visual Studio 17 2022"
         cmake -B build `
           -G "Visual Studio 17 2022" `
           -A x64 `
@@ -162,8 +161,7 @@ jobs:
           -DBUILD_STATIC_LIBS=ON `
           -DBUILD_SHARED_LIBS=OFF `
           -DBUILD_EXAMPLES=OFF `
-          -DBUILD_TESTS=OFF `
-          -DCMAKE_SYSTEM_NAME=Windows
+          -DBUILD_TESTS=OFF
 
     - name: Configure CMake (Dynamic Runtime)
       if: matrix.runtime == 'dynamic'
@@ -171,7 +169,6 @@ jobs:
       run: |
         $env:CC = ''
         $env:CXX = ''
-        $env:CMAKE_GENERATOR = "Visual Studio 17 2022"
         cmake -B build `
           -G "Visual Studio 17 2022" `
           -A x64 `
@@ -183,8 +180,7 @@ jobs:
           -DBUILD_STATIC_LIBS=ON `
           -DBUILD_SHARED_LIBS=ON `
           -DBUILD_EXAMPLES=OFF `
-          -DBUILD_TESTS=OFF `
-          -DCMAKE_SYSTEM_NAME=Windows
+          -DBUILD_TESTS=OFF
 
     - name: Build
       run: cmake --build build --config ${{ matrix.build-type }} --parallel
