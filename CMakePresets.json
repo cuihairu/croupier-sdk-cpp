@@ -117,7 +117,7 @@
     },
     {
       "name": "windows-x64-debug-vcpkg",
-      "displayName": "Windows x64 Debug (vcpkg, VS2022)",
+      "displayName": "Windows x64 Debug (vcpkg, VS2022, Dynamic Runtime)",
       "generator": "Visual Studio 17 2022",
       "architecture": {
         "value": "x64"
@@ -137,12 +137,13 @@
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-overlays/triplets",
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "CROUPIER_USE_STATIC_RUNTIME": "OFF"
       }
     },
     {
       "name": "windows-x64-release-vcpkg",
-      "displayName": "Windows x64 Release (vcpkg, VS2022)",
+      "displayName": "Windows x64 Release (vcpkg, VS2022, Dynamic Runtime)",
       "generator": "Visual Studio 17 2022",
       "architecture": {
         "value": "x64"
@@ -162,7 +163,8 @@
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-overlays",
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-overlays/triplets",
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "CROUPIER_USE_STATIC_RUNTIME": "OFF"
       }
     }
   ],

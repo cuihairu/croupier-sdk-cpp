@@ -181,7 +181,15 @@ if(MSVC)
     endif()
 
     # Option to choose between static (MT/MTd) and dynamic (MD/MDd) runtime
-    option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
+    # Default to dynamic runtime (MD/MDd) to match vcpkg's standard x64-windows triplet
+    # Use static runtime only when explicitly specified or using x64-windows-static triplet
+    if(VCPKG_TARGET_TRIPLET MATCHES "static$")
+        # Static triplet (x64-windows-static) defaults to static runtime
+        option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" ON)
+    else()
+        # Standard triplet (x64-windows) defaults to dynamic runtime
+        option(CROUPIER_USE_STATIC_RUNTIME "Use static runtime library (MT/MTd) instead of dynamic (MD/MDd)" OFF)
+    endif()
 
     if(CROUPIER_USE_STATIC_RUNTIME)
         # Use static runtime: MT for Release, MTd for Debug

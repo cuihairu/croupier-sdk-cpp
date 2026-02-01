@@ -143,10 +143,10 @@ jobs:
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
+        # 明确指定 triplet，确保与运行时类型匹配
+        triplet: ${{ matrix.runtime == 'static' && 'x64-windows-static' || 'x64-windows-static-md' }}
       env:
         # 防止 VS2022 自带的 vcpkg 干扰我们的 vcpkg 检测
-        # 明确指定默认 triplet，防止 vcpkg 自动检测错误的工具集
-        VCPKG_DEFAULT_TRIPLET: ${{ matrix.runtime == 'static' && 'x64-windows-static' || 'x64-windows-static-md' }}
         # 确保 vcpkg 使用我们的实例，而不是 VS2022 自带的副本
         VCPKG_ROOT: '${{ github.workspace }}/vcpkg'
 

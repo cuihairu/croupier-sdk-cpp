@@ -16,6 +16,7 @@
 #include <atomic>
 #include <signal.h>
 #include <fstream>
+#include <limits>
 
 using namespace croupier::sdk;
 
@@ -215,9 +216,9 @@ void demonstrateClientLifecycle(CroupierClient& client) {
         client.Serve();
     });
 
-    // 让Service运行一段Time
-    std::cout << "⏳ Service运行中，等待3秒..." << '\n';
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    // 让Service运行一段Time（测试模式：快速退出）
+    std::cout << "⏳ Service运行中..." << '\n';
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // 优雅Stop
     std::cout << "🛑 Stop - Stop local service..." << '\n';
@@ -235,9 +236,19 @@ void demonstrateInvoker() {
 
     // CreateInvoke器Configuration
     InvokerConfig invokerConfig;
-    invokerConfig.address = "localhost:8080";  // Connect到Service器或代理
+    invokerConfig.address = "localhost:18443";  // Connect到Server gRPC端口 (不是HTTP端口)
     invokerConfig.timeout_seconds = 30;
-    invokerConfig.insecure = true;
+
+    // TLS 配置：优先从环境变量读取
+    const char* ca_cert_path = std::getenv("CROUPIER_CA_CERT");
+    if (ca_cert_path && std::string(ca_cert_path) != "") {
+        invokerConfig.insecure = false;
+        invokerConfig.ca_file = ca_cert_path;
+        std::cout << "🔐 Invoker using TLS with CA cert: " << ca_cert_path << '\n';
+    } else {
+        invokerConfig.insecure = true;
+        std::cout << "⚠️  Invoker using insecure connection (dev only)" << '\n';
+    }
 
     CroupierInvoker invoker(invokerConfig);
 
@@ -411,9 +422,19 @@ int main() {
         config.service_id = "demo-service";
         config.service_version = "1.0.0";
         config.agent_addr = "localhost:19090";
-        config.local_listen = ":0";  // 自动分配端口
+        config.local_listen = "0.0.0.0:0";  // 自动分配端口（gRPC 需要完整地址）
         config.timeout_seconds = 30;
-        config.insecure = true;
+
+        // TLS 配置：优先从环境变量读取，否则使用不安全连接
+        const char* ca_cert_path = std::getenv("CROUPIER_CA_CERT");
+        if (ca_cert_path && std::string(ca_cert_path) != "") {
+            config.insecure = false;
+            config.ca_file = ca_cert_path;
+            std::cout << "🔐 Using TLS with CA cert from environment: " << ca_cert_path << '\n';
+        } else {
+            config.insecure = true;  // 回退到不安全连接（仅用于开发环境）
+            std::cout << "⚠️  No CA cert provided, using insecure connection (dev only)" << '\n';
+        }
 
         std::cout << "🔧 Configuration: Game=" << config.game_id
                   << ", Environment=" << config.env
@@ -475,8 +496,14 @@ int main() {
         std::cout << "   ⏹️ CancelJob - Cancel job" << '\n';
         std::cout << "   📄 SetSchema - Set validation schema" << '\n';
 
+        // 等待用户按键后再退出 (避免闪退)
+        std::cout << "\n\n按 Enter 键退出程序..." << std::flush;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
     } catch (const std::exception& e) {
         std::cerr << "❌ 程序Exception: " << e.what() << '\n';
+        std::cerr << "按 Enter 键退出..." << std::flush;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return 1;
     }
 
