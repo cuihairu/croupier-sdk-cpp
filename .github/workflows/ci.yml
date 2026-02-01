@@ -143,6 +143,9 @@ jobs:
         vcpkgJsonGlob: 'vcpkg.json'
         doNotCache: true  # Windows 上缓存可能不稳定
         extraCacheKeys: ${{ matrix.runtime }}
+      env:
+        # 关键修复：明确指定默认 triplet，防止 vcpkg 自动检测错误
+        VCPKG_DEFAULT_TRIPLET: ${{ matrix.runtime == 'static' && 'x64-windows-static' || 'x64-windows-static-md' }}
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
