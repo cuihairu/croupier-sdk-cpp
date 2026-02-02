@@ -213,11 +213,11 @@ if(MSVC)
 
     if(CROUPIER_USE_STATIC_RUNTIME)
         # Use static runtime: MT for Release, MTd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
         message(STATUS "Croupier SDK: Using static runtime library (MT/MTd)")
     else()
         # Use dynamic runtime: MD for Release, MDd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         message(STATUS "Croupier SDK: Using dynamic runtime library (MD/MDd)")
     endif()
 endif()
@@ -495,10 +495,10 @@ if(BUILD_STATIC_LIBS)
     if(MSVC)
         if(CROUPIER_USE_STATIC_RUNTIME)
             set_property(TARGET croupier-sdk-static PROPERTY
-                MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+                MSVC_RUNTIME_LIBRARY "MultiThreaded")
         else()
             set_property(TARGET croupier-sdk-static PROPERTY
-                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
+                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
         endif()
     endif()
 
