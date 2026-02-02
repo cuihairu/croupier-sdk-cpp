@@ -5,6 +5,7 @@
 
 # Build directories
 /build/
+build-*/
 /bin/
 /target/
 /CMakeFiles/
@@ -80,6 +81,7 @@ node_modules/
 
 # Build outputs
 build/
+build-*/
 cmake-build-*/
 out/
 *.tgz
