@@ -150,12 +150,28 @@ endif()
 
 # ========== Lua Binding ==========
 if(ENABLE_LUA_BINDING)
-    # Try multiple package names for Lua (prefer Lua 5.5)
-    find_package(Lua 5.5 QUIET)
-    if(NOT Lua_FOUND)
-        find_package(Lua 5.4 QUIET)
+    # Set up search paths for vcpkg-installed packages when using manifest mode
+    if(DEFINED ENV{VCPKG_ROOT} AND NOT LUA_FOUND)
+        list(APPEND CMAKE_PREFIX_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows" "$ENV{VCPKG_ROOT}/installed/x64-windows-static")
     endif()
-    if(NOT Lua_FOUND)
+
+    # Try vcpkg's unofficial-lua first (vcpkg uses this name)
+    find_package(unofficial-lua CONFIG QUIET)
+    if(unofficial-lua_FOUND)
+        set(LUA_FOUND TRUE)
+        set(LUA_INCLUDE_DIR "$ENV{VCPKG_ROOT}/installed/x64-windows/include" "$ENV{VCPKG_ROOT}/installed/x64-windows-static/include")
+        set(LUA_LIBRARIES unofficial::lua::lua)
+        set(LUA_VERSION_STRING "5.5.0")
+    endif()
+
+    # Try standard Lua package names
+    if(NOT LUA_FOUND)
+        find_package(Lua 5.5 QUIET)
+        if(NOT Lua_FOUND)
+            find_package(Lua 5.4 QUIET)
+        endif()
+    endif()
+    if(NOT LUA_FOUND)
         find_package(PkgConfig)
         if(PKG_CONFIG_FOUND)
             pkg_check_modules(LUA lua5.5 lua5.4 lua)
@@ -163,8 +179,18 @@ if(ENABLE_LUA_BINDING)
     endif()
 
     # Find sol2 or use FetchContent
+    # First try vcpkg-installed sol2 (may be in global vcpkg if not in manifest)
+    if(DEFINED ENV{VCPKG_ROOT} AND NOT sol2_FOUND)
+        set(CMAKE_PREFIX_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows;$ENV{VCPKG_ROOT}/installed/x64-windows-static;${CMAKE_PREFIX_PATH}")
+    endif()
     find_package(sol2 CONFIG QUIET)
-    if(NOT sol2_FOUND)
+    if(sol2_FOUND)
+        message(STATUS "Found sol2 via find_package (vcpkg or system)")
+        set(SOL2_INCLUDE_DIR "$ENV{VCPKG_ROOT}/installed/x64-windows/include")
+        if(NOT EXISTS "${SOL2_INCLUDE_DIR}/sol2/sol.hpp")
+            set(SOL2_INCLUDE_DIR "$ENV{VCPKG_ROOT}/installed/x64-windows-static/include")
+        endif()
+    else()
         message(STATUS "sol2 not found via find_package, using FetchContent...")
         include(FetchContent)
         FetchContent_Declare(
@@ -402,6 +428,8 @@ if(BUILD_SHARED_LIBS)
         target_include_directories(croupier-sdk-shared PRIVATE ${LUA_INCLUDE_DIRS})
         target_link_libraries(croupier-sdk-shared PRIVATE ${LUA_LIBRARIES})
         if(sol2_FOUND)
+            # vcpkg or system-installed sol2
+            target_include_directories(croupier-sdk-shared PRIVATE ${SOL2_INCLUDE_DIR})
             target_link_libraries(croupier-sdk-shared PRIVATE sol2::sol2)
         elseif(TARGET sol2)
             # sol2 was fetched via FetchContent - add include dir explicitly
@@ -478,6 +506,8 @@ if(BUILD_STATIC_LIBS)
         target_include_directories(croupier-sdk-static PRIVATE ${LUA_INCLUDE_DIRS})
         target_link_libraries(croupier-sdk-static PRIVATE ${LUA_LIBRARIES})
         if(sol2_FOUND)
+            # vcpkg or system-installed sol2
+            target_include_directories(croupier-sdk-static PRIVATE ${SOL2_INCLUDE_DIR})
             target_link_libraries(croupier-sdk-static PRIVATE sol2::sol2)
         elseif(TARGET sol2)
             # sol2 was fetched via FetchContent - add include dir explicitly
@@ -485,6 +515,8 @@ if(BUILD_STATIC_LIBS)
             target_link_libraries(croupier-sdk-static PRIVATE sol2)
         endif()
         target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_ENABLE_LUA)
+        # Define version macro for Lua binding
+        target_compile_definitions(croupier-sdk-static PRIVATE "CROUPIER_SDK_VERSION=\"${PROJECT_VERSION}\"")
     endif()
 
 

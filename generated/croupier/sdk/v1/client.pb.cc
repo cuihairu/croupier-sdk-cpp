@@ -413,47 +413,42 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_croupier_2fsdk_2fv1_2fclient_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
     "\n\034croupier/sdk/v1/client.proto\022\017croupier"
-    ".sdk.v1\">\n\022FunctionDescriptor\022\016\n\002id\030\001 \001("
-    "\tR\002id\022\030\n\007version\030\002 \001(\tR\007version\"\256\001\n\025Regi"
-    "sterClientRequest\022\035\n\nservice_id\030\001 \001(\tR\ts"
-    "erviceId\022\030\n\007version\030\002 \001(\tR\007version\022\031\n\010rp"
-    "c_addr\030\003 \001(\tR\007rpcAddr\022A\n\tfunctions\030\004 \003(\013"
-    "2#.croupier.sdk.v1.FunctionDescriptorR\tf"
-    "unctions\"7\n\026RegisterClientResponse\022\035\n\nse"
-    "ssion_id\030\001 \001(\tR\tsessionId\"P\n\020HeartbeatRe"
-    "quest\022\035\n\nservice_id\030\001 \001(\tR\tserviceId\022\035\n\n"
-    "session_id\030\002 \001(\tR\tsessionId\"\023\n\021Heartbeat"
-    "Response\"z\n\016ClientInstance\022\035\n\nservice_id"
-    "\030\001 \001(\tR\tserviceId\022\022\n\004addr\030\002 \001(\tR\004addr\022\030\n"
-    "\007version\030\003 \001(\tR\007version\022\033\n\tlast_seen\030\004 \001"
-    "(\tR\010lastSeen\"_\n\016ClientFunction\022\016\n\002id\030\001 \001"
-    "(\tR\002id\022=\n\tinstances\030\002 \003(\0132\037.croupier.sdk"
-    ".v1.ClientInstanceR\tinstances\"\024\n\022ListCli"
-    "entsRequest\"T\n\023ListClientsResponse\022=\n\tfu"
-    "nctions\030\001 \003(\0132\037.croupier.sdk.v1.ClientFu"
-    "nctionR\tfunctions\",\n\023GetJobResultRequest"
-    "\022\025\n\006job_id\030\001 \001(\tR\005jobId\"\\\n\024GetJobResultR"
-    "esponse\022\024\n\005state\030\001 \001(\tR\005state\022\030\n\007payload"
-    "\030\002 \001(\014R\007payload\022\024\n\005error\030\003 \001(\tR\005error2\375\002"
-    "\n\rClientService\022a\n\016RegisterClient\022&.crou"
-    "pier.sdk.v1.RegisterClientRequest\032\'.crou"
-    "pier.sdk.v1.RegisterClientResponse\022R\n\tHe"
-    "artbeat\022!.croupier.sdk.v1.HeartbeatReque"
-    "st\032\".croupier.sdk.v1.HeartbeatResponse\022X"
-    "\n\013ListClients\022#.croupier.sdk.v1.ListClie"
-    "ntsRequest\032$.croupier.sdk.v1.ListClients"
-    "Response\022[\n\014GetJobResult\022$.croupier.sdk."
-    "v1.GetJobResultRequest\032%.croupier.sdk.v1"
-    ".GetJobResultResponseBa\n\"io.github.cuiha"
-    "iru.croupier.sdk.v1P\001Z9github.com/cuihai"
-    "ru/croupier/pkg/pb/croupier/sdk/v1;sdkv1"
-    "b\006proto3"
+    ".sdk.v1\"1\n\022FunctionDescriptor\022\n\n\002id\030\001 \001("
+    "\t\022\017\n\007version\030\002 \001(\t\"\206\001\n\025RegisterClientReq"
+    "uest\022\022\n\nservice_id\030\001 \001(\t\022\017\n\007version\030\002 \001("
+    "\t\022\020\n\010rpc_addr\030\003 \001(\t\0226\n\tfunctions\030\004 \003(\0132#"
+    ".croupier.sdk.v1.FunctionDescriptor\",\n\026R"
+    "egisterClientResponse\022\022\n\nsession_id\030\001 \001("
+    "\t\":\n\020HeartbeatRequest\022\022\n\nservice_id\030\001 \001("
+    "\t\022\022\n\nsession_id\030\002 \001(\t\"\023\n\021HeartbeatRespon"
+    "se\"V\n\016ClientInstance\022\022\n\nservice_id\030\001 \001(\t"
+    "\022\014\n\004addr\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022\021\n\tlast_"
+    "seen\030\004 \001(\t\"P\n\016ClientFunction\022\n\n\002id\030\001 \001(\t"
+    "\0222\n\tinstances\030\002 \003(\0132\037.croupier.sdk.v1.Cl"
+    "ientInstance\"\024\n\022ListClientsRequest\"I\n\023Li"
+    "stClientsResponse\0222\n\tfunctions\030\001 \003(\0132\037.c"
+    "roupier.sdk.v1.ClientFunction\"%\n\023GetJobR"
+    "esultRequest\022\016\n\006job_id\030\001 \001(\t\"E\n\024GetJobRe"
+    "sultResponse\022\r\n\005state\030\001 \001(\t\022\017\n\007payload\030\002"
+    " \001(\014\022\r\n\005error\030\003 \001(\t2\375\002\n\rClientService\022a\n"
+    "\016RegisterClient\022&.croupier.sdk.v1.Regist"
+    "erClientRequest\032\'.croupier.sdk.v1.Regist"
+    "erClientResponse\022R\n\tHeartbeat\022!.croupier"
+    ".sdk.v1.HeartbeatRequest\032\".croupier.sdk."
+    "v1.HeartbeatResponse\022X\n\013ListClients\022#.cr"
+    "oupier.sdk.v1.ListClientsRequest\032$.croup"
+    "ier.sdk.v1.ListClientsResponse\022[\n\014GetJob"
+    "Result\022$.croupier.sdk.v1.GetJobResultReq"
+    "uest\032%.croupier.sdk.v1.GetJobResultRespo"
+    "nseBa\n\"io.github.cuihairu.croupier.sdk.v"
+    "1P\001Z9github.com/cuihairu/croupier/pkg/pb"
+    "/croupier/sdk/v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto = {
     false,
     false,
-    1408,
+    1230,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2fclient_2eproto,
     "croupier/sdk/v1/client.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto_once,
@@ -574,19 +569,19 @@ const ::_pbi::TcParseTable<1, 2, 0, 52, 2> FunctionDescriptor::_table_ = {
     &_FunctionDescriptor_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDescriptor, _impl_.version_)}},
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDescriptor, _impl_.id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {PROTOBUF_FIELD_OFFSET(FunctionDescriptor, _impl_.id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {PROTOBUF_FIELD_OFFSET(FunctionDescriptor, _impl_.version_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -606,7 +601,7 @@ const ::_pbi::TcParseTable<1, 2, 0, 52, 2> FunctionDescriptor::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     const std::string& _s = this->_internal_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -614,7 +609,7 @@ const ::_pbi::TcParseTable<1, 2, 0, 52, 2> FunctionDescriptor::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     const std::string& _s = this->_internal_version();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -639,13 +634,13 @@ const ::_pbi::TcParseTable<1, 2, 0, 52, 2> FunctionDescriptor::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_id());
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_version());
@@ -800,31 +795,31 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
     &_RegisterClientRequest_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+    // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
     {::_pbi::TcParser::FastMtR1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.functions_)}},
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.service_id_)}},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.version_)}},
-    // string rpc_addr = 3 [json_name = "rpcAddr"];
+    // string rpc_addr = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.rpc_addr_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.service_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.version_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string rpc_addr = 3 [json_name = "rpcAddr"];
+    // string rpc_addr = 3;
     {PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.rpc_addr_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+    // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
     {PROTOBUF_FIELD_OFFSET(RegisterClientRequest, _impl_.functions_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -845,7 +840,7 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     const std::string& _s = this->_internal_service_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -853,7 +848,7 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     const std::string& _s = this->_internal_version();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -861,7 +856,7 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // string rpc_addr = 3 [json_name = "rpcAddr"];
+  // string rpc_addr = 3;
   if (!this->_internal_rpc_addr().empty()) {
     const std::string& _s = this->_internal_rpc_addr();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -869,7 +864,7 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
     target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
-  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_functions_size()); i < n; i++) {
     const auto& repfield = this->_internal_functions().Get(i);
@@ -894,25 +889,25 @@ const ::_pbi::TcParseTable<2, 4, 1, 71, 2> RegisterClientRequest::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
   total_size += 1UL * this->_internal_functions_size();
   for (const auto& msg : this->_internal_functions()) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_service_id());
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_version());
   }
 
-  // string rpc_addr = 3 [json_name = "rpcAddr"];
+  // string rpc_addr = 3;
   if (!this->_internal_rpc_addr().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_rpc_addr());
@@ -1063,13 +1058,13 @@ const ::_pbi::TcParseTable<0, 1, 0, 57, 2> RegisterClientResponse::_table_ = {
     &_RegisterClientResponse_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string session_id = 1 [json_name = "sessionId"];
+    // string session_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(RegisterClientResponse, _impl_.session_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string session_id = 1 [json_name = "sessionId"];
+    // string session_id = 1;
     {PROTOBUF_FIELD_OFFSET(RegisterClientResponse, _impl_.session_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -1088,7 +1083,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 57, 2> RegisterClientResponse::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string session_id = 1 [json_name = "sessionId"];
+  // string session_id = 1;
   if (!this->_internal_session_id().empty()) {
     const std::string& _s = this->_internal_session_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1113,7 +1108,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 57, 2> RegisterClientResponse::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string session_id = 1 [json_name = "sessionId"];
+  // string session_id = 1;
   if (!this->_internal_session_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_session_id());
@@ -1257,19 +1252,19 @@ const ::_pbi::TcParseTable<1, 2, 0, 61, 2> HeartbeatRequest::_table_ = {
     &_HeartbeatRequest_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string session_id = 2 [json_name = "sessionId"];
+    // string session_id = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(HeartbeatRequest, _impl_.session_id_)}},
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(HeartbeatRequest, _impl_.service_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {PROTOBUF_FIELD_OFFSET(HeartbeatRequest, _impl_.service_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string session_id = 2 [json_name = "sessionId"];
+    // string session_id = 2;
     {PROTOBUF_FIELD_OFFSET(HeartbeatRequest, _impl_.session_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -1289,7 +1284,7 @@ const ::_pbi::TcParseTable<1, 2, 0, 61, 2> HeartbeatRequest::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     const std::string& _s = this->_internal_service_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1297,7 +1292,7 @@ const ::_pbi::TcParseTable<1, 2, 0, 61, 2> HeartbeatRequest::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string session_id = 2 [json_name = "sessionId"];
+  // string session_id = 2;
   if (!this->_internal_session_id().empty()) {
     const std::string& _s = this->_internal_session_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1322,13 +1317,13 @@ const ::_pbi::TcParseTable<1, 2, 0, 61, 2> HeartbeatRequest::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_service_id());
   }
 
-  // string session_id = 2 [json_name = "sessionId"];
+  // string session_id = 2;
   if (!this->_internal_session_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_session_id());
@@ -1519,31 +1514,31 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
     &_ClientInstance_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string last_seen = 4 [json_name = "lastSeen"];
+    // string last_seen = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.last_seen_)}},
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.service_id_)}},
-    // string addr = 2 [json_name = "addr"];
+    // string addr = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.addr_)}},
-    // string version = 3 [json_name = "version"];
+    // string version = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.version_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.service_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string addr = 2 [json_name = "addr"];
+    // string addr = 2;
     {PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.addr_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string version = 3 [json_name = "version"];
+    // string version = 3;
     {PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.version_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string last_seen = 4 [json_name = "lastSeen"];
+    // string last_seen = 4;
     {PROTOBUF_FIELD_OFFSET(ClientInstance, _impl_.last_seen_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -1565,7 +1560,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     const std::string& _s = this->_internal_service_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1573,7 +1568,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string addr = 2 [json_name = "addr"];
+  // string addr = 2;
   if (!this->_internal_addr().empty()) {
     const std::string& _s = this->_internal_addr();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1581,7 +1576,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // string version = 3 [json_name = "version"];
+  // string version = 3;
   if (!this->_internal_version().empty()) {
     const std::string& _s = this->_internal_version();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1589,7 +1584,7 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
     target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
-  // string last_seen = 4 [json_name = "lastSeen"];
+  // string last_seen = 4;
   if (!this->_internal_last_seen().empty()) {
     const std::string& _s = this->_internal_last_seen();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1614,25 +1609,25 @@ const ::_pbi::TcParseTable<2, 4, 0, 69, 2> ClientInstance::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_service_id());
   }
 
-  // string addr = 2 [json_name = "addr"];
+  // string addr = 2;
   if (!this->_internal_addr().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_addr());
   }
 
-  // string version = 3 [json_name = "version"];
+  // string version = 3;
   if (!this->_internal_version().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_version());
   }
 
-  // string last_seen = 4 [json_name = "lastSeen"];
+  // string last_seen = 4;
   if (!this->_internal_last_seen().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_last_seen());
@@ -1787,19 +1782,19 @@ const ::_pbi::TcParseTable<1, 2, 1, 41, 2> ClientFunction::_table_ = {
     &_ClientFunction_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+    // repeated .croupier.sdk.v1.ClientInstance instances = 2;
     {::_pbi::TcParser::FastMtR1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(ClientFunction, _impl_.instances_)}},
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(ClientFunction, _impl_.id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {PROTOBUF_FIELD_OFFSET(ClientFunction, _impl_.id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+    // repeated .croupier.sdk.v1.ClientInstance instances = 2;
     {PROTOBUF_FIELD_OFFSET(ClientFunction, _impl_.instances_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -1818,7 +1813,7 @@ const ::_pbi::TcParseTable<1, 2, 1, 41, 2> ClientFunction::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     const std::string& _s = this->_internal_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1826,7 +1821,7 @@ const ::_pbi::TcParseTable<1, 2, 1, 41, 2> ClientFunction::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+  // repeated .croupier.sdk.v1.ClientInstance instances = 2;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_instances_size()); i < n; i++) {
     const auto& repfield = this->_internal_instances().Get(i);
@@ -1851,13 +1846,13 @@ const ::_pbi::TcParseTable<1, 2, 1, 41, 2> ClientFunction::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+  // repeated .croupier.sdk.v1.ClientInstance instances = 2;
   total_size += 1UL * this->_internal_instances_size();
   for (const auto& msg : this->_internal_instances()) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_id());
@@ -2034,13 +2029,13 @@ const ::_pbi::TcParseTable<0, 1, 1, 0, 2> ListClientsResponse::_table_ = {
     &_ListClientsResponse_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+    // repeated .croupier.sdk.v1.ClientFunction functions = 1;
     {::_pbi::TcParser::FastMtR1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(ListClientsResponse, _impl_.functions_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+    // repeated .croupier.sdk.v1.ClientFunction functions = 1;
     {PROTOBUF_FIELD_OFFSET(ListClientsResponse, _impl_.functions_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -2056,7 +2051,7 @@ const ::_pbi::TcParseTable<0, 1, 1, 0, 2> ListClientsResponse::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.ClientFunction functions = 1;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_functions_size()); i < n; i++) {
     const auto& repfield = this->_internal_functions().Get(i);
@@ -2081,7 +2076,7 @@ const ::_pbi::TcParseTable<0, 1, 1, 0, 2> ListClientsResponse::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.ClientFunction functions = 1;
   total_size += 1UL * this->_internal_functions_size();
   for (const auto& msg : this->_internal_functions()) {
     total_size +=
@@ -2218,13 +2213,13 @@ const ::_pbi::TcParseTable<0, 1, 0, 50, 2> GetJobResultRequest::_table_ = {
     &_GetJobResultRequest_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string job_id = 1 [json_name = "jobId"];
+    // string job_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(GetJobResultRequest, _impl_.job_id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string job_id = 1 [json_name = "jobId"];
+    // string job_id = 1;
     {PROTOBUF_FIELD_OFFSET(GetJobResultRequest, _impl_.job_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -2243,7 +2238,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 50, 2> GetJobResultRequest::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   if (!this->_internal_job_id().empty()) {
     const std::string& _s = this->_internal_job_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -2268,7 +2263,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 50, 2> GetJobResultRequest::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   if (!this->_internal_job_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_job_id());
@@ -2417,25 +2412,25 @@ const ::_pbi::TcParseTable<2, 3, 0, 55, 2> GetJobResultResponse::_table_ = {
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string state = 1 [json_name = "state"];
+    // string state = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.state_)}},
-    // bytes payload = 2 [json_name = "payload"];
+    // bytes payload = 2;
     {::_pbi::TcParser::FastBS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.payload_)}},
-    // string error = 3 [json_name = "error"];
+    // string error = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.error_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string state = 1 [json_name = "state"];
+    // string state = 1;
     {PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.state_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bytes payload = 2 [json_name = "payload"];
+    // bytes payload = 2;
     {PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.payload_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBytes | ::_fl::kRepAString)},
-    // string error = 3 [json_name = "error"];
+    // string error = 3;
     {PROTOBUF_FIELD_OFFSET(GetJobResultResponse, _impl_.error_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
@@ -2455,7 +2450,7 @@ const ::_pbi::TcParseTable<2, 3, 0, 55, 2> GetJobResultResponse::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string state = 1 [json_name = "state"];
+  // string state = 1;
   if (!this->_internal_state().empty()) {
     const std::string& _s = this->_internal_state();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -2463,13 +2458,13 @@ const ::_pbi::TcParseTable<2, 3, 0, 55, 2> GetJobResultResponse::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // bytes payload = 2 [json_name = "payload"];
+  // bytes payload = 2;
   if (!this->_internal_payload().empty()) {
     const std::string& _s = this->_internal_payload();
     target = stream->WriteBytesMaybeAliased(2, _s, target);
   }
 
-  // string error = 3 [json_name = "error"];
+  // string error = 3;
   if (!this->_internal_error().empty()) {
     const std::string& _s = this->_internal_error();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -2494,19 +2489,19 @@ const ::_pbi::TcParseTable<2, 3, 0, 55, 2> GetJobResultResponse::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string state = 1 [json_name = "state"];
+  // string state = 1;
   if (!this->_internal_state().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_state());
   }
 
-  // bytes payload = 2 [json_name = "payload"];
+  // bytes payload = 2;
   if (!this->_internal_payload().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
                                     this->_internal_payload());
   }
 
-  // string error = 3 [json_name = "error"];
+  // string error = 3;
   if (!this->_internal_error().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_error());

@@ -15,7 +15,8 @@
 #include "croupier/sdk/bindings/lua_binding_sol2.h"
 #include "croupier/sdk/croupier_client.h"
 
-#include <sol2/sol.hpp>
+// Use sol/sol.hpp (vcpkg installs sol2 as 'sol' directory)
+#include <sol/sol.hpp>
 #include <cstring>
 #include <sstream>
 #include <string>

@@ -15,6 +15,9 @@
 #ifndef CROUPIER_SDK_BINDINGS_LUA_BINDING_SOL2_H_
 #define CROUPIER_SDK_BINDINGS_LUA_BINDING_SOL2_H_
 
+// Forward declaration for lua_State (complete type defined in lua.h)
+typedef struct lua_State lua_State;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

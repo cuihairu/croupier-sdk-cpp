@@ -258,39 +258,34 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_croupier_2fsdk_2fv1_2ftypes_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
     "\n\033croupier/sdk/v1/types.proto\022\017croupier."
-    "sdk.v1\"\276\001\n\022FunctionDefinition\022\016\n\002id\030\001 \001("
-    "\tR\002id\022\030\n\007version\030\002 \001(\tR\007version\022\032\n\010categ"
-    "ory\030\003 \001(\tR\010category\022\022\n\004risk\030\004 \001(\tR\004risk\022"
-    "\026\n\006entity\030\005 \001(\tR\006entity\022\034\n\toperation\030\006 \001"
-    "(\tR\toperation\022\030\n\007enabled\030\007 \001(\010R\007enabled\""
-    "\273\001\n\rServiceConfig\022\035\n\nservice_id\030\001 \001(\tR\ts"
-    "erviceId\022\030\n\007version\030\002 \001(\tR\007version\022\027\n\007ga"
-    "me_id\030\003 \001(\tR\006gameId\022\020\n\003env\030\004 \001(\tR\003env\022\035\n"
-    "\nlocal_addr\030\005 \001(\tR\tlocalAddr\022\'\n\017timeout_"
-    "seconds\030\006 \001(\005R\016timeoutSeconds\"\345\001\n\007JobInf"
-    "o\022\025\n\006job_id\030\001 \001(\tR\005jobId\022\037\n\013function_id\030"
-    "\002 \001(\tR\nfunctionId\0222\n\006status\030\003 \001(\0162\032.crou"
-    "pier.sdk.v1.JobStatusR\006status\022\035\n\ncreated"
-    "_at\030\004 \001(\003R\tcreatedAt\022\035\n\nupdated_at\030\005 \001(\003"
-    "R\tupdatedAt\022\024\n\005error\030\006 \001(\tR\005error\022\032\n\010pro"
-    "gress\030\007 \001(\005R\010progress\"\270\001\n\tErrorInfo\022\022\n\004c"
-    "ode\030\001 \001(\tR\004code\022\030\n\007message\030\002 \001(\tR\007messag"
-    "e\022A\n\007details\030\003 \003(\0132\'.croupier.sdk.v1.Err"
-    "orInfo.DetailsEntryR\007details\032:\n\014DetailsE"
-    "ntry\022\020\n\003key\030\001 \001(\tR\003key\022\024\n\005value\030\002 \001(\tR\005v"
-    "alue:\0028\001*\242\001\n\tJobStatus\022\032\n\026JOB_STATUS_UNS"
-    "PECIFIED\020\000\022\026\n\022JOB_STATUS_PENDING\020\001\022\026\n\022JO"
-    "B_STATUS_RUNNING\020\002\022\030\n\024JOB_STATUS_COMPLET"
-    "ED\020\003\022\025\n\021JOB_STATUS_FAILED\020\004\022\030\n\024JOB_STATU"
-    "S_CANCELLED\020\005Ba\n\"io.github.cuihairu.crou"
-    "pier.sdk.v1P\001Z9github.com/cuihairu/croup"
-    "ier/pkg/pb/croupier/sdk/v1;sdkv1b\006proto3"
+    "sdk.v1\"\205\001\n\022FunctionDefinition\022\n\n\002id\030\001 \001("
+    "\t\022\017\n\007version\030\002 \001(\t\022\020\n\010category\030\003 \001(\t\022\014\n\004"
+    "risk\030\004 \001(\t\022\016\n\006entity\030\005 \001(\t\022\021\n\toperation\030"
+    "\006 \001(\t\022\017\n\007enabled\030\007 \001(\010\"\177\n\rServiceConfig\022"
+    "\022\n\nservice_id\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\017\n\007"
+    "game_id\030\003 \001(\t\022\013\n\003env\030\004 \001(\t\022\022\n\nlocal_addr"
+    "\030\005 \001(\t\022\027\n\017timeout_seconds\030\006 \001(\005\"\243\001\n\007JobI"
+    "nfo\022\016\n\006job_id\030\001 \001(\t\022\023\n\013function_id\030\002 \001(\t"
+    "\022*\n\006status\030\003 \001(\0162\032.croupier.sdk.v1.JobSt"
+    "atus\022\022\n\ncreated_at\030\004 \001(\003\022\022\n\nupdated_at\030\005"
+    " \001(\003\022\r\n\005error\030\006 \001(\t\022\020\n\010progress\030\007 \001(\005\"\224\001"
+    "\n\tErrorInfo\022\014\n\004code\030\001 \001(\t\022\017\n\007message\030\002 \001"
+    "(\t\0228\n\007details\030\003 \003(\0132\'.croupier.sdk.v1.Er"
+    "rorInfo.DetailsEntry\032.\n\014DetailsEntry\022\013\n\003"
+    "key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\242\001\n\tJobStat"
+    "us\022\032\n\026JOB_STATUS_UNSPECIFIED\020\000\022\026\n\022JOB_ST"
+    "ATUS_PENDING\020\001\022\026\n\022JOB_STATUS_RUNNING\020\002\022\030"
+    "\n\024JOB_STATUS_COMPLETED\020\003\022\025\n\021JOB_STATUS_F"
+    "AILED\020\004\022\030\n\024JOB_STATUS_CANCELLED\020\005Ba\n\"io."
+    "github.cuihairu.croupier.sdk.v1P\001Z9githu"
+    "b.com/cuihairu/croupier/pkg/pb/croupier/"
+    "sdk/v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto = {
     false,
     false,
-    1120,
+    900,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2ftypes_2eproto,
     "croupier/sdk/v1/types.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto_once,
@@ -440,49 +435,49 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.id_)}},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.version_)}},
-    // string category = 3 [json_name = "category"];
+    // string category = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.category_)}},
-    // string risk = 4 [json_name = "risk"];
+    // string risk = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.risk_)}},
-    // string entity = 5 [json_name = "entity"];
+    // string entity = 5;
     {::_pbi::TcParser::FastUS1,
      {42, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.entity_)}},
-    // string operation = 6 [json_name = "operation"];
+    // string operation = 6;
     {::_pbi::TcParser::FastUS1,
      {50, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.operation_)}},
-    // bool enabled = 7 [json_name = "enabled"];
+    // bool enabled = 7;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(FunctionDefinition, _impl_.enabled_), 63>(),
      {56, 63, 0, PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.enabled_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string id = 1 [json_name = "id"];
+    // string id = 1;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.version_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string category = 3 [json_name = "category"];
+    // string category = 3;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.category_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string risk = 4 [json_name = "risk"];
+    // string risk = 4;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.risk_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string entity = 5 [json_name = "entity"];
+    // string entity = 5;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.entity_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string operation = 6 [json_name = "operation"];
+    // string operation = 6;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.operation_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bool enabled = 7 [json_name = "enabled"];
+    // bool enabled = 7;
     {PROTOBUF_FIELD_OFFSET(FunctionDefinition, _impl_.enabled_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
   }},
@@ -506,7 +501,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     const std::string& _s = this->_internal_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -514,7 +509,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     const std::string& _s = this->_internal_version();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -522,7 +517,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // string category = 3 [json_name = "category"];
+  // string category = 3;
   if (!this->_internal_category().empty()) {
     const std::string& _s = this->_internal_category();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -530,7 +525,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
-  // string risk = 4 [json_name = "risk"];
+  // string risk = 4;
   if (!this->_internal_risk().empty()) {
     const std::string& _s = this->_internal_risk();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -538,7 +533,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(4, _s, target);
   }
 
-  // string entity = 5 [json_name = "entity"];
+  // string entity = 5;
   if (!this->_internal_entity().empty()) {
     const std::string& _s = this->_internal_entity();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -546,7 +541,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(5, _s, target);
   }
 
-  // string operation = 6 [json_name = "operation"];
+  // string operation = 6;
   if (!this->_internal_operation().empty()) {
     const std::string& _s = this->_internal_operation();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -554,7 +549,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
     target = stream->WriteStringMaybeAliased(6, _s, target);
   }
 
-  // bool enabled = 7 [json_name = "enabled"];
+  // bool enabled = 7;
   if (this->_internal_enabled() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteBoolToArray(
@@ -578,43 +573,43 @@ const ::_pbi::TcParseTable<3, 7, 0, 79, 2> FunctionDefinition::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   if (!this->_internal_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_id());
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_version());
   }
 
-  // string category = 3 [json_name = "category"];
+  // string category = 3;
   if (!this->_internal_category().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_category());
   }
 
-  // string risk = 4 [json_name = "risk"];
+  // string risk = 4;
   if (!this->_internal_risk().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_risk());
   }
 
-  // string entity = 5 [json_name = "entity"];
+  // string entity = 5;
   if (!this->_internal_entity().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_entity());
   }
 
-  // string operation = 6 [json_name = "operation"];
+  // string operation = 6;
   if (!this->_internal_operation().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_operation());
   }
 
-  // bool enabled = 7 [json_name = "enabled"];
+  // bool enabled = 7;
   if (this->_internal_enabled() != 0) {
     total_size += 2;
   }
@@ -797,44 +792,44 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.service_id_)}},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.version_)}},
-    // string game_id = 3 [json_name = "gameId"];
+    // string game_id = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.game_id_)}},
-    // string env = 4 [json_name = "env"];
+    // string env = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.env_)}},
-    // string local_addr = 5 [json_name = "localAddr"];
+    // string local_addr = 5;
     {::_pbi::TcParser::FastUS1,
      {42, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.local_addr_)}},
-    // int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+    // int32 timeout_seconds = 6;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ServiceConfig, _impl_.timeout_seconds_), 63>(),
      {48, 63, 0, PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.timeout_seconds_)}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
-    // string service_id = 1 [json_name = "serviceId"];
+    // string service_id = 1;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.service_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string version = 2 [json_name = "version"];
+    // string version = 2;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.version_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string game_id = 3 [json_name = "gameId"];
+    // string game_id = 3;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.game_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string env = 4 [json_name = "env"];
+    // string env = 4;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.env_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string local_addr = 5 [json_name = "localAddr"];
+    // string local_addr = 5;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.local_addr_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+    // int32 timeout_seconds = 6;
     {PROTOBUF_FIELD_OFFSET(ServiceConfig, _impl_.timeout_seconds_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
@@ -857,7 +852,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     const std::string& _s = this->_internal_service_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -865,7 +860,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     const std::string& _s = this->_internal_version();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -873,7 +868,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // string game_id = 3 [json_name = "gameId"];
+  // string game_id = 3;
   if (!this->_internal_game_id().empty()) {
     const std::string& _s = this->_internal_game_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -881,7 +876,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
-  // string env = 4 [json_name = "env"];
+  // string env = 4;
   if (!this->_internal_env().empty()) {
     const std::string& _s = this->_internal_env();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -889,7 +884,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     target = stream->WriteStringMaybeAliased(4, _s, target);
   }
 
-  // string local_addr = 5 [json_name = "localAddr"];
+  // string local_addr = 5;
   if (!this->_internal_local_addr().empty()) {
     const std::string& _s = this->_internal_local_addr();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -897,7 +892,7 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
     target = stream->WriteStringMaybeAliased(5, _s, target);
   }
 
-  // int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+  // int32 timeout_seconds = 6;
   if (this->_internal_timeout_seconds() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<6>(
@@ -921,37 +916,37 @@ const ::_pbi::TcParseTable<3, 6, 0, 75, 2> ServiceConfig::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   if (!this->_internal_service_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_service_id());
   }
 
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   if (!this->_internal_version().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_version());
   }
 
-  // string game_id = 3 [json_name = "gameId"];
+  // string game_id = 3;
   if (!this->_internal_game_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_game_id());
   }
 
-  // string env = 4 [json_name = "env"];
+  // string env = 4;
   if (!this->_internal_env().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_env());
   }
 
-  // string local_addr = 5 [json_name = "localAddr"];
+  // string local_addr = 5;
   if (!this->_internal_local_addr().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_local_addr());
   }
 
-  // int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+  // int32 timeout_seconds = 6;
   if (this->_internal_timeout_seconds() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_timeout_seconds());
@@ -1136,49 +1131,49 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string job_id = 1 [json_name = "jobId"];
+    // string job_id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.job_id_)}},
-    // string function_id = 2 [json_name = "functionId"];
+    // string function_id = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.function_id_)}},
-    // .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+    // .croupier.sdk.v1.JobStatus status = 3;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(JobInfo, _impl_.status_), 63>(),
      {24, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.status_)}},
-    // int64 created_at = 4 [json_name = "createdAt"];
+    // int64 created_at = 4;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(JobInfo, _impl_.created_at_), 63>(),
      {32, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.created_at_)}},
-    // int64 updated_at = 5 [json_name = "updatedAt"];
+    // int64 updated_at = 5;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(JobInfo, _impl_.updated_at_), 63>(),
      {40, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.updated_at_)}},
-    // string error = 6 [json_name = "error"];
+    // string error = 6;
     {::_pbi::TcParser::FastUS1,
      {50, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.error_)}},
-    // int32 progress = 7 [json_name = "progress"];
+    // int32 progress = 7;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(JobInfo, _impl_.progress_), 63>(),
      {56, 63, 0, PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.progress_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string job_id = 1 [json_name = "jobId"];
+    // string job_id = 1;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.job_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string function_id = 2 [json_name = "functionId"];
+    // string function_id = 2;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.function_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+    // .croupier.sdk.v1.JobStatus status = 3;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.status_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
-    // int64 created_at = 4 [json_name = "createdAt"];
+    // int64 created_at = 4;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.created_at_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
-    // int64 updated_at = 5 [json_name = "updatedAt"];
+    // int64 updated_at = 5;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.updated_at_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
-    // string error = 6 [json_name = "error"];
+    // string error = 6;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.error_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 progress = 7 [json_name = "progress"];
+    // int32 progress = 7;
     {PROTOBUF_FIELD_OFFSET(JobInfo, _impl_.progress_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
@@ -1199,7 +1194,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   if (!this->_internal_job_id().empty()) {
     const std::string& _s = this->_internal_job_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1207,7 +1202,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string function_id = 2 [json_name = "functionId"];
+  // string function_id = 2;
   if (!this->_internal_function_id().empty()) {
     const std::string& _s = this->_internal_function_id();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1215,28 +1210,28 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+  // .croupier.sdk.v1.JobStatus status = 3;
   if (this->_internal_status() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
         3, this->_internal_status(), target);
   }
 
-  // int64 created_at = 4 [json_name = "createdAt"];
+  // int64 created_at = 4;
   if (this->_internal_created_at() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt64ToArrayWithField<4>(
             stream, this->_internal_created_at(), target);
   }
 
-  // int64 updated_at = 5 [json_name = "updatedAt"];
+  // int64 updated_at = 5;
   if (this->_internal_updated_at() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt64ToArrayWithField<5>(
             stream, this->_internal_updated_at(), target);
   }
 
-  // string error = 6 [json_name = "error"];
+  // string error = 6;
   if (!this->_internal_error().empty()) {
     const std::string& _s = this->_internal_error();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1244,7 +1239,7 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
     target = stream->WriteStringMaybeAliased(6, _s, target);
   }
 
-  // int32 progress = 7 [json_name = "progress"];
+  // int32 progress = 7;
   if (this->_internal_progress() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<7>(
@@ -1268,43 +1263,43 @@ const ::_pbi::TcParseTable<3, 7, 0, 54, 2> JobInfo::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   if (!this->_internal_job_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_job_id());
   }
 
-  // string function_id = 2 [json_name = "functionId"];
+  // string function_id = 2;
   if (!this->_internal_function_id().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_function_id());
   }
 
-  // string error = 6 [json_name = "error"];
+  // string error = 6;
   if (!this->_internal_error().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_error());
   }
 
-  // int64 created_at = 4 [json_name = "createdAt"];
+  // int64 created_at = 4;
   if (this->_internal_created_at() != 0) {
     total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
         this->_internal_created_at());
   }
 
-  // int64 updated_at = 5 [json_name = "updatedAt"];
+  // int64 updated_at = 5;
   if (this->_internal_updated_at() != 0) {
     total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
         this->_internal_updated_at());
   }
 
-  // .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+  // .croupier.sdk.v1.JobStatus status = 3;
   if (this->_internal_status() != 0) {
     total_size += 1 +
                   ::_pbi::WireFormatLite::EnumSize(this->_internal_status());
   }
 
-  // int32 progress = 7 [json_name = "progress"];
+  // int32 progress = 7;
   if (this->_internal_progress() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_progress());
@@ -1487,22 +1482,22 @@ const ::_pbi::TcParseTable<1, 3, 1, 52, 2> ErrorInfo::_table_ = {
     &_ErrorInfo_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // string message = 2 [json_name = "message"];
+    // string message = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.message_)}},
-    // string code = 1 [json_name = "code"];
+    // string code = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.code_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string code = 1 [json_name = "code"];
+    // string code = 1;
     {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.code_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string message = 2 [json_name = "message"];
+    // string message = 2;
     {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.message_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // map<string, string> details = 3 [json_name = "details"];
+    // map<string, string> details = 3;
     {PROTOBUF_FIELD_OFFSET(ErrorInfo, _impl_.details_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
   }}, {{
@@ -1526,7 +1521,7 @@ const ::_pbi::TcParseTable<1, 3, 1, 52, 2> ErrorInfo::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string code = 1 [json_name = "code"];
+  // string code = 1;
   if (!this->_internal_code().empty()) {
     const std::string& _s = this->_internal_code();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1534,7 +1529,7 @@ const ::_pbi::TcParseTable<1, 3, 1, 52, 2> ErrorInfo::_table_ = {
     target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // string message = 2 [json_name = "message"];
+  // string message = 2;
   if (!this->_internal_message().empty()) {
     const std::string& _s = this->_internal_message();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1542,7 +1537,7 @@ const ::_pbi::TcParseTable<1, 3, 1, 52, 2> ErrorInfo::_table_ = {
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
-  // map<string, string> details = 3 [json_name = "details"];
+  // map<string, string> details = 3;
   if (!_internal_details().empty()) {
     using MapType = ::google::protobuf::Map<std::string, std::string>;
     using WireHelper = _pbi::MapEntryFuncs<std::string, std::string,
@@ -1592,20 +1587,20 @@ const ::_pbi::TcParseTable<1, 3, 1, 52, 2> ErrorInfo::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // map<string, string> details = 3 [json_name = "details"];
+  // map<string, string> details = 3;
   total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_details_size());
   for (const auto& entry : _internal_details()) {
     total_size += _pbi::MapEntryFuncs<std::string, std::string,
                                    _pbi::WireFormatLite::TYPE_STRING,
                                    _pbi::WireFormatLite::TYPE_STRING>::ByteSizeLong(entry.first, entry.second);
   }
-  // string code = 1 [json_name = "code"];
+  // string code = 1;
   if (!this->_internal_code().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_code());
   }
 
-  // string message = 2 [json_name = "message"];
+  // string message = 2;
   if (!this->_internal_message().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_message());

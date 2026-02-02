@@ -243,7 +243,7 @@ class RegisterClientResponse final :
   enum : int {
     kSessionIdFieldNumber = 1,
   };
-  // string session_id = 1 [json_name = "sessionId"];
+  // string session_id = 1;
   void clear_session_id() ;
   const std::string& session_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -697,7 +697,7 @@ class HeartbeatRequest final :
     kServiceIdFieldNumber = 1,
     kSessionIdFieldNumber = 2,
   };
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   void clear_service_id() ;
   const std::string& service_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -713,7 +713,7 @@ class HeartbeatRequest final :
   std::string* _internal_mutable_service_id();
 
   public:
-  // string session_id = 2 [json_name = "sessionId"];
+  // string session_id = 2;
   void clear_session_id() ;
   const std::string& session_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -897,7 +897,7 @@ class GetJobResultResponse final :
     kPayloadFieldNumber = 2,
     kErrorFieldNumber = 3,
   };
-  // string state = 1 [json_name = "state"];
+  // string state = 1;
   void clear_state() ;
   const std::string& state() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -913,7 +913,7 @@ class GetJobResultResponse final :
   std::string* _internal_mutable_state();
 
   public:
-  // bytes payload = 2 [json_name = "payload"];
+  // bytes payload = 2;
   void clear_payload() ;
   const std::string& payload() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -929,7 +929,7 @@ class GetJobResultResponse final :
   std::string* _internal_mutable_payload();
 
   public:
-  // string error = 3 [json_name = "error"];
+  // string error = 3;
   void clear_error() ;
   const std::string& error() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1112,7 +1112,7 @@ class GetJobResultRequest final :
   enum : int {
     kJobIdFieldNumber = 1,
   };
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   void clear_job_id() ;
   const std::string& job_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1294,7 +1294,7 @@ class FunctionDescriptor final :
     kIdFieldNumber = 1,
     kVersionFieldNumber = 2,
   };
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   void clear_id() ;
   const std::string& id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1310,7 +1310,7 @@ class FunctionDescriptor final :
   std::string* _internal_mutable_id();
 
   public:
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   void clear_version() ;
   const std::string& version() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1495,7 +1495,7 @@ class ClientInstance final :
     kVersionFieldNumber = 3,
     kLastSeenFieldNumber = 4,
   };
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   void clear_service_id() ;
   const std::string& service_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1511,7 +1511,7 @@ class ClientInstance final :
   std::string* _internal_mutable_service_id();
 
   public:
-  // string addr = 2 [json_name = "addr"];
+  // string addr = 2;
   void clear_addr() ;
   const std::string& addr() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1527,7 +1527,7 @@ class ClientInstance final :
   std::string* _internal_mutable_addr();
 
   public:
-  // string version = 3 [json_name = "version"];
+  // string version = 3;
   void clear_version() ;
   const std::string& version() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1543,7 +1543,7 @@ class ClientInstance final :
   std::string* _internal_mutable_version();
 
   public:
-  // string last_seen = 4 [json_name = "lastSeen"];
+  // string last_seen = 4;
   void clear_last_seen() ;
   const std::string& last_seen() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1730,7 +1730,7 @@ class RegisterClientRequest final :
     kVersionFieldNumber = 2,
     kRpcAddrFieldNumber = 3,
   };
-  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
   int functions_size() const;
   private:
   int _internal_functions_size() const;
@@ -1748,7 +1748,7 @@ class RegisterClientRequest final :
   ::croupier::sdk::v1::FunctionDescriptor* add_functions();
   const ::google::protobuf::RepeatedPtrField< ::croupier::sdk::v1::FunctionDescriptor >&
       functions() const;
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   void clear_service_id() ;
   const std::string& service_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1764,7 +1764,7 @@ class RegisterClientRequest final :
   std::string* _internal_mutable_service_id();
 
   public:
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   void clear_version() ;
   const std::string& version() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1780,7 +1780,7 @@ class RegisterClientRequest final :
   std::string* _internal_mutable_version();
 
   public:
-  // string rpc_addr = 3 [json_name = "rpcAddr"];
+  // string rpc_addr = 3;
   void clear_rpc_addr() ;
   const std::string& rpc_addr() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1965,7 +1965,7 @@ class ClientFunction final :
     kInstancesFieldNumber = 2,
     kIdFieldNumber = 1,
   };
-  // repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+  // repeated .croupier.sdk.v1.ClientInstance instances = 2;
   int instances_size() const;
   private:
   int _internal_instances_size() const;
@@ -1983,7 +1983,7 @@ class ClientFunction final :
   ::croupier::sdk::v1::ClientInstance* add_instances();
   const ::google::protobuf::RepeatedPtrField< ::croupier::sdk::v1::ClientInstance >&
       instances() const;
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   void clear_id() ;
   const std::string& id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -2165,7 +2165,7 @@ class ListClientsResponse final :
   enum : int {
     kFunctionsFieldNumber = 1,
   };
-  // repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+  // repeated .croupier.sdk.v1.ClientFunction functions = 1;
   int functions_size() const;
   private:
   int _internal_functions_size() const;
@@ -2230,7 +2230,7 @@ class ListClientsResponse final :
 
 // FunctionDescriptor
 
-// string id = 1 [json_name = "id"];
+// string id = 1;
 inline void FunctionDescriptor::clear_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.id_.ClearToEmpty();
@@ -2283,7 +2283,7 @@ inline void FunctionDescriptor::set_allocated_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDescriptor.id)
 }
 
-// string version = 2 [json_name = "version"];
+// string version = 2;
 inline void FunctionDescriptor::clear_version() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.version_.ClearToEmpty();
@@ -2340,7 +2340,7 @@ inline void FunctionDescriptor::set_allocated_version(std::string* value) {
 
 // RegisterClientRequest
 
-// string service_id = 1 [json_name = "serviceId"];
+// string service_id = 1;
 inline void RegisterClientRequest::clear_service_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.service_id_.ClearToEmpty();
@@ -2393,7 +2393,7 @@ inline void RegisterClientRequest::set_allocated_service_id(std::string* value) 
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.RegisterClientRequest.service_id)
 }
 
-// string version = 2 [json_name = "version"];
+// string version = 2;
 inline void RegisterClientRequest::clear_version() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.version_.ClearToEmpty();
@@ -2446,7 +2446,7 @@ inline void RegisterClientRequest::set_allocated_version(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.RegisterClientRequest.version)
 }
 
-// string rpc_addr = 3 [json_name = "rpcAddr"];
+// string rpc_addr = 3;
 inline void RegisterClientRequest::clear_rpc_addr() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.rpc_addr_.ClearToEmpty();
@@ -2499,7 +2499,7 @@ inline void RegisterClientRequest::set_allocated_rpc_addr(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.RegisterClientRequest.rpc_addr)
 }
 
-// repeated .croupier.sdk.v1.FunctionDescriptor functions = 4 [json_name = "functions"];
+// repeated .croupier.sdk.v1.FunctionDescriptor functions = 4;
 inline int RegisterClientRequest::_internal_functions_size() const {
   return _internal_functions().size();
 }
@@ -2552,7 +2552,7 @@ RegisterClientRequest::_internal_mutable_functions() {
 
 // RegisterClientResponse
 
-// string session_id = 1 [json_name = "sessionId"];
+// string session_id = 1;
 inline void RegisterClientResponse::clear_session_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.session_id_.ClearToEmpty();
@@ -2609,7 +2609,7 @@ inline void RegisterClientResponse::set_allocated_session_id(std::string* value)
 
 // HeartbeatRequest
 
-// string service_id = 1 [json_name = "serviceId"];
+// string service_id = 1;
 inline void HeartbeatRequest::clear_service_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.service_id_.ClearToEmpty();
@@ -2662,7 +2662,7 @@ inline void HeartbeatRequest::set_allocated_service_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.HeartbeatRequest.service_id)
 }
 
-// string session_id = 2 [json_name = "sessionId"];
+// string session_id = 2;
 inline void HeartbeatRequest::clear_session_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.session_id_.ClearToEmpty();
@@ -2723,7 +2723,7 @@ inline void HeartbeatRequest::set_allocated_session_id(std::string* value) {
 
 // ClientInstance
 
-// string service_id = 1 [json_name = "serviceId"];
+// string service_id = 1;
 inline void ClientInstance::clear_service_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.service_id_.ClearToEmpty();
@@ -2776,7 +2776,7 @@ inline void ClientInstance::set_allocated_service_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ClientInstance.service_id)
 }
 
-// string addr = 2 [json_name = "addr"];
+// string addr = 2;
 inline void ClientInstance::clear_addr() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.addr_.ClearToEmpty();
@@ -2829,7 +2829,7 @@ inline void ClientInstance::set_allocated_addr(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ClientInstance.addr)
 }
 
-// string version = 3 [json_name = "version"];
+// string version = 3;
 inline void ClientInstance::clear_version() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.version_.ClearToEmpty();
@@ -2882,7 +2882,7 @@ inline void ClientInstance::set_allocated_version(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ClientInstance.version)
 }
 
-// string last_seen = 4 [json_name = "lastSeen"];
+// string last_seen = 4;
 inline void ClientInstance::clear_last_seen() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.last_seen_.ClearToEmpty();
@@ -2939,7 +2939,7 @@ inline void ClientInstance::set_allocated_last_seen(std::string* value) {
 
 // ClientFunction
 
-// string id = 1 [json_name = "id"];
+// string id = 1;
 inline void ClientFunction::clear_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.id_.ClearToEmpty();
@@ -2992,7 +2992,7 @@ inline void ClientFunction::set_allocated_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ClientFunction.id)
 }
 
-// repeated .croupier.sdk.v1.ClientInstance instances = 2 [json_name = "instances"];
+// repeated .croupier.sdk.v1.ClientInstance instances = 2;
 inline int ClientFunction::_internal_instances_size() const {
   return _internal_instances().size();
 }
@@ -3049,7 +3049,7 @@ ClientFunction::_internal_mutable_instances() {
 
 // ListClientsResponse
 
-// repeated .croupier.sdk.v1.ClientFunction functions = 1 [json_name = "functions"];
+// repeated .croupier.sdk.v1.ClientFunction functions = 1;
 inline int ListClientsResponse::_internal_functions_size() const {
   return _internal_functions().size();
 }
@@ -3102,7 +3102,7 @@ ListClientsResponse::_internal_mutable_functions() {
 
 // GetJobResultRequest
 
-// string job_id = 1 [json_name = "jobId"];
+// string job_id = 1;
 inline void GetJobResultRequest::clear_job_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.job_id_.ClearToEmpty();
@@ -3159,7 +3159,7 @@ inline void GetJobResultRequest::set_allocated_job_id(std::string* value) {
 
 // GetJobResultResponse
 
-// string state = 1 [json_name = "state"];
+// string state = 1;
 inline void GetJobResultResponse::clear_state() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.state_.ClearToEmpty();
@@ -3212,7 +3212,7 @@ inline void GetJobResultResponse::set_allocated_state(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.GetJobResultResponse.state)
 }
 
-// bytes payload = 2 [json_name = "payload"];
+// bytes payload = 2;
 inline void GetJobResultResponse::clear_payload() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.payload_.ClearToEmpty();
@@ -3265,7 +3265,7 @@ inline void GetJobResultResponse::set_allocated_payload(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.GetJobResultResponse.payload)
 }
 
-// string error = 3 [json_name = "error"];
+// string error = 3;
 inline void GetJobResultResponse::clear_error() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.error_.ClearToEmpty();

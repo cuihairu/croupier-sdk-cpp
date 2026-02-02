@@ -270,7 +270,7 @@ class ServiceConfig final :
     kLocalAddrFieldNumber = 5,
     kTimeoutSecondsFieldNumber = 6,
   };
-  // string service_id = 1 [json_name = "serviceId"];
+  // string service_id = 1;
   void clear_service_id() ;
   const std::string& service_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -286,7 +286,7 @@ class ServiceConfig final :
   std::string* _internal_mutable_service_id();
 
   public:
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   void clear_version() ;
   const std::string& version() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -302,7 +302,7 @@ class ServiceConfig final :
   std::string* _internal_mutable_version();
 
   public:
-  // string game_id = 3 [json_name = "gameId"];
+  // string game_id = 3;
   void clear_game_id() ;
   const std::string& game_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -318,7 +318,7 @@ class ServiceConfig final :
   std::string* _internal_mutable_game_id();
 
   public:
-  // string env = 4 [json_name = "env"];
+  // string env = 4;
   void clear_env() ;
   const std::string& env() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -334,7 +334,7 @@ class ServiceConfig final :
   std::string* _internal_mutable_env();
 
   public:
-  // string local_addr = 5 [json_name = "localAddr"];
+  // string local_addr = 5;
   void clear_local_addr() ;
   const std::string& local_addr() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -350,7 +350,7 @@ class ServiceConfig final :
   std::string* _internal_mutable_local_addr();
 
   public:
-  // int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+  // int32 timeout_seconds = 6;
   void clear_timeout_seconds() ;
   ::int32_t timeout_seconds() const;
   void set_timeout_seconds(::int32_t value);
@@ -536,7 +536,7 @@ class JobInfo final :
     kStatusFieldNumber = 3,
     kProgressFieldNumber = 7,
   };
-  // string job_id = 1 [json_name = "jobId"];
+  // string job_id = 1;
   void clear_job_id() ;
   const std::string& job_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -552,7 +552,7 @@ class JobInfo final :
   std::string* _internal_mutable_job_id();
 
   public:
-  // string function_id = 2 [json_name = "functionId"];
+  // string function_id = 2;
   void clear_function_id() ;
   const std::string& function_id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -568,7 +568,7 @@ class JobInfo final :
   std::string* _internal_mutable_function_id();
 
   public:
-  // string error = 6 [json_name = "error"];
+  // string error = 6;
   void clear_error() ;
   const std::string& error() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -584,7 +584,7 @@ class JobInfo final :
   std::string* _internal_mutable_error();
 
   public:
-  // int64 created_at = 4 [json_name = "createdAt"];
+  // int64 created_at = 4;
   void clear_created_at() ;
   ::int64_t created_at() const;
   void set_created_at(::int64_t value);
@@ -594,7 +594,7 @@ class JobInfo final :
   void _internal_set_created_at(::int64_t value);
 
   public:
-  // int64 updated_at = 5 [json_name = "updatedAt"];
+  // int64 updated_at = 5;
   void clear_updated_at() ;
   ::int64_t updated_at() const;
   void set_updated_at(::int64_t value);
@@ -604,7 +604,7 @@ class JobInfo final :
   void _internal_set_updated_at(::int64_t value);
 
   public:
-  // .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+  // .croupier.sdk.v1.JobStatus status = 3;
   void clear_status() ;
   ::croupier::sdk::v1::JobStatus status() const;
   void set_status(::croupier::sdk::v1::JobStatus value);
@@ -614,7 +614,7 @@ class JobInfo final :
   void _internal_set_status(::croupier::sdk::v1::JobStatus value);
 
   public:
-  // int32 progress = 7 [json_name = "progress"];
+  // int32 progress = 7;
   void clear_progress() ;
   ::int32_t progress() const;
   void set_progress(::int32_t value);
@@ -801,7 +801,7 @@ class FunctionDefinition final :
     kOperationFieldNumber = 6,
     kEnabledFieldNumber = 7,
   };
-  // string id = 1 [json_name = "id"];
+  // string id = 1;
   void clear_id() ;
   const std::string& id() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -817,7 +817,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_id();
 
   public:
-  // string version = 2 [json_name = "version"];
+  // string version = 2;
   void clear_version() ;
   const std::string& version() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -833,7 +833,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_version();
 
   public:
-  // string category = 3 [json_name = "category"];
+  // string category = 3;
   void clear_category() ;
   const std::string& category() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -849,7 +849,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_category();
 
   public:
-  // string risk = 4 [json_name = "risk"];
+  // string risk = 4;
   void clear_risk() ;
   const std::string& risk() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -865,7 +865,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_risk();
 
   public:
-  // string entity = 5 [json_name = "entity"];
+  // string entity = 5;
   void clear_entity() ;
   const std::string& entity() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -881,7 +881,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_entity();
 
   public:
-  // string operation = 6 [json_name = "operation"];
+  // string operation = 6;
   void clear_operation() ;
   const std::string& operation() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -897,7 +897,7 @@ class FunctionDefinition final :
   std::string* _internal_mutable_operation();
 
   public:
-  // bool enabled = 7 [json_name = "enabled"];
+  // bool enabled = 7;
   void clear_enabled() ;
   bool enabled() const;
   void set_enabled(bool value);
@@ -1111,7 +1111,7 @@ class ErrorInfo final :
     kCodeFieldNumber = 1,
     kMessageFieldNumber = 2,
   };
-  // map<string, string> details = 3 [json_name = "details"];
+  // map<string, string> details = 3;
   int details_size() const;
   private:
   int _internal_details_size() const;
@@ -1126,7 +1126,7 @@ class ErrorInfo final :
   ::google::protobuf::Map<std::string, std::string>* _internal_mutable_details();
 
   public:
-  // string code = 1 [json_name = "code"];
+  // string code = 1;
   void clear_code() ;
   const std::string& code() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1142,7 +1142,7 @@ class ErrorInfo final :
   std::string* _internal_mutable_code();
 
   public:
-  // string message = 2 [json_name = "message"];
+  // string message = 2;
   void clear_message() ;
   const std::string& message() const;
   template <typename Arg_ = const std::string&, typename... Args_>
@@ -1210,7 +1210,7 @@ class ErrorInfo final :
 
 // FunctionDefinition
 
-// string id = 1 [json_name = "id"];
+// string id = 1;
 inline void FunctionDefinition::clear_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.id_.ClearToEmpty();
@@ -1263,7 +1263,7 @@ inline void FunctionDefinition::set_allocated_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.id)
 }
 
-// string version = 2 [json_name = "version"];
+// string version = 2;
 inline void FunctionDefinition::clear_version() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.version_.ClearToEmpty();
@@ -1316,7 +1316,7 @@ inline void FunctionDefinition::set_allocated_version(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.version)
 }
 
-// string category = 3 [json_name = "category"];
+// string category = 3;
 inline void FunctionDefinition::clear_category() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.category_.ClearToEmpty();
@@ -1369,7 +1369,7 @@ inline void FunctionDefinition::set_allocated_category(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.category)
 }
 
-// string risk = 4 [json_name = "risk"];
+// string risk = 4;
 inline void FunctionDefinition::clear_risk() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.risk_.ClearToEmpty();
@@ -1422,7 +1422,7 @@ inline void FunctionDefinition::set_allocated_risk(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.risk)
 }
 
-// string entity = 5 [json_name = "entity"];
+// string entity = 5;
 inline void FunctionDefinition::clear_entity() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.entity_.ClearToEmpty();
@@ -1475,7 +1475,7 @@ inline void FunctionDefinition::set_allocated_entity(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.entity)
 }
 
-// string operation = 6 [json_name = "operation"];
+// string operation = 6;
 inline void FunctionDefinition::clear_operation() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.operation_.ClearToEmpty();
@@ -1528,7 +1528,7 @@ inline void FunctionDefinition::set_allocated_operation(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.FunctionDefinition.operation)
 }
 
-// bool enabled = 7 [json_name = "enabled"];
+// bool enabled = 7;
 inline void FunctionDefinition::clear_enabled() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.enabled_ = false;
@@ -1555,7 +1555,7 @@ inline void FunctionDefinition::_internal_set_enabled(bool value) {
 
 // ServiceConfig
 
-// string service_id = 1 [json_name = "serviceId"];
+// string service_id = 1;
 inline void ServiceConfig::clear_service_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.service_id_.ClearToEmpty();
@@ -1608,7 +1608,7 @@ inline void ServiceConfig::set_allocated_service_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ServiceConfig.service_id)
 }
 
-// string version = 2 [json_name = "version"];
+// string version = 2;
 inline void ServiceConfig::clear_version() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.version_.ClearToEmpty();
@@ -1661,7 +1661,7 @@ inline void ServiceConfig::set_allocated_version(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ServiceConfig.version)
 }
 
-// string game_id = 3 [json_name = "gameId"];
+// string game_id = 3;
 inline void ServiceConfig::clear_game_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.game_id_.ClearToEmpty();
@@ -1714,7 +1714,7 @@ inline void ServiceConfig::set_allocated_game_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ServiceConfig.game_id)
 }
 
-// string env = 4 [json_name = "env"];
+// string env = 4;
 inline void ServiceConfig::clear_env() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.env_.ClearToEmpty();
@@ -1767,7 +1767,7 @@ inline void ServiceConfig::set_allocated_env(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ServiceConfig.env)
 }
 
-// string local_addr = 5 [json_name = "localAddr"];
+// string local_addr = 5;
 inline void ServiceConfig::clear_local_addr() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.local_addr_.ClearToEmpty();
@@ -1820,7 +1820,7 @@ inline void ServiceConfig::set_allocated_local_addr(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ServiceConfig.local_addr)
 }
 
-// int32 timeout_seconds = 6 [json_name = "timeoutSeconds"];
+// int32 timeout_seconds = 6;
 inline void ServiceConfig::clear_timeout_seconds() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.timeout_seconds_ = 0;
@@ -1847,7 +1847,7 @@ inline void ServiceConfig::_internal_set_timeout_seconds(::int32_t value) {
 
 // JobInfo
 
-// string job_id = 1 [json_name = "jobId"];
+// string job_id = 1;
 inline void JobInfo::clear_job_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.job_id_.ClearToEmpty();
@@ -1900,7 +1900,7 @@ inline void JobInfo::set_allocated_job_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.JobInfo.job_id)
 }
 
-// string function_id = 2 [json_name = "functionId"];
+// string function_id = 2;
 inline void JobInfo::clear_function_id() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.function_id_.ClearToEmpty();
@@ -1953,7 +1953,7 @@ inline void JobInfo::set_allocated_function_id(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.JobInfo.function_id)
 }
 
-// .croupier.sdk.v1.JobStatus status = 3 [json_name = "status"];
+// .croupier.sdk.v1.JobStatus status = 3;
 inline void JobInfo::clear_status() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.status_ = 0;
@@ -1976,7 +1976,7 @@ inline void JobInfo::_internal_set_status(::croupier::sdk::v1::JobStatus value) 
   _impl_.status_ = value;
 }
 
-// int64 created_at = 4 [json_name = "createdAt"];
+// int64 created_at = 4;
 inline void JobInfo::clear_created_at() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.created_at_ = ::int64_t{0};
@@ -1999,7 +1999,7 @@ inline void JobInfo::_internal_set_created_at(::int64_t value) {
   _impl_.created_at_ = value;
 }
 
-// int64 updated_at = 5 [json_name = "updatedAt"];
+// int64 updated_at = 5;
 inline void JobInfo::clear_updated_at() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.updated_at_ = ::int64_t{0};
@@ -2022,7 +2022,7 @@ inline void JobInfo::_internal_set_updated_at(::int64_t value) {
   _impl_.updated_at_ = value;
 }
 
-// string error = 6 [json_name = "error"];
+// string error = 6;
 inline void JobInfo::clear_error() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.error_.ClearToEmpty();
@@ -2075,7 +2075,7 @@ inline void JobInfo::set_allocated_error(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.JobInfo.error)
 }
 
-// int32 progress = 7 [json_name = "progress"];
+// int32 progress = 7;
 inline void JobInfo::clear_progress() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.progress_ = 0;
@@ -2104,7 +2104,7 @@ inline void JobInfo::_internal_set_progress(::int32_t value) {
 
 // ErrorInfo
 
-// string code = 1 [json_name = "code"];
+// string code = 1;
 inline void ErrorInfo::clear_code() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.code_.ClearToEmpty();
@@ -2157,7 +2157,7 @@ inline void ErrorInfo::set_allocated_code(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ErrorInfo.code)
 }
 
-// string message = 2 [json_name = "message"];
+// string message = 2;
 inline void ErrorInfo::clear_message() {
   PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   _impl_.message_.ClearToEmpty();
@@ -2210,7 +2210,7 @@ inline void ErrorInfo::set_allocated_message(std::string* value) {
   // @@protoc_insertion_point(field_set_allocated:croupier.sdk.v1.ErrorInfo.message)
 }
 
-// map<string, string> details = 3 [json_name = "details"];
+// map<string, string> details = 3;
 inline int ErrorInfo::_internal_details_size() const {
   return _internal_details().size();
 }
