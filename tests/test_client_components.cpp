@@ -172,16 +172,6 @@ TEST_F(ClientComponentsTest, ComponentDescriptorValidation) {
     desc.config["max_items"] = "100";
     desc.config["auto_save"] = "true";
 
-    // 验证 map 字段
-    EXPECT_TRUE(desc.resources.size() >= 0);
-    EXPECT_TRUE(desc.config.size() >= 0);
-    EXPECT_TRUE(desc.metadata.size() >= 0);
-
-    // 验证 vector 字段
-    EXPECT_TRUE(desc.entities.size() >= 0);
-    EXPECT_TRUE(desc.functions.size() >= 0);
-    EXPECT_TRUE(desc.dependencies.size() >= 0);
-
     // 注册组件
     bool success = client->RegisterComponent(desc);
     EXPECT_TRUE(success);

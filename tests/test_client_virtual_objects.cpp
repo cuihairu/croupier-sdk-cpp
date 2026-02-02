@@ -104,15 +104,6 @@ TEST_F(ClientVirtualObjectsTest, VirtualObjectDescriptorValidation) {
     EXPECT_EQ(desc.name, "Test Object");
     EXPECT_EQ(desc.description, "A test virtual object");
 
-    // 验证 schema、operations、relationships 都是 map 类型
-    EXPECT_TRUE(desc.schema.empty() || desc.schema.size() >= 0);
-    EXPECT_TRUE(desc.operations.empty() || desc.operations.size() >= 0);
-    EXPECT_TRUE(desc.relationships.empty() || desc.relationships.size() >= 0);
-    EXPECT_TRUE(desc.metadata.empty() || desc.metadata.size() >= 0);
-
-    // 验证 functions 是 vector
-    EXPECT_TRUE(desc.functions.empty() || desc.functions.size() >= 0);
-
     // 注册对象
     std::map<std::string, FunctionHandler> handlers;
     handlers["validate"] = CreateSimpleHandler("{\"result\":\"validated\"}");
