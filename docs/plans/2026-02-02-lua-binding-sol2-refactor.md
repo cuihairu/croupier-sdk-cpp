@@ -338,10 +338,10 @@ croupier.version  → SDK version string
 
 | Lua 类型 | C++ 类型 | 转换方式 |
 |---------|---------|---------|
-| table | std::map<string, T> | sol2 自动解析 |
-| table | std::vector<T> | 数组自动转换 |
+| table | std::map\<string, T\> | sol2 自动解析 |
+| table | std::vector\<T\> | 数组自动转换 |
 | table | sol::table | 延迟求值 |
-| function | std::function<R(Args...)> | 自动包装 |
+| function | std::function\<R(Args...)\> | 自动包装 |
 
 ### 6.3 典型数据流示例
 
@@ -763,7 +763,7 @@ endif()
 
 | 指标 | 当前实现 | sol2 目标 | 说明 |
 |-----|---------|----------|------|
-| 函数调用延迟 | < 1ms | < 1ms | 保持不变 |
+| 函数调用延迟 | \< 1ms | \< 1ms | 保持不变 |
 | 类型转换 | 手动 | 自动 | 可接受的开销 |
 | 内存占用 | 基准 | +5% | sol2 少量开销 |
 | 代码大小 | 380 行 | ~150 行 | 减少 60% |
