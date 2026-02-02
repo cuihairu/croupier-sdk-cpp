@@ -230,6 +230,12 @@ public:
             return false;
         }
 
+        // Validate function ID
+        if (desc.id.empty()) {
+            SDK_LOG_ERROR("Cannot register function with empty ID");
+            return false;
+        }
+
         handlers_[desc.id] = std::move(handler);
         descriptors_[desc.id] = desc;
 
@@ -1802,12 +1808,8 @@ bool ValidateObjectDescriptor(const VirtualObjectDescriptor& desc) {
         return false;
     }
 
-    if (desc.operations.empty()) {
-        std::cerr << "Object descriptor validation failed: no operations defined" << '\n';
-        return false;
-    }
-
-    // Validate operation mappings
+    // Note: operations can be empty - functions can be registered separately via handlers parameter
+    // Validate operation mappings only if operations are defined
     for (const auto& op : desc.operations) {
         if (op.first.empty() || op.second.empty()) {
             std::cerr << "Object descriptor validation failed: invalid operation mapping" << '\n';

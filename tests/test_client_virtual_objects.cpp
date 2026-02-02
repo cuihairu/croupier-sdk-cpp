@@ -205,8 +205,11 @@ TEST_F(ClientVirtualObjectsTest, VirtualObjectWithSchema) {
     EXPECT_EQ(desc.metadata["category"], "gameplay");
 
     // 注册带 schema 的虚拟对象
+    // Note: handlers key must match operations value (function_id)
     std::map<std::string, FunctionHandler> handlers;
-    handlers["validate"] = CreateSimpleHandler("{\"valid\":true}");
+    handlers["entity.create"] = CreateSimpleHandler("{\"created\":true}");
+    handlers["entity.get"] = CreateSimpleHandler("{\"data\":{}}");
+    handlers["entity.update"] = CreateSimpleHandler("{\"updated\":true}");
 
     bool success = client->RegisterVirtualObject(desc, handlers);
     EXPECT_TRUE(success);

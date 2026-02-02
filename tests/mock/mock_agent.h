@@ -13,7 +13,8 @@ namespace test {
 // Mock Agent server for testing
 class MockAgent {
 public:
-    explicit MockAgent(const std::string& server_address = "127.0.0.1:19090");
+    // Use port 0 for automatic port allocation
+    explicit MockAgent(const std::string& server_address = "127.0.0.1:0");
     ~MockAgent();
 
     // Start the mock agent server (blocking, runs in background thread)
@@ -26,7 +27,7 @@ public:
     bool IsRunning() const { return running_; }
 
     // Get the actual server address (with assigned port if using :0)
-    std::string GetAddress() const { return server_address_; }
+    std::string GetAddress() const { return actual_address_; }
 
     // Get the number of RegisterLocal calls received
     int GetRegisterCallCount() const { return register_call_count_; }
@@ -74,7 +75,8 @@ private:
         MockAgent* agent_;
     };
 
-    std::string server_address_;
+    std::string server_address_;   // Original address (may contain :0)
+    std::string actual_address_;    // Actual bound address with real port
     std::unique_ptr<grpc::Server> server_;
     std::unique_ptr<LocalControlServiceImpl> service_;
     std::thread server_thread_;

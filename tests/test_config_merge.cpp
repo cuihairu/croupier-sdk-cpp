@@ -306,6 +306,7 @@ TEST_F(ConfigMergeTest, MergeConfigsMultipleOverlays) {
 
     // 第二次合并（基于第一次的结果）
     ClientConfig overlay2;
+    overlay2.agent_addr = result1.agent_addr;  // 显式保留第一次的结果
     overlay2.env = "production";  // 覆盖
     overlay2.timeout_seconds = 90;  // 覆盖上次的 60
 

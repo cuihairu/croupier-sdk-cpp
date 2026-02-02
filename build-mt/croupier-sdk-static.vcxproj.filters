@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\croupier_client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\grpc_service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\config_driven_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\utils\json_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\utils\file_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\config\client_config_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\src\plugin\dynamic_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\agent\local\v1\local.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\agent\local\v1\local.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\control\v1\control.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\control\v1\control.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\client.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\client.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\invoker.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\invoker.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\types.grpc.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\types.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\croupier_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\grpc_service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\config_driven_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\utils\json_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\utils\file_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\config\client_config_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\include\croupier\sdk\plugin\dynamic_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\agent\local\v1\local.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\agent\local\v1\local.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\control\v1\control.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\control\v1\control.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\client.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\client.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\invoker.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\invoker.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\types.grpc.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Workspaces\croupier\croupier-sdk-cpp\generated\croupier\sdk\v1\types.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-mt\vcpkg_installed\x64-windows-static\share\nlohmann_json\nlohmann_json.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{F0FE962E-A48F-3486-B9E4-AC4ED0F989E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{91A01E9E-EA03-3B21-8FD7-871928FA904C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+^E:\WORKSPACES\CROUPIER\CROUPIER-SDK-CPP\BUILD-MT\CMAKEFILES\AB948B2C27A6A1220BB0EA1F8D5E2234\GENERATE.STAMP.RULE
+setlocal
+C:\Users\Administrator\scoop\apps\cmake\current\bin\cmake.exe -SE:/Workspaces/croupier/croupier-sdk-cpp -BE:/Workspaces/croupier/croupier-sdk-cpp/build-mt --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/Workspaces/croupier/croupier-sdk-cpp/build-mt/croupier-cpp-sdk.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

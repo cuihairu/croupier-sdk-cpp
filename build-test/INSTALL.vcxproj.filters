@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\CMakeFiles\6d49b1f03765285abf7a0ccb168b9d8f\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{A0E5924E-E951-3FC2-8A26-402747445CCF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

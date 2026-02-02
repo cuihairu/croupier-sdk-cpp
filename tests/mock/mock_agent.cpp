@@ -25,8 +25,12 @@ bool MockAgent::Start() {
 
     // Build gRPC server
     grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address_, grpc::InsecureServerCredentials());
+    int selected_port = 0;
+    builder.AddListeningPort(server_address_, grpc::InsecureServerCredentials(), &selected_port);
     builder.RegisterService(service_.get());
+
+    // Add reuse port option to help with port conflicts between test runs
+    builder.AddChannelArgument(GRPC_ARG_ALLOW_REUSEPORT, 1);
 
     // Create and start server
     server_ = builder.BuildAndStart();
@@ -35,8 +39,11 @@ bool MockAgent::Start() {
         return false;
     }
 
+    // Update actual address with the real port
+    actual_address_ = "127.0.0.1:" + std::to_string(selected_port);
+
     running_ = true;
-    std::cout << "MockAgent started on " << server_address_ << std::endl;
+    std::cout << "MockAgent started on " << actual_address_ << std::endl;
     return true;
 }
 
@@ -48,8 +55,9 @@ void MockAgent::Stop() {
     std::cout << "Stopping MockAgent..." << std::endl;
 
     if (server_) {
-        server_->Shutdown();
-        server_->Wait();
+        // For tests, use immediate shutdown (no graceful wait)
+        server_->Shutdown(gpr_time_0(GPR_CLOCK_REALTIME));
+        // Don't use Wait() as it can block indefinitely in test scenarios
         server_.reset();
     }
 

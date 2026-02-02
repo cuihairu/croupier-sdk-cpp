@@ -110,6 +110,8 @@ private:
     std::thread reconnect_thread_;
     std::mutex state_mutex_;
     std::condition_variable state_cv_;
+    std::mutex heartbeat_mutex_;
+    std::condition_variable heartbeat_cv_;  // For immediate heartbeat thread wake-up
 
     // 回调
     std::function<void(const std::string&)> error_callback_;

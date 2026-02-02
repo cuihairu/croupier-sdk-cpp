@@ -13,8 +13,8 @@ using namespace croupier::test;
 class GrpcLocalServerTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // 启动 Mock Agent
-        mock_agent = std::make_unique<MockAgent>("127.0.0.1:19090");
+        // 启动 Mock Agent with dynamic port (0 = auto-allocate)
+        mock_agent = std::make_unique<MockAgent>("127.0.0.1:0");
         ASSERT_TRUE(mock_agent->Start()) << "Failed to start mock agent";
 
         // 等待 Agent 启动
@@ -25,7 +25,7 @@ protected:
         // 基本配置 - 不安全模式用于测试
         config = loader->CreateDefaultConfig();
         config.insecure = true;
-        config.agent_addr = "127.0.0.1:19090";
+        config.agent_addr = mock_agent->GetAddress();  // Use dynamically assigned port
         config.blocking_connect = true;  // 使用阻塞连接模式以确保连接成功
         config.auto_reconnect = false;
 
@@ -47,7 +47,11 @@ protected:
         // 停止 Mock Agent
         if (mock_agent) {
             mock_agent->Stop();
+            mock_agent.reset();
         }
+
+        // Brief pause to allow port to be fully released
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     // 等待连接完成（非阻塞模式需要）

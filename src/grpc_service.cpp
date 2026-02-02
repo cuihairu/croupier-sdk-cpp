@@ -280,8 +280,9 @@ bool GrpcClientManager::StartLocalServer() {
 
 void GrpcClientManager::StopLocalServer() {
     if (local_server_) {
-        local_server_->Shutdown();
-        local_server_->Wait();
+        // Use immediate shutdown (no graceful wait) for faster cleanup in tests
+        local_server_->Shutdown(gpr_time_0(GPR_CLOCK_REALTIME));
+        // Skip Wait() as it can block indefinitely in test scenarios
         local_server_.reset();
     }
 
@@ -427,10 +428,16 @@ void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
     heartbeat_running_ = true;
     heartbeat_thread_ = std::thread([this, session_id]() {
         const auto interval = std::chrono::seconds(config_.heartbeat_interval > 0 ? config_.heartbeat_interval : 60);
+        std::unique_lock<std::mutex> lock(heartbeat_mutex_);
 
         while (heartbeat_running_) {
-            std::this_thread::sleep_for(interval);
+            // Use condition_variable with timeout for immediate wake-up on stop
+            if (heartbeat_cv_.wait_for(lock, interval, [this] { return !heartbeat_running_; })) {
+                // Woke up because heartbeat_running_ changed to false
+                break;
+            }
 
+            // Check again after timeout
             if (!heartbeat_running_)
                 break;
 
@@ -451,6 +458,8 @@ void GrpcClientManager::StartHeartbeatLoop(const std::string& session_id) {
 
 void GrpcClientManager::StopHeartbeatLoop() {
     heartbeat_running_ = false;
+    // Notify the condition variable to wake up the heartbeat thread immediately
+    heartbeat_cv_.notify_all();
     if (heartbeat_thread_.joinable()) {
         heartbeat_thread_.join();
     }

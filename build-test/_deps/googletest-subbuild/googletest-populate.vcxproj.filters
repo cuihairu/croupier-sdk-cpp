@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\cd522b4bf9d9d37a22a983f725adce6f\googletest-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\77ec97f1621d6b211fc1b572160889d9\googletest-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\616c887acc33e8993beb05c6c2a29e38\googletest-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="E:\Workspaces\croupier\croupier-sdk-cpp\build-test\_deps\googletest-subbuild\CMakeFiles\googletest-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C660DE31-3526-3EBE-B288-A401C199B855}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
