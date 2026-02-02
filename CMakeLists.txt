@@ -404,7 +404,8 @@ if(BUILD_SHARED_LIBS)
         if(sol2_FOUND)
             target_link_libraries(croupier-sdk-shared PRIVATE sol2::sol2)
         elseif(TARGET sol2)
-            # sol2 was fetched via FetchContent
+            # sol2 was fetched via FetchContent - add include dir explicitly
+            target_include_directories(croupier-sdk-shared PRIVATE ${SOL2_INCLUDE_DIR})
             target_link_libraries(croupier-sdk-shared PRIVATE sol2)
         endif()
         target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_ENABLE_LUA)
@@ -479,7 +480,8 @@ if(BUILD_STATIC_LIBS)
         if(sol2_FOUND)
             target_link_libraries(croupier-sdk-static PRIVATE sol2::sol2)
         elseif(TARGET sol2)
-            # sol2 was fetched via FetchContent
+            # sol2 was fetched via FetchContent - add include dir explicitly
+            target_include_directories(croupier-sdk-static PRIVATE ${SOL2_INCLUDE_DIR})
             target_link_libraries(croupier-sdk-static PRIVATE sol2)
         endif()
         target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_ENABLE_LUA)
