@@ -560,53 +560,10 @@ if(BUILD_STATIC_LIBS)
         endif()
     endif()
 
-    # On Windows with gRPC, create a merged static library that includes all dependencies
-    # This allows users to link against a single lib file instead of 30+ separate libs
-    if(WIN32 AND ENABLE_GRPC)
-        # Get all gRPC dependency library paths
-        get_target_property(GRPCPP_LOCATION gRPC::grpc++ IMPORTED_IMPLIB)
-        get_target_property(GRPC_LOCATION gRPC::grpc IMPORTED_IMPLIB)
-        get_target_property(GPR_LOCATION gRPC::gpr IMPORTED_IMPLIB)
-        get_target_property(PROTOBUF_LOCATION protobuf::libprotobuf IMPORTED_IMPLIB)
-
-        # Create a script to merge static libraries
-        set(MERGE_LIB_SCRIPT "${CMAKE_BINARY_DIR}/merge_static_libs.cmake")
-        file(WRITE "${MERGE_LIB_SCRIPT}"
-"# Script to merge static libraries on Windows
-# This creates a single lib file containing all dependencies
-# Output overwrites croupier-sdk.lib with the merged version
-
-message(STATUS \"Creating merged static library with all dependencies...\")
-
-execute_process(
-    COMMAND \"${CMAKE_COMMAND}\" -E env
-    LIB.exe /OUT:${CMAKE_BINARY_DIR}/lib/croupier-sdk.lib
-    ${CMAKE_BINARY_DIR}/lib/croupier-sdk.lib
-    \${GRPCPP_LOCATION}
-    \${GRPC_LOCATION}
-    \${GPR_LOCATION}
-    \${PROTOBUF_LOCATION}
-    ws2_32.lib
-    RESULT_VARIABLE MERGE_RESULT
-)
-
-if(NOT MERGE_RESULT EQUAL 0)
-    message(FATAL_ERROR \"Failed to create merged static library\")
-endif()
-
-message(STATUS \"Created merged static library: croupier-sdk.lib (with all gRPC dependencies bundled)\")
-"
-        )
-
-        # Add post-build command to merge libraries
-        add_custom_command(TARGET croupier-sdk-static POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -P ${MERGE_LIB_SCRIPT}
-            COMMENT "Merging static libraries with dependencies..."
-            VERBATIM
-        )
-
-        message(STATUS "Windows: Configured post-build to create merged static library")
-    endif()
+    # On Windows, we do NOT merge static libraries
+    # Users should link against the required gRPC dependencies explicitly
+    # This keeps library sizes reasonable and avoids version conflicts
+    # See docs/INTEGRATION.md for required dependencies list
 
     # Alias for easier usage
     add_library(croupier::sdk-static ALIAS croupier-sdk-static)
