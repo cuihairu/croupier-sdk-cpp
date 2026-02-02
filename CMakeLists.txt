@@ -158,21 +158,38 @@ if(ENABLE_LUA_BINDING)
     if(NOT Lua_FOUND)
         find_package(PkgConfig)
         if(PKG_CONFIG_FOUND)
-            pkg_check_modules(LUA REQUIRED lua5.5 lua5.4 lua)
+            pkg_check_modules(LUA lua5.5 lua5.4 lua)
         endif()
     endif()
 
-    if(Lua_FOUND OR LUA_FOUND)
-        message(STATUS "Lua binding enabled")
-        if(Lua_FOUND)
-            message(STATUS "Found Lua: ${LUA_VERSION_STRING}")
-            set(LUA_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
-            set(LUA_LIBRARIES ${LUA_LIBRARIES})
-        else()
-            message(STATUS "Found Lua: ${LUA_VERSION}")
-        endif()
-    else()
+    # Find sol2 or use FetchContent
+    find_package(sol2 CONFIG QUIET)
+    if(NOT sol2_FOUND)
+        message(STATUS "sol2 not found via find_package, using FetchContent...")
+        include(FetchContent)
+        FetchContent_Declare(
+            sol2
+            GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+            GIT_TAG v3.3.1
+            GIT_SHALLOW TRUE
+        )
+        # sol2 is header-only, just need to fetch and include
+        FetchContent_MakeAvailable(sol2)
+        set(SOL2_INCLUDE_DIR "${sol2_SOURCE_DIR}")
+        message(STATUS "sol2 fetched via FetchContent: ${SOL2_INCLUDE_DIR}")
+    endif()
+
+    if(NOT (Lua_FOUND OR LUA_FOUND))
         message(FATAL_ERROR "ENABLE_LUA_BINDING=ON but Lua 5.4+ was not found. Install Lua-devel/lua-dev")
+    endif()
+
+    message(STATUS "Lua binding enabled (sol2)")
+    if(Lua_FOUND)
+        message(STATUS "Found Lua: ${LUA_VERSION_STRING}")
+        set(LUA_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
+        set(LUA_LIBRARIES ${LUA_LIBRARIES})
+    else()
+        message(STATUS "Found Lua: ${LUA_VERSION}")
     endif()
 endif()
 
@@ -302,11 +319,11 @@ if(ENABLE_GRPC)
     endif()
 endif()
 
-# Add Lua binding source files if enabled
+# Add Lua binding source files if enabled (using sol2)
 if(ENABLE_LUA_BINDING)
-    list(APPEND SDK_SOURCES src/bindings/lua_binding.cpp)
-    list(APPEND SDK_HEADERS include/croupier/sdk/bindings/lua_binding.h)
-    message(STATUS "Added Lua binding source files")
+    list(APPEND SDK_SOURCES src/bindings/lua_binding_sol2.cpp)
+    list(APPEND SDK_HEADERS include/croupier/sdk/bindings/lua_binding_sol2.h)
+    message(STATUS "Added Lua binding source files (sol2)")
 endif()
 
 
@@ -384,6 +401,12 @@ if(BUILD_SHARED_LIBS)
     if(ENABLE_LUA_BINDING)
         target_include_directories(croupier-sdk-shared PRIVATE ${LUA_INCLUDE_DIRS})
         target_link_libraries(croupier-sdk-shared PRIVATE ${LUA_LIBRARIES})
+        if(sol2_FOUND)
+            target_link_libraries(croupier-sdk-shared PRIVATE sol2::sol2)
+        elseif(TARGET sol2)
+            # sol2 was fetched via FetchContent
+            target_link_libraries(croupier-sdk-shared PRIVATE sol2)
+        endif()
         target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_ENABLE_LUA)
     endif()
 
@@ -453,6 +476,12 @@ if(BUILD_STATIC_LIBS)
     if(ENABLE_LUA_BINDING)
         target_include_directories(croupier-sdk-static PRIVATE ${LUA_INCLUDE_DIRS})
         target_link_libraries(croupier-sdk-static PRIVATE ${LUA_LIBRARIES})
+        if(sol2_FOUND)
+            target_link_libraries(croupier-sdk-static PRIVATE sol2::sol2)
+        elseif(TARGET sol2)
+            # sol2 was fetched via FetchContent
+            target_link_libraries(croupier-sdk-static PRIVATE sol2)
+        endif()
         target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_ENABLE_LUA)
     endif()
 
