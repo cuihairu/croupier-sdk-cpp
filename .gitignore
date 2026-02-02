@@ -63,7 +63,7 @@ vcpkg_installed/
 vcpkg/
 node_modules/
 
-# Protobuf generated files
+# Protobuf generated files (except in generated/ directory which is tracked)
 *.pb.h
 *.pb.cc
 *.pb.cpp
@@ -74,14 +74,18 @@ node_modules/
 *.pb.swift
 *.ts
 
+# Exception: track proto files in generated/ directory
+!generated/**/*.pb.h
+!generated/**/*.pb.cc
+
 # Build outputs
 build/
 cmake-build-*/
 out/
 *.tgz
 
-# Generated directory
-generated/
+# Generated directory - proto files are now tracked for easier integration
+# Only ignore build artifacts inside build directories
 
 # Buf configuration files (generated dynamically)
 # buf.lock is the only dynamically generated file
