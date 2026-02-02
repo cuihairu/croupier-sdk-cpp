@@ -141,10 +141,8 @@ jobs:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
         vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: true  # Windows 上缓存可能不稳定
-        extraCacheKeys: ${{ matrix.runtime }}
-        # 明确指定 triplet，确保与运行时类型匹配
-        triplet: ${{ matrix.runtime == 'static' && 'x64-windows-static' || 'x64-windows-static-md' }}
+        doNotCache: false  # 启用缓存
+        extraCacheKeys: ${{ matrix.runtime }} ${{ matrix.build-type }}
       env:
         # 防止 VS2022 自带的 vcpkg 干扰我们的 vcpkg 检测
         # 确保 vcpkg 使用我们的实例，而不是 VS2022 自带的副本
