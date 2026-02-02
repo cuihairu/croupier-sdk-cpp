@@ -46,7 +46,7 @@ option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(ENABLE_VCPKG "Enable vcpkg package management" ON)
 option(CROUPIER_CI_BUILD "Enable CI build with proto generation" OFF)
-option(ENABLE_LUA_BINDING "Enable Lua language binding (requires Lua 5.3+)" OFF)
+option(ENABLE_LUA_BINDING "Enable Lua language binding (requires Lua 5.4+)" OFF)
 
 # ========== Standalone Build Options ==========
 option(CROUPIER_STANDALONE_BUILD "Enable standalone build mode" OFF)
@@ -150,12 +150,15 @@ endif()
 
 # ========== Lua Binding ==========
 if(ENABLE_LUA_BINDING)
-    # Try multiple package names for Lua
-    find_package(Lua 5.3 QUIET)
+    # Try multiple package names for Lua (prefer Lua 5.5)
+    find_package(Lua 5.5 QUIET)
+    if(NOT Lua_FOUND)
+        find_package(Lua 5.4 QUIET)
+    endif()
     if(NOT Lua_FOUND)
         find_package(PkgConfig)
         if(PKG_CONFIG_FOUND)
-            pkg_check_modules(LUA REQUIRED lua5.3 lua5.4 lua)
+            pkg_check_modules(LUA REQUIRED lua5.5 lua5.4 lua)
         endif()
     endif()
 
@@ -169,7 +172,7 @@ if(ENABLE_LUA_BINDING)
             message(STATUS "Found Lua: ${LUA_VERSION}")
         endif()
     else()
-        message(FATAL_ERROR "ENABLE_LUA_BINDING=ON but Lua 5.3+ was not found. Install Lua-devel/lua-dev")
+        message(FATAL_ERROR "ENABLE_LUA_BINDING=ON but Lua 5.4+ was not found. Install Lua-devel/lua-dev")
     endif()
 endif()
 
