@@ -36,7 +36,7 @@
       "binaryDir": "${sourceDir}/build/macos-arm64-debug-vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "VCPKG_TARGET_TRIPLET": "arm64-osx-static"
+        "VCPKG_TARGET_TRIPLET": "arm64-osx"
       }
     },
     {
@@ -51,7 +51,7 @@
       "binaryDir": "${sourceDir}/build/macos-arm64-release-vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "VCPKG_TARGET_TRIPLET": "arm64-osx-static"
+        "VCPKG_TARGET_TRIPLET": "arm64-osx"
       }
     },
     {
@@ -66,7 +66,7 @@
       "binaryDir": "${sourceDir}/build/macos-x64-debug-vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "VCPKG_TARGET_TRIPLET": "x64-osx-static"
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
       }
     },
     {
@@ -81,7 +81,7 @@
       "binaryDir": "${sourceDir}/build/macos-x64-release-vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "VCPKG_TARGET_TRIPLET": "x64-osx-static"
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
       }
     }
     ,
