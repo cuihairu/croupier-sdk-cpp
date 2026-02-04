@@ -349,15 +349,15 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2finvoker_2eproto[] ABS
     "Request\032\031.croupier.sdk.v1.JobEvent0\001\022Q\n\t"
     "CancelJob\022!.croupier.sdk.v1.CancelJobReq"
     "uest\032!.croupier.sdk.v1.StartJobResponseB"
-    "a\n\"io.github.cuihairu.croupier.sdk.v1P\001Z"
-    "9github.com/cuihairu/croupier/pkg/pb/cro"
-    "upier/sdk/v1;sdkv1b\006proto3"
+    "i\n\"io.github.cuihairu.croupier.sdk.v1P\001Z"
+    "Agithub.com/cuihairu/croupier/sdks/go/pk"
+    "g/pb/croupier/sdk/v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2finvoker_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2finvoker_2eproto = {
     false,
     false,
-    1026,
+    1034,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2finvoker_2eproto,
     "croupier/sdk/v1/invoker.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2finvoker_2eproto_once,
