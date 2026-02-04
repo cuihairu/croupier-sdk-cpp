@@ -316,15 +316,16 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2ftypes_2eproto[] ABSL_
     "PECIFIED\020\000\022\026\n\022JOB_STATUS_PENDING\020\001\022\026\n\022JO"
     "B_STATUS_RUNNING\020\002\022\030\n\024JOB_STATUS_COMPLET"
     "ED\020\003\022\025\n\021JOB_STATUS_FAILED\020\004\022\030\n\024JOB_STATU"
-    "S_CANCELLED\020\005Ba\n\"io.github.cuihairu.crou"
-    "pier.sdk.v1P\001Z9github.com/cuihairu/croup"
-    "ier/pkg/pb/croupier/sdk/v1;sdkv1b\006proto3"
+    "S_CANCELLED\020\005Bi\n\"io.github.cuihairu.crou"
+    "pier.sdk.v1P\001ZAgithub.com/cuihairu/croup"
+    "ier/sdks/go/pkg/pb/croupier/sdk/v1;sdkv1"
+    "b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto = {
     false,
     false,
-    1120,
+    1128,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2ftypes_2eproto,
     "croupier/sdk/v1/types.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2ftypes_2eproto_once,

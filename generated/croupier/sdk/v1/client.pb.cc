@@ -514,16 +514,16 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2fclient_2eproto[] ABSL
     "ntsRequest\032$.croupier.sdk.v1.ListClients"
     "Response\022[\n\014GetJobResult\022$.croupier.sdk."
     "v1.GetJobResultRequest\032%.croupier.sdk.v1"
-    ".GetJobResultResponseBa\n\"io.github.cuiha"
-    "iru.croupier.sdk.v1P\001Z9github.com/cuihai"
-    "ru/croupier/pkg/pb/croupier/sdk/v1;sdkv1"
-    "b\006proto3"
+    ".GetJobResultResponseBi\n\"io.github.cuiha"
+    "iru.croupier.sdk.v1P\001ZAgithub.com/cuihai"
+    "ru/croupier/sdks/go/pkg/pb/croupier/sdk/"
+    "v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto = {
     false,
     false,
-    1408,
+    1416,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2fclient_2eproto,
     "croupier/sdk/v1/client.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2fclient_2eproto_once,
