@@ -548,16 +548,16 @@ const char descriptor_table_protodef_croupier_2fagent_2flocal_2fv1_2flocal_2epro
     "agent.local.v1.ListLocalResponse\022k\n\014GetJ"
     "obResult\022,.croupier.agent.local.v1.GetJo"
     "bResultRequest\032-.croupier.agent.local.v1"
-    ".GetJobResultResponseB{\n*io.github.cuiha"
-    "iru.croupier.agent.local.v1P\001ZKgithub.co"
-    "m/cuihairu/croupier/sdks/go/pkg/pb/croup"
-    "ier/agent/local/v1;localv1b\006proto3"
+    ".GetJobResultResponseBs\n*io.github.cuiha"
+    "iru.croupier.agent.local.v1P\001ZCgithub.co"
+    "m/cuihairu/croupier/pkg/pb/croupier/agen"
+    "t/local/v1;localv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto = {
     false,
     false,
-    1754,
+    1746,
     descriptor_table_protodef_croupier_2fagent_2flocal_2fv1_2flocal_2eproto,
     "croupier/agent/local/v1/local.proto",
     &descriptor_table_croupier_2fagent_2flocal_2fv1_2flocal_2eproto_once,
