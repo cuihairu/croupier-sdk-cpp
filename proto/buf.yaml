@@ -2,4 +2,4 @@ version: v2
 modules:
   - path: .
 deps:
-  - buf.build/protocolbuffers/wellknowntypes:v25.1
+  - buf.build/protocolbuffers/wellknowntypes:v29.5
