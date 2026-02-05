@@ -124,6 +124,10 @@ endfunction()
 # Function to setup standalone build
 function(setup_standalone_build)
     message(STATUS "Standalone build mode detected")
+    # gRPC has been removed
+    message(STATUS "gRPC support removed")
+    set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+    return()
 
     if(CROUPIER_PREBUILT_PROTO)
         # Mode 1: Use prebuilt proto files
@@ -182,6 +186,11 @@ endfunction()
 
 # Function to setup CI build with proto generation
 function(setup_ci_build)
+    # gRPC has been removed - always return
+    message(STATUS "gRPC support removed - proto generation disabled")
+    set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
+    return()
+
     # Check if we're in CI environment or CI build is explicitly enabled
     if(DEFINED ENV{CI} OR CROUPIER_CI_BUILD)
         message(STATUS "CI build detected, setting up proto generation...")

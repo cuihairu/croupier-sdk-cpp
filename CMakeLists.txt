@@ -65,14 +65,8 @@ else()
     setup_ci_build()
 endif()
 
-# Set gRPC enable flag based on CI build result
-if(CROUPIER_SDK_ENABLE_GRPC)
-    message(STATUS "Building with real gRPC implementation")
-    set(ENABLE_GRPC ON)
-else()
-    message(STATUS "Building with mock gRPC implementation")
-    set(ENABLE_GRPC OFF)
-endif()
+# gRPC support has been removed - using HTTP/JSON only
+message(STATUS "Building with HTTP/JSON client (gRPC removed)")
 
 # ========== vcpkg Integration ==========
 if(ENABLE_VCPKG)
@@ -117,26 +111,6 @@ endif()
 
 # ========== Dependencies ==========
 find_package(Threads REQUIRED)
-
-# gRPC and Protobuf for real implementation
-if(ENABLE_GRPC)
-    find_package(gRPC CONFIG REQUIRED)
-    find_package(Protobuf CONFIG QUIET)
-    if(NOT Protobuf_FOUND)
-        find_package(Protobuf MODULE REQUIRED)
-    endif()
-    find_package(ZLIB REQUIRED)
-
-    message(STATUS "Found gRPC: ${gRPC_VERSION}")
-    message(STATUS "Found Protobuf: ${Protobuf_VERSION}")
-
-    set(GRPC_LIBRARIES
-        gRPC::grpc++
-        gRPC::grpc++_reflection
-        gRPC::gpr
-        protobuf::libprotobuf
-    )
-endif()
 
 # JSON library for better JSON support (via vcpkg)
 find_package(nlohmann_json CONFIG)
@@ -278,39 +252,6 @@ endif()
 
 # ========== Generated Proto Files ==========
 # `cmake/ProtoGeneration.cmake` populates:
-# - `GENERATED_PROTO_SOURCES` / `GENERATED_PROTO_HEADERS`
-# - `PROTO_GENERATED_DIR`
-#
-# Keep a minimal fallback for older/alternate layouts only if nothing was configured.
-if(ENABLE_GRPC AND NOT GENERATED_PROTO_SOURCES)
-    message(STATUS "⚠️ No generated proto sources were configured; attempting fallback discovery")
-
-    set(MONOREPO_GEN_DIR "${PROJECT_ROOT_DIR}/gen")
-    if(EXISTS "${MONOREPO_GEN_DIR}/croupier")
-        file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${MONOREPO_GEN_DIR}/**/*.cc")
-        file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${MONOREPO_GEN_DIR}/**/*.h")
-        if(GENERATED_PROTO_SOURCES)
-            set(PROTO_GENERATED_DIR "${MONOREPO_GEN_DIR}")
-        endif()
-    endif()
-
-    if(NOT GENERATED_PROTO_SOURCES)
-        set(SDK_GENERATED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-        if(EXISTS "${SDK_GENERATED_DIR}/croupier")
-            file(GLOB_RECURSE GENERATED_PROTO_SOURCES "${SDK_GENERATED_DIR}/**/*.cc")
-            file(GLOB_RECURSE GENERATED_PROTO_HEADERS "${SDK_GENERATED_DIR}/**/*.h")
-            if(GENERATED_PROTO_SOURCES)
-                set(PROTO_GENERATED_DIR "${SDK_GENERATED_DIR}")
-            endif()
-        endif()
-    endif()
-
-    if(NOT GENERATED_PROTO_SOURCES)
-        message(STATUS "🔧 No proto files found, using mock gRPC implementation")
-        set(ENABLE_GRPC OFF)
-    endif()
-endif()
-
 # ========== Source Files ==========
 # SDK source and header files
 set(SDK_SOURCES
@@ -331,17 +272,6 @@ set(SDK_HEADERS
     include/croupier/sdk/config/client_config_loader.h
     include/croupier/sdk/plugin/dynamic_loader.h
 )
-
-# Add generated proto files if gRPC is enabled AND proto files exist
-if(ENABLE_GRPC)
-    if(GENERATED_PROTO_SOURCES)
-        list(APPEND SDK_SOURCES ${GENERATED_PROTO_SOURCES})
-        list(APPEND SDK_HEADERS ${GENERATED_PROTO_HEADERS})
-        message(STATUS "Added generated proto files to build")
-    else()
-        message(STATUS "Building without generated proto files (using mock implementation)")
-    endif()
-endif()
 
 # Add Lua binding source files if enabled (using sol2)
 if(ENABLE_LUA_BINDING)
@@ -388,31 +318,14 @@ if(BUILD_SHARED_LIBS)
     target_include_directories(croupier-sdk-shared
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<$<AND:$<BOOL:${ENABLE_GRPC}>,$<BOOL:${PROTO_GENERATED_DIR}>>:$<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>>
             $<INSTALL_INTERFACE:include>
     )
 
-    # For shared library: link gRPC dependencies privately
-    # This means gRPC/protobuf are statically linked into the DLL
-    # Users only need to link against croupier-sdk.lib (import library)
+    # Link dependencies
     target_link_libraries(croupier-sdk-shared
         PRIVATE
             Threads::Threads
     )
-
-    if(ENABLE_GRPC)
-        target_link_libraries(croupier-sdk-shared
-            PRIVATE
-                ${GRPC_LIBRARIES}
-                ZLIB::ZLIB
-        )
-        target_compile_definitions(croupier-sdk-shared
-            PUBLIC
-                CROUPIER_SDK_ENABLE_GRPC
-                PROTOBUF_NONNULL=
-                PROTOBUF_NULLABLE=
-        )
-    endif()
 
     if(JSON_LIBRARY)
         target_link_libraries(croupier-sdk-shared
@@ -469,49 +382,14 @@ if(BUILD_STATIC_LIBS)
     target_include_directories(croupier-sdk-static
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<$<AND:$<BOOL:${ENABLE_GRPC}>,$<BOOL:${PROTO_GENERATED_DIR}>>:$<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>>
             $<INSTALL_INTERFACE:include>
     )
 
     # For static library, we still link dependencies publicly for user projects
-    # But on Windows, we'll create a merged lib with all dependencies
     target_link_libraries(croupier-sdk-static
         PUBLIC
             Threads::Threads
     )
-
-    if(ENABLE_GRPC)
-        target_link_libraries(croupier-sdk-static
-            PUBLIC
-                ${GRPC_LIBRARIES}
-                ZLIB::ZLIB
-        )
-        target_compile_definitions(croupier-sdk-static
-            PUBLIC
-                CROUPIER_SDK_ENABLE_GRPC
-                PROTOBUF_NONNULL=
-                PROTOBUF_NULLABLE=
-        )
-
-        # On Windows, create a merged static library with all dependencies bundled
-        # This allows users to link against a single lib file
-        if(WIN32)
-            # Create an interface library that users will link against
-            # This library will be generated during post-build
-            add_library(croupier-sdk-static-merged INTERFACE)
-            target_include_directories(croupier-sdk-static-merged
-                INTERFACE
-                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                    $<$<AND:$<BOOL:${ENABLE_GRPC}>,$<BOOL:${PROTO_GENERATED_DIR}>>:$<BUILD_INTERFACE:${PROTO_GENERATED_DIR}>>
-            )
-            target_compile_definitions(croupier-sdk-static-merged
-                INTERFACE
-                    CROUPIER_SDK_ENABLE_GRPC
-                    CROUPIER_SDK_STATIC
-                )
-            message(STATUS "Windows: Will create merged static library croupier-sdk-static-merged.lib")
-        endif()
-    endif()
 
     if(JSON_LIBRARY)
         target_link_libraries(croupier-sdk-static
@@ -770,13 +648,6 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
-# Generated proto headers
-if(ENABLE_GRPC AND PROTO_GENERATED_DIR AND EXISTS "${PROTO_GENERATED_DIR}/croupier")
-    install(DIRECTORY "${PROTO_GENERATED_DIR}/croupier/"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/croupier"
-        FILES_MATCHING PATTERN "*.h"
-    )
-endif()
 
 if(BUILD_SHARED_LIBS)
     install(TARGETS croupier-sdk-shared
@@ -826,17 +697,13 @@ message(STATUS "  BUILD_STATIC_LIBS: ${BUILD_STATIC_LIBS}")
 message(STATUS "  BUILD_EXAMPLES:    ${BUILD_EXAMPLES}")
 message(STATUS "  BUILD_TESTS:       ${BUILD_TESTS}")
 message(STATUS "  ENABLE_VCPKG:      ${ENABLE_VCPKG}")
-message(STATUS "  ENABLE_GRPC:       ${ENABLE_GRPC}")
+message(STATUS "  gRPC support:     Removed (HTTP/JSON only)")
 message(STATUS "  ENABLE_LUA_BINDING: ${ENABLE_LUA_BINDING}")
 if(ENABLE_VCPKG)
 message(STATUS "  VCPKG_TRIPLET:     ${VCPKG_TARGET_TRIPLET}")
 endif()
 message(STATUS "")
 message(STATUS "Dependencies:")
-if(ENABLE_GRPC)
-message(STATUS "  gRPC:            Found")
-message(STATUS "  Protobuf:        Found")
-endif()
 if(nlohmann_json_FOUND)
 message(STATUS "  nlohmann_json:   Found")
 endif()

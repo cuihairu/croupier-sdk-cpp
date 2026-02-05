@@ -7,14 +7,6 @@
   "supports": "windows | linux | osx",
   "dependencies": [
     {
-      "name": "grpc",
-      "features": ["codegen"]
-    },
-    {
-      "name": "protobuf",
-      "features": ["zlib"]
-    },
-    {
       "name": "nlohmann-json"
     }
   ],
