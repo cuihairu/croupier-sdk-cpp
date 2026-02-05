@@ -124,8 +124,8 @@ endfunction()
 # Function to setup standalone build
 function(setup_standalone_build)
     message(STATUS "Standalone build mode detected")
-    # gRPC has been removed
-    message(STATUS "gRPC support removed")
+    # HTTP/JSON only - proto generation disabled
+    message(STATUS "HTTP/JSON client mode")
     set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
     return()
 
@@ -186,8 +186,8 @@ endfunction()
 
 # Function to setup CI build with proto generation
 function(setup_ci_build)
-    # gRPC has been removed - always return
-    message(STATUS "gRPC support removed - proto generation disabled")
+    # HTTP/JSON only - proto generation disabled
+    message(STATUS "HTTP/JSON client mode - proto generation disabled")
     set(CROUPIER_SDK_ENABLE_GRPC OFF PARENT_SCOPE)
     return()
 

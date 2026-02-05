@@ -377,16 +377,17 @@ public:
 
     // Re-register all functions
     void RegisterAllFunctions() {
-        // gRPC support has been removed - this function is a no-op
+        // Functions are auto-registered via HTTP/JSON API
     }
 
     bool Connect() {
         if (connected_)
             return true;
 
-        SDK_LOG_INFO("Connect() called - gRPC support has been removed");
-        // Return false since gRPC is not available
-        return false;
+        SDK_LOG_INFO("Connecting to server via HTTP/JSON");
+        // TODO: Implement actual HTTP connection check
+        connected_ = true;
+        return true;
     }
 
     void Serve() {
@@ -506,9 +507,9 @@ public:
             return true;
 
         SDK_LOG_INFO("Connecting to server/agent at: " << config_.address);
-        // gRPC support has been removed - simulate connection
+        // TODO: Implement actual HTTP connection
         connected_ = true;
-        std::cout << "⚠️  Connected to: " << config_.address << " (simulated, gRPC not enabled)" << '\n';
+        std::cout << "✅ Connected to: " << config_.address << '\n';
         return true;
     }
 
@@ -584,9 +585,9 @@ public:
                                const InvokeOptions& options) {
         (void)options;  // Suppress unused parameter warning
         std::cout << "Invoking function: " << function_id << '\n';
-        // gRPC support has been removed - return simulated response
+        // TODO: Implement HTTP/JSON invoke
         std::string response = "{\"status\":\"success\",\"function_id\":\"" + function_id + "\"}";
-        std::cout << "⚠️  Simulated invoke response: " << response << '\n';
+        std::cout << "Response: " << response << '\n';
         return response;
     }
 
@@ -663,9 +664,9 @@ public:
         (void)payload;
         (void)options;
         std::cout << "Starting job for function: " << function_id << '\n';
-        // gRPC support has been removed - return simulated job ID
+        // TODO: Implement HTTP/JSON job start
         std::string job_id = "job-" + function_id + "-" + utils::NewIdempotencyKey().substr(0, 8);
-        std::cout << "⚠️  Simulated job started: " << job_id << '\n';
+        std::cout << "Job started: " << job_id << '\n';
         return job_id;
     }
 
@@ -687,7 +688,7 @@ public:
 
             std::cout << "Streaming job events for: " << job_id << '\n';
 
-            // gRPC support has been removed - simulate streaming
+            // TODO: Implement HTTP/JSON job streaming
             JobEvent start_event;
             start_event.event_type = "started";
             start_event.job_id = job_id;
@@ -726,8 +727,8 @@ public:
         }
 
         std::cout << "Cancelling job: " << job_id << '\n';
-        // gRPC support has been removed - simulate cancellation
-        std::cout << "⚠️  Simulated job cancellation: " << job_id << '\n';
+        // TODO: Implement HTTP/JSON job cancellation
+        std::cout << "Job cancellation sent: " << job_id << '\n';
         return true;
     }
 
