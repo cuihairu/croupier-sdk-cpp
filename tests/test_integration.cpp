@@ -131,24 +131,12 @@ TEST_F(IntegrationTest, ConnectionAttempt) {
 
     client->RegisterFunction(desc, handler);
 
-    // 尝试连接（在没有真实Agent的情况下会失败，这是正常的）
-    [[maybe_unused]] bool connected = client->Connect();
+    // 尝试连接（gRPC support removed, will return false）
+    bool connected = client->Connect();
 
-    // 在集成测试环境中，我们可能没有真实的Agent运行
-    // 所以连接失败是正常的，但gRPC管理器应该正确处理这种情况
-    if (!connected) {
-        std::cout << "ℹ️ Agent 连接失败（预期行为，因为测试环境可能没有运行 Agent）" << std::endl;
-        EXPECT_FALSE(connected); // 这是预期的结果
-    } else {
-        std::cout << "✅ 成功连接到 Agent！" << std::endl;
-        EXPECT_TRUE(connected);
-
-        // 如果连接成功，测试基本服务功能
-        std::string local_addr = client->GetLocalAddress();
-        EXPECT_FALSE(local_addr.empty());
-
-        std::cout << "📍 本地服务地址: " << local_addr << std::endl;
-    }
+    // gRPC support has been removed, connection will fail
+    EXPECT_FALSE(connected);
+    std::cout << "ℹ️ Agent 连接失败（预期行为，gRPC support has been removed）" << std::endl;
 }
 
 // 测试错误处理

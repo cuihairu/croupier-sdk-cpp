@@ -385,8 +385,8 @@ public:
             return true;
 
         SDK_LOG_INFO("Connect() called - gRPC support has been removed");
-        connected_ = true;
-        return true;
+        // Return false since gRPC is not available
+        return false;
     }
 
     void Serve() {
