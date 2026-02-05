@@ -18,9 +18,8 @@
 #include <thread>
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include "croupier/control/v1/control.grpc.pb.h"
-#include "croupier/sdk/v1/client.grpc.pb.h"
-#include "croupier/sdk/v1/invoker.grpc.pb.h"
+#include "croupier/agent/v1/register.grpc.pb.h"
+#include "croupier/sdk/v1/invocation.grpc.pb.h"
 
 #include <zlib.h>
 #endif
@@ -73,7 +72,7 @@ namespace sdk {
 
 #ifdef CROUPIER_SDK_ENABLE_GRPC
 namespace sdkv1 = ::croupier::sdk::v1;
-namespace controlv1 = ::croupier::control::v1;
+namespace agentv1 = ::croupier::agent::v1;
 #endif
 
 // Utility function implementations
@@ -608,13 +607,13 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
             return false;
         }
 
-        auto stub = controlv1::ControlService::NewStub(channel);
+        auto stub = agentv1::AgentRegistrationService::NewStub(channel);
         grpc::ClientContext ctx;
         if (config_.timeout_seconds > 0) {
             ctx.set_deadline(std::chrono::system_clock::now() + timeout);
         }
 
-        controlv1::RegisterCapabilitiesRequest request;
+        agentv1::RegisterCapabilitiesRequest request;
         auto* provider = request.mutable_provider();
         provider->set_id(SafeString(config_.service_id, "cpp-service"));
         provider->set_version(DefaultVersion(config_.service_version));
@@ -622,7 +621,7 @@ bool CroupierClient::Impl::UploadCapabilitiesManifest() {
         provider->set_sdk(SafeString(config_.provider_sdk, "croupier-cpp-sdk"));
         request.set_manifest_json_gz(compressed);
 
-        controlv1::RegisterCapabilitiesResponse response;
+        agentv1::RegisterCapabilitiesResponse response;
         grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
         if (!status.ok()) {
             std::cerr << "⚠️  ControlService.RegisterCapabilities failed: " << status.error_message() << '\n';

@@ -36,7 +36,6 @@ std::string ReadFileContent(const std::string& path) {
 
 }  // namespace
 
-namespace localv1 = ::croupier::agent::local::v1;
 namespace sdkv1 = ::croupier::sdk::v1;
 
 //==============================================================================
@@ -824,7 +823,7 @@ std::string LocalFunctionServiceImpl::ExecuteHandler(const std::string& function
 
 LocalControlServiceStub::LocalControlServiceStub(std::shared_ptr<grpc::Channel> channel)
     : channel_(channel),
-      stub_(localv1::LocalControlService::NewStub(channel)),
+      stub_(sdkv1::LocalControlService::NewStub(channel)),
       default_timeout_(std::chrono::milliseconds(30000))  // 30 second timeout
 {}
 
@@ -834,7 +833,7 @@ bool LocalControlServiceStub::RegisterLocal(const std::string& service_id, const
                                             std::string& session_id, std::string& error_message) {
     try {
         auto context = CreateContext();
-        localv1::RegisterLocalRequest request;
+        sdkv1::RegisterLocalRequest request;
         request.set_service_id(service_id);
         request.set_version(version);
         request.set_rpc_addr(rpc_addr);
@@ -844,7 +843,7 @@ bool LocalControlServiceStub::RegisterLocal(const std::string& service_id, const
             out->set_version(fn.version);
         }
 
-        localv1::RegisterLocalResponse response;
+        sdkv1::RegisterLocalResponse response;
         grpc::Status status = stub_->RegisterLocal(context.get(), request, &response);
         if (!status.ok()) {
             error_message = status.error_message();
@@ -868,11 +867,11 @@ bool LocalControlServiceStub::Heartbeat(const std::string& service_id, const std
                                         std::string& error_message) {
     try {
         auto context = CreateContext();
-        localv1::HeartbeatRequest request;
+        sdkv1::HeartbeatRequest request;
         request.set_service_id(service_id);
         request.set_session_id(session_id);
 
-        localv1::HeartbeatResponse response;
+        sdkv1::HeartbeatResponse response;
         grpc::Status status = stub_->Heartbeat(context.get(), request, &response);
         if (!status.ok()) {
             error_message = status.error_message();
@@ -888,8 +887,8 @@ bool LocalControlServiceStub::Heartbeat(const std::string& service_id, const std
 bool LocalControlServiceStub::ListLocal(std::vector<FunctionDescriptor>& functions, std::string& error_message) {
     try {
         auto context = CreateContext();
-        localv1::ListLocalRequest request;
-        localv1::ListLocalResponse response;
+        sdkv1::ListLocalRequest request;
+        sdkv1::ListLocalResponse response;
         grpc::Status status = stub_->ListLocal(context.get(), request, &response);
         if (!status.ok()) {
             error_message = status.error_message();

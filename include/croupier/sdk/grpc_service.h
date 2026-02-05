@@ -22,8 +22,9 @@
 
 // Only include gRPC headers when gRPC is enabled
 #ifdef CROUPIER_SDK_ENABLE_GRPC
-#include "croupier/agent/local/v1/local.grpc.pb.h"
-#include "croupier/sdk/v1/invoker.grpc.pb.h"
+#include "croupier/agent/v1/register.grpc.pb.h"
+#include "croupier/sdk/v1/invocation.grpc.pb.h"
+#include "croupier/sdk/v1/provider.grpc.pb.h"
 
 #include <google/protobuf/map.h>
 
@@ -219,7 +220,7 @@ public:
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<croupier::agent::local::v1::LocalControlService::Stub> stub_;
+    std::unique_ptr<croupier::sdk::v1::LocalControlService::Stub> stub_;
 
     // 超时配置
     std::chrono::milliseconds default_timeout_;
