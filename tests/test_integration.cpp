@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "croupier/sdk/croupier_client.h"
-#include "croupier/sdk/grpc_service.h"
 #include <thread>
 #include <chrono>
 

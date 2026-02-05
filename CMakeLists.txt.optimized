@@ -171,7 +171,6 @@ endif()
 # ========== 源文件 ==========
 set(SDK_SOURCES
     src/croupier_client.cpp
-    src/grpc_service.cpp
     src/config_driven_loader.cpp
     src/utils/json_utils.cpp
     src/utils/file_utils.cpp
@@ -181,7 +180,6 @@ set(SDK_SOURCES
 
 set(SDK_HEADERS
     include/croupier/sdk/croupier_client.h
-    include/croupier/sdk/grpc_service.h
     include/croupier/sdk/config_driven_loader.h
     include/croupier/sdk/utils/json_utils.h
     include/croupier/sdk/utils/file_utils.h

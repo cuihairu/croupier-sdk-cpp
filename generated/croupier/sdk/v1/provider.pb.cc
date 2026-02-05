@@ -464,25 +464,16 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2fprovider_2eproto[] PR
     ",\n\023GetJobResultRequest\022\025\n\006job_id\030\001 \001(\tR\005"
     "jobId\"\\\n\024GetJobResultResponse\022\024\n\005state\030\001"
     " \001(\tR\005state\022\030\n\007payload\030\002 \001(\014R\007payload\022\024\n"
-    "\005error\030\003 \001(\tR\005error2\372\002\n\023LocalControlServ"
-    "ice\022^\n\rRegisterLocal\022%.croupier.sdk.v1.R"
-    "egisterLocalRequest\032&.croupier.sdk.v1.Re"
-    "gisterLocalResponse\022R\n\tHeartbeat\022!.croup"
-    "ier.sdk.v1.HeartbeatRequest\032\".croupier.s"
-    "dk.v1.HeartbeatResponse\022R\n\tListLocal\022!.c"
-    "roupier.sdk.v1.ListLocalRequest\032\".croupi"
-    "er.sdk.v1.ListLocalResponse\022[\n\014GetJobRes"
-    "ult\022$.croupier.sdk.v1.GetJobResultReques"
-    "t\032%.croupier.sdk.v1.GetJobResultResponse"
-    "Ba\n\"io.github.cuihairu.croupier.sdk.v1P\001"
-    "Z9github.com/cuihairu/croupier/pkg/pb/cr"
-    "oupier/sdk/v1;sdkv1b\006proto3"
+    "\005error\030\003 \001(\tR\005errorBa\n\"io.github.cuihair"
+    "u.croupier.sdk.v1P\001Z9github.com/cuihairu"
+    "/croupier/pkg/pb/croupier/sdk/v1;sdkv1b\006"
+    "proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2fprovider_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2fprovider_2eproto = {
     false,
     false,
-    1627,
+    1246,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2fprovider_2eproto,
     "croupier/sdk/v1/provider.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2fprovider_2eproto_once,

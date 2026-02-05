@@ -315,7 +315,6 @@ endif()
 # SDK source and header files
 set(SDK_SOURCES
     src/croupier_client.cpp
-    src/grpc_service.cpp
     src/config_driven_loader.cpp
     src/utils/json_utils.cpp
     src/utils/file_utils.cpp
@@ -326,7 +325,6 @@ set(SDK_SOURCES
 set(SDK_HEADERS
     include/croupier/sdk/croupier_client.h
     include/croupier/sdk/logger.h
-    include/croupier/sdk/grpc_service.h
     include/croupier/sdk/config_driven_loader.h
     include/croupier/sdk/utils/json_utils.h
     include/croupier/sdk/utils/file_utils.h
@@ -713,11 +711,9 @@ if(BUILD_TESTS)
     # Targets are available either from `find_package(GTest)` (vcpkg/system) or FetchContent.
     if(TARGET GTest::gtest_main OR TARGET gtest_main)
         add_executable(croupier-sdk-tests
-            tests/mock/mock_agent.cpp
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
             tests/test_integration.cpp
-            tests/test_invoker.cpp
             tests/test_json_utils.cpp
             tests/test_file_utils.cpp
             tests/test_main_thread_dispatcher.cpp
@@ -734,18 +730,6 @@ if(BUILD_TESTS)
             tests/test_client_components.cpp
             tests/test_client_connection.cpp
             tests/test_client_lifecycle.cpp
-            tests/test_grpc_connection.cpp
-            tests/test_grpc_registration.cpp
-            tests/test_grpc_heartbeat.cpp
-            tests/test_grpc_reconnect.cpp
-            tests/test_grpc_local_server.cpp
-            tests/test_grpc_function_service.cpp
-            tests/test_grpc_jobs.cpp
-        )
-
-        # Add mock directory to include path
-        target_include_directories(croupier-sdk-tests PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/tests/mock
         )
 
         if(TARGET GTest::gtest_main)
@@ -786,7 +770,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
-# Generated proto headers are part of the public API surface (grpc_service.h includes them).
+# Generated proto headers
 if(ENABLE_GRPC AND PROTO_GENERATED_DIR AND EXISTS "${PROTO_GENERATED_DIR}/croupier")
     install(DIRECTORY "${PROTO_GENERATED_DIR}/croupier/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/croupier"

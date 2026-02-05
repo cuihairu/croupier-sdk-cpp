@@ -1,6 +1,5 @@
 #include "croupier/sdk/croupier_client.h"
 
-#include "croupier/sdk/grpc_service.h"
 #include "croupier/sdk/logger.h"
 #include "croupier/sdk/utils/json_utils.h"
 
@@ -16,13 +15,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <thread>
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-#include "croupier/agent/v1/register.grpc.pb.h"
-#include "croupier/sdk/v1/invocation.grpc.pb.h"
-
-#include <zlib.h>
-#endif
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -69,11 +61,6 @@
 
 namespace croupier {
 namespace sdk {
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-namespace sdkv1 = ::croupier::sdk::v1;
-namespace agentv1 = ::croupier::agent::v1;
-#endif
 
 // Utility function implementations
 namespace utils {
@@ -165,10 +152,6 @@ public:
     std::map<std::string, VirtualObjectDescriptor> objects_;
     std::map<std::string, ComponentDescriptor> components_;
 
-    // gRPC Manager器
-    std::unique_ptr<grpc_service::GrpcClientManager> grpc_manager_;
-    std::string session_id_;
-
     std::atomic<bool> running_{false};
     std::atomic<bool> connected_{false};
     std::thread server_thread_;
@@ -203,22 +186,6 @@ public:
 
         SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id << "' in '" << config_.env
                                                              << "' environment");
-
-        // Initialize gRPC Manager器
-        grpc_manager_ = std::make_unique<grpc_service::GrpcClientManager>(config_);
-
-        // Set error callback
-        grpc_manager_->SetErrorCallback([](const std::string& error) {
-            SDK_LOG_ERROR("gRPC Error: " << error);
-            // Error handling logic can be implemented here
-        });
-
-        // Set reconnect callback
-        grpc_manager_->SetReconnectCallback([this]() {
-            SDK_LOG_INFO("gRPC Reconnected, re-registering functions...");
-            // Re-register all functions
-            RegisterAllFunctions();
-        });
     }
 
     ~Impl() { Stop(); }
@@ -408,128 +375,31 @@ public:
         return true;
     }
 
-    // Re-register all functions to gRPC manager
+    // Re-register all functions
     void RegisterAllFunctions() {
-        if (!grpc_manager_->IsConnected()) {
-            return;
-        }
-
-        grpc_manager_->UpdateHandlers(handlers_);
-
-        // Convert FunctionDescriptor to LocalFunctionDescriptor (for local registration)
-        std::vector<LocalFunctionDescriptor> local_functions;
-        for (const auto& desc : descriptors_) {
-            LocalFunctionDescriptor local_func;
-            local_func.id = desc.second.id;
-            local_func.version = desc.second.version;
-            local_functions.push_back(local_func);
-        }
-
-        // Register with Agent (first layer: SDK -> Agent)
-        std::string new_session_id;
-        if (grpc_manager_->RegisterWithAgent(local_functions, new_session_id)) {
-            session_id_ = new_session_id;
-            SDK_LOG_INFO("Re-registration successful, session_id: " << session_id_);
-        } else {
-            SDK_LOG_ERROR("Re-registration failed");
-        }
+        // gRPC support has been removed - this function is a no-op
     }
 
     bool Connect() {
         if (connected_)
             return true;
 
-        SDK_LOG_INFO("Connecting to Croupier Agent: " << config_.agent_addr);
-
-        grpc_manager_->UpdateHandlers(handlers_);
-
-        // 使用 gRPC Manager器Connect
-        if (!grpc_manager_->Connect()) {
-            SDK_LOG_ERROR("Failed to connect to Agent");
-            return false;
-        }
-
-        // Convert FunctionDescriptor to LocalFunctionDescriptor for agent registration
-        std::vector<LocalFunctionDescriptor> local_functions;
-        for (const auto& desc : descriptors_) {
-            LocalFunctionDescriptor local_func;
-            local_func.id = desc.second.id;
-            local_func.version = desc.second.version;
-            local_functions.push_back(local_func);
-        }
-
-        // Register with Agent (first layer: SDK -> Agent)
-        if (!grpc_manager_->RegisterWithAgent(local_functions, session_id_)) {
-            SDK_LOG_ERROR("Failed to register service with Agent");
-            grpc_manager_->Disconnect();
-            return false;
-        }
-
-        // UpdateLocalService器Address
-        local_address_ = grpc_manager_->GetLocalServerAddress();
-
+        SDK_LOG_INFO("Connect() called - gRPC support has been removed");
         connected_ = true;
-        SDK_LOG_INFO("Successfully connected and registered to Agent");
-        SDK_LOG_INFO("Local service address: " << local_address_);
-        SDK_LOG_DEBUG("Session ID: " << session_id_);
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-        if (!config_.control_addr.empty()) {
-            if (!UploadCapabilitiesManifest()) {
-                SDK_LOG_WARN("Failed to upload provider capabilities manifest");
-            }
-        }
-#endif
-
         return true;
     }
 
     void Serve() {
         running_ = true;
         SDK_LOG_INFO("Croupier client service started");
-        SDK_LOG_INFO("Local service address: " << local_address_);
         SDK_LOG_INFO("Registered functions: " << handlers_.size());
         std::cout << "📦 已RegisterVirtual Object: " << objects_.size() << " 个" << '\n';
         std::cout << "🔧 已RegisterComponent: " << components_.size() << " 个" << '\n';
         std::cout << "💡 使用 Stop() 方法StopService" << '\n';
         std::cout << "===============================================" << '\n';
 
-        // 保持Service运行，等待来自 Agent 的Invoke
-        const int reconnect_interval_seconds = std::max(1, config_.reconnect_interval_seconds);
-        int reconnect_attempts = 0;
-
+        // Keep service running
         while (running_) {
-            // CheckConnect状态
-            if (!grpc_manager_->IsConnected()) {
-                connected_ = false;
-                std::cerr << "⚠️ 与 Agent 的Connect已断开" << '\n';
-
-                if (!config_.auto_reconnect) {
-                    break;
-                }
-
-                if (config_.reconnect_max_attempts > 0 && reconnect_attempts >= config_.reconnect_max_attempts) {
-                    std::cerr << "❌ Reconnect failed: max attempts reached" << '\n';
-                    break;
-                }
-
-                reconnect_attempts++;
-                std::cout << "🔄 Reconnect attempt " << reconnect_attempts << " (every " << reconnect_interval_seconds
-                          << "s)..." << '\n';
-
-                if (grpc_manager_->Connect()) {
-                    RegisterAllFunctions();
-                    local_address_ = grpc_manager_->GetLocalServerAddress();
-                    connected_ = true;
-                    reconnect_attempts = 0;
-                    std::cout << "✅ Reconnected and re-registered with Agent" << '\n';
-                } else {
-                    std::this_thread::sleep_for(std::chrono::seconds(reconnect_interval_seconds));
-                }
-
-                continue;
-            }
-
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
@@ -544,11 +414,6 @@ public:
 
         // Signal reconnection thread to stop
         should_stop_reconnecting_ = true;
-
-        // Disconnect gRPC manager first to prevent new connections
-        if (grpc_manager_) {
-            grpc_manager_->Disconnect();
-        }
 
         // Wait for reconnection thread to finish (before server thread to avoid deadlock)
         is_reconnecting_ = false;
@@ -573,200 +438,7 @@ public:
     std::string GetLocalAddress() const { return local_address_; }
 
     bool IsConnected() const { return connected_; }
-
-private:
-    // 这些方法现在由 gRPC Manager器Handler
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-    bool UploadCapabilitiesManifest();
-    std::string BuildCapabilitiesManifest() const;
-    std::string EscapeJson(const std::string& value) const;
-    std::string DefaultVersion(const std::string& version) const;
-    std::string SafeString(const std::string& value, const std::string& fallback) const;
-    std::string GzipCompress(const std::string& input) const;
-#endif
 };
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-bool CroupierClient::Impl::UploadCapabilitiesManifest() {
-    if (!grpc_manager_) {
-        std::cerr << "⚠️  gRPC manager is not initialized; skipping capability upload" << '\n';
-        return false;
-    }
-    try {
-        const std::string manifest = BuildCapabilitiesManifest();
-        const std::string compressed = GzipCompress(manifest);
-
-        auto credentials = grpc_manager_->BuildClientCredentials();
-        auto channel_args = grpc_manager_->BuildClientChannelArguments();
-        auto channel = grpc::CreateCustomChannel(config_.control_addr, credentials, channel_args);
-
-        const auto timeout = std::chrono::seconds(config_.timeout_seconds > 0 ? config_.timeout_seconds : 30);
-        auto connect_deadline = std::chrono::system_clock::now() + timeout;
-        if (!channel->WaitForConnected(connect_deadline)) {
-            std::cerr << "⚠️  Unable to connect to control service at " << config_.control_addr << '\n';
-            return false;
-        }
-
-        auto stub = agentv1::AgentRegistrationService::NewStub(channel);
-        grpc::ClientContext ctx;
-        if (config_.timeout_seconds > 0) {
-            ctx.set_deadline(std::chrono::system_clock::now() + timeout);
-        }
-
-        agentv1::RegisterCapabilitiesRequest request;
-        auto* provider = request.mutable_provider();
-        provider->set_id(SafeString(config_.service_id, "cpp-service"));
-        provider->set_version(DefaultVersion(config_.service_version));
-        provider->set_lang(SafeString(config_.provider_lang, "cpp"));
-        provider->set_sdk(SafeString(config_.provider_sdk, "croupier-cpp-sdk"));
-        request.set_manifest_json_gz(compressed);
-
-        agentv1::RegisterCapabilitiesResponse response;
-        grpc::Status status = stub->RegisterCapabilities(&ctx, request, &response);
-        if (!status.ok()) {
-            std::cerr << "⚠️  ControlService.RegisterCapabilities failed: " << status.error_message() << '\n';
-            return false;
-        }
-
-        std::cout << "📤 Uploaded provider capabilities manifest (" << descriptors_.size() << " functions)" << '\n';
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "⚠️  Failed to upload capabilities: " << e.what() << '\n';
-        return false;
-    }
-}
-
-std::string CroupierClient::Impl::BuildCapabilitiesManifest() const {
-    std::ostringstream oss;
-    oss << "{\"provider\":{";
-    oss << "\"id\":\"" << EscapeJson(SafeString(config_.service_id, "cpp-service")) << "\",";
-    oss << "\"version\":\"" << EscapeJson(DefaultVersion(config_.service_version)) << "\",";
-    oss << "\"lang\":\"" << EscapeJson(SafeString(config_.provider_lang, "cpp")) << "\",";
-    oss << "\"sdk\":\"" << EscapeJson(SafeString(config_.provider_sdk, "croupier-cpp-sdk")) << "\"}";
-
-    bool has_functions = false;
-    for (const auto& entry : descriptors_) {
-        const auto& descriptor = entry.second;
-        if (descriptor.id.empty()) {
-            continue;
-        }
-        if (!has_functions) {
-            oss << ",\"functions\":[";
-            has_functions = true;
-        } else {
-            oss << ",";
-        }
-
-        oss << "{";
-        oss << "\"id\":\"" << EscapeJson(descriptor.id) << "\",";
-        oss << "\"version\":\"" << EscapeJson(DefaultVersion(descriptor.version)) << "\"";
-        if (!descriptor.category.empty()) {
-            oss << ",\"category\":\"" << EscapeJson(descriptor.category) << "\"";
-        }
-        if (!descriptor.risk.empty()) {
-            oss << ",\"risk\":\"" << EscapeJson(descriptor.risk) << "\"";
-        }
-        if (!descriptor.entity.empty()) {
-            oss << ",\"entity\":\"" << EscapeJson(descriptor.entity) << "\"";
-        }
-        if (!descriptor.operation.empty()) {
-            oss << ",\"operation\":\"" << EscapeJson(descriptor.operation) << "\"";
-        }
-        if (descriptor.enabled) {
-            oss << ",\"enabled\":true";
-        }
-        oss << "}";
-    }
-    if (has_functions) {
-        oss << "]";
-    }
-
-    oss << "}";
-    return oss.str();
-}
-
-std::string CroupierClient::Impl::EscapeJson(const std::string& value) const {
-    std::ostringstream oss;
-    for (const char ch : value) {
-        switch (ch) {
-        case '"':
-            oss << "\\\"";
-            break;
-        case '\\':
-            oss << "\\\\";
-            break;
-        case '\b':
-            oss << "\\b";
-            break;
-        case '\f':
-            oss << "\\f";
-            break;
-        case '\n':
-            oss << "\\n";
-            break;
-        case '\r':
-            oss << "\\r";
-            break;
-        case '\t':
-            oss << "\\t";
-            break;
-        default:
-            if (static_cast<unsigned char>(ch) < 0x20) {
-                oss << "\\u" << std::hex << std::setw(4) << std::setfill('0')
-                    << static_cast<int>(static_cast<unsigned char>(ch)) << std::dec << std::setfill(' ');
-            } else {
-                oss << ch;
-            }
-        }
-    }
-    return oss.str();
-}
-
-std::string CroupierClient::Impl::DefaultVersion(const std::string& version) const {
-    return version.empty() ? "1.0.0" : version;
-}
-
-std::string CroupierClient::Impl::SafeString(const std::string& value, const std::string& fallback) const {
-    return value.empty() ? fallback : value;
-}
-
-std::string CroupierClient::Impl::GzipCompress(const std::string& input) const {
-    if (input.empty()) {
-        return "";
-    }
-
-    z_stream zs;
-    std::memset(&zs, 0, sizeof(zs));
-    int ret = deflateInit2(&zs, Z_BEST_SPEED, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY);
-    if (ret != Z_OK) {
-        throw std::runtime_error("deflateInit2 failed");
-    }
-
-    zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(input.data()));
-    zs.avail_in = static_cast<uInt>(input.size());
-
-    std::string output;
-    output.reserve(input.size());
-
-    char buffer[4096];
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(buffer);
-        zs.avail_out = sizeof(buffer);
-
-        ret = deflate(&zs, zs.avail_in > 0 ? Z_NO_FLUSH : Z_FINISH);
-        if (ret == Z_STREAM_ERROR) {
-            deflateEnd(&zs);
-            throw std::runtime_error("deflate failed");
-        }
-
-        std::size_t produced = sizeof(buffer) - zs.avail_out;
-        output.append(buffer, produced);
-    } while (ret != Z_STREAM_END);
-
-    deflateEnd(&zs);
-    return output;
-}
-#endif
 
 // Invoker Implementation
 class CroupierInvoker::Impl {
@@ -783,12 +455,6 @@ public:
     std::atomic<bool> should_stop_reconnecting_{false};
     std::thread reconnect_thread_;
     std::string last_error_;
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-    // gRPC components
-    std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<sdkv1::InvokerService::Stub> stub_;
-#endif
 
     explicit Impl(const InvokerConfig& config) : config_(config) {
         // ========== Initialize Logger Configuration ==========
@@ -840,46 +506,10 @@ public:
             return true;
 
         SDK_LOG_INFO("Connecting to server/agent at: " << config_.address);
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-        try {
-            // Create gRPC channel
-            grpc::ChannelArguments args;
-            args.SetMaxReceiveMessageSize(INT_MAX);
-            args.SetMaxSendMessageSize(INT_MAX);
-
-            // Use insecure credentials for now, can be enhanced to support TLS
-            channel_ = grpc::CreateCustomChannel(config_.address, grpc::InsecureChannelCredentials(), args);
-
-            if (!channel_) {
-                SDK_LOG_ERROR("Failed to create gRPC channel");
-                return false;
-            }
-
-            // Create stub
-            stub_ = sdkv1::InvokerService::NewStub(channel_);
-            if (!stub_) {
-                SDK_LOG_ERROR("Failed to create gRPC stub");
-                return false;
-            }
-
-            connected_ = true;
-            reconnect_attempts_ = 0;
-            is_reconnecting_ = false;
-            SDK_LOG_INFO("Connected to: " << config_.address);
-            return true;
-
-        } catch (const std::exception& e) {
-            SDK_LOG_ERROR("Connection failed: " << e.what());
-            last_error_ = e.what();
-            return false;
-        }
-#else
-        // Fallback to simulated connection when gRPC is not enabled
+        // gRPC support has been removed - simulate connection
         connected_ = true;
         std::cout << "⚠️  Connected to: " << config_.address << " (simulated, gRPC not enabled)" << '\n';
         return true;
-#endif
     }
 
     std::string Invoke(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -952,80 +582,12 @@ public:
 
     std::string invokeInternal(const std::string& function_id, const std::string& payload,
                                const InvokeOptions& options) {
+        (void)options;  // Suppress unused parameter warning
         std::cout << "Invoking function: " << function_id << '\n';
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-        try {
-            // Create gRPC context
-            grpc::ClientContext context;
-
-            // Set timeout from options or invoker default
-            const int timeout_seconds = options.timeout_seconds > 0 ? options.timeout_seconds : config_.timeout_seconds;
-            auto timeout = std::chrono::seconds(timeout_seconds > 0 ? timeout_seconds : 30);
-            context.set_deadline(std::chrono::system_clock::now() + timeout);
-
-            // Set metadata
-            if (!config_.game_id.empty()) {
-                context.AddMetadata("x-game-id", config_.game_id);
-            }
-            if (!config_.env.empty()) {
-                context.AddMetadata("x-env", config_.env);
-            }
-            if (!options.idempotency_key.empty()) {
-                context.AddMetadata("idempotency-key", options.idempotency_key);
-            }
-            if (!config_.auth_token.empty()) {
-                context.AddMetadata("authorization", "Bearer " + config_.auth_token);
-            }
-            for (const auto& [k, v] : config_.headers) {
-                context.AddMetadata(k, v);
-            }
-
-            // Create request
-            sdkv1::InvokeRequest request;
-            request.set_function_id(function_id);
-            if (!options.idempotency_key.empty()) {
-                request.set_idempotency_key(options.idempotency_key);
-            }
-            request.set_payload(payload);
-            auto* request_metadata = request.mutable_metadata();
-            if (!options.route.empty())
-                (*request_metadata)["route"] = options.route;
-            if (!options.target_service_id.empty())
-                (*request_metadata)["target_service_id"] = options.target_service_id;
-            if (!options.hash_key.empty())
-                (*request_metadata)["hash_key"] = options.hash_key;
-            if (!options.trace_id.empty())
-                (*request_metadata)["trace_id"] = options.trace_id;
-            for (const auto& [k, v] : options.metadata) {
-                (*request_metadata)[k] = v;
-            }
-
-            // Send request
-            sdkv1::InvokeResponse response;
-            grpc::Status status = stub_->Invoke(&context, request, &response);
-
-            if (!status.ok()) {
-                std::string error_msg =
-                    "gRPC error: " + status.error_message() + " (code: " + std::to_string(status.error_code()) + ")";
-                throw std::runtime_error(error_msg);
-            }
-
-            std::string result = response.payload();
-            std::cout << "✅ Invoke successful, response size: " << result.size() << " bytes" << '\n';
-            return result;
-
-        } catch (const std::exception& e) {
-            std::cerr << "❌ Invoke failed: " << e.what() << '\n';
-            last_error_ = e.what();
-            throw;
-        }
-#else
-        // Fallback simulation when gRPC is not enabled
+        // gRPC support has been removed - return simulated response
         std::string response = "{\"status\":\"success\",\"function_id\":\"" + function_id + "\"}";
         std::cout << "⚠️  Simulated invoke response: " << response << '\n';
         return response;
-#endif
     }
 
     std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -1098,80 +660,13 @@ public:
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
                                  const InvokeOptions& options) {
+        (void)payload;
+        (void)options;
         std::cout << "Starting job for function: " << function_id << '\n';
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-        try {
-            // Create gRPC context
-            grpc::ClientContext context;
-
-            // Set timeout from options or invoker default
-            const int timeout_seconds = options.timeout_seconds > 0 ? options.timeout_seconds : config_.timeout_seconds;
-            auto timeout = std::chrono::seconds(timeout_seconds > 0 ? timeout_seconds : 30);
-            context.set_deadline(std::chrono::system_clock::now() + timeout);
-
-            // Set metadata
-            if (!config_.game_id.empty()) {
-                context.AddMetadata("x-game-id", config_.game_id);
-            }
-            if (!config_.env.empty()) {
-                context.AddMetadata("x-env", config_.env);
-            }
-            if (!options.idempotency_key.empty()) {
-                context.AddMetadata("idempotency-key", options.idempotency_key);
-            }
-            if (!config_.auth_token.empty()) {
-                context.AddMetadata("authorization", "Bearer " + config_.auth_token);
-            }
-            for (const auto& [k, v] : config_.headers) {
-                context.AddMetadata(k, v);
-            }
-
-            // Create request
-            sdkv1::InvokeRequest request;
-            request.set_function_id(function_id);
-            if (!options.idempotency_key.empty()) {
-                request.set_idempotency_key(options.idempotency_key);
-            }
-            request.set_payload(payload);
-            auto* request_metadata = request.mutable_metadata();
-            if (!options.route.empty())
-                (*request_metadata)["route"] = options.route;
-            if (!options.target_service_id.empty())
-                (*request_metadata)["target_service_id"] = options.target_service_id;
-            if (!options.hash_key.empty())
-                (*request_metadata)["hash_key"] = options.hash_key;
-            if (!options.trace_id.empty())
-                (*request_metadata)["trace_id"] = options.trace_id;
-            for (const auto& [k, v] : options.metadata) {
-                (*request_metadata)[k] = v;
-            }
-
-            // Send request
-            sdkv1::StartJobResponse response;
-            grpc::Status status = stub_->StartJob(&context, request, &response);
-
-            if (!status.ok()) {
-                std::string error_msg =
-                    "gRPC error: " + status.error_message() + " (code: " + std::to_string(status.error_code()) + ")";
-                throw std::runtime_error(error_msg);
-            }
-
-            std::string job_id = response.job_id();
-            std::cout << "✅ Job started successfully: " << job_id << '\n';
-            return job_id;
-
-        } catch (const std::exception& e) {
-            std::cerr << "❌ StartJob failed: " << e.what() << '\n';
-            last_error_ = e.what();
-            throw;
-        }
-#else
-        // Fallback simulation when gRPC is not enabled
+        // gRPC support has been removed - return simulated job ID
         std::string job_id = "job-" + function_id + "-" + utils::NewIdempotencyKey().substr(0, 8);
         std::cout << "⚠️  Simulated job started: " << job_id << '\n';
         return job_id;
-#endif
     }
 
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id) {
@@ -1192,73 +687,7 @@ public:
 
             std::cout << "Streaming job events for: " << job_id << '\n';
 
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-            try {
-                // Create gRPC context
-                grpc::ClientContext context;
-                context.set_deadline(std::chrono::system_clock::now() +
-                                     std::chrono::minutes(30));  // Long timeout for streaming
-
-                // Create request
-                sdkv1::JobStreamRequest request;
-                request.set_job_id(job_id);
-
-                // Create streaming reader
-                std::unique_ptr<grpc::ClientReader<sdkv1::JobEvent>> reader(stub_->StreamJob(&context, request));
-
-                // Read events
-                sdkv1::JobEvent grpc_event;
-                while (reader->Read(&grpc_event)) {
-                    JobEvent event;
-                    event.job_id = job_id;
-                    event.event_type = grpc_event.type();
-                    event.message = grpc_event.message();
-                    event.progress = grpc_event.progress();
-                    event.payload = grpc_event.payload();
-                    if (event.event_type == "error") {
-                        event.error = event.message;
-                    }
-                    event.done = (event.event_type == "done" || event.event_type == "completed" ||
-                                  event.event_type == "cancelled" || event.event_type == "error");
-
-                    events.push_back(event);
-
-                    std::cout << "📡 Received event: " << event.event_type << '\n';
-
-                    // Stop reading if job is done
-                    if (event.done) {
-                        break;
-                    }
-                }
-
-                // Check streaming status
-                grpc::Status status = reader->Finish();
-                if (!status.ok() && status.error_code() != grpc::StatusCode::OK) {
-                    std::cerr << "Stream error: " << status.error_message() << '\n';
-
-                    // Add error event if stream failed
-                    JobEvent error_event;
-                    error_event.job_id = job_id;
-                    error_event.error = "Stream error: " + status.error_message();
-                    error_event.done = true;
-                    events.push_back(error_event);
-                }
-
-                std::cout << "✅ Streaming completed for job: " << job_id << '\n';
-                return events;
-
-            } catch (const std::exception& e) {
-                std::cerr << "❌ StreamJob failed: " << e.what() << '\n';
-
-                JobEvent error_event;
-                error_event.job_id = job_id;
-                error_event.error = e.what();
-                error_event.done = true;
-                events.push_back(error_event);
-                return events;
-            }
-#else
-            // Fallback simulation when gRPC is not enabled
+            // gRPC support has been removed - simulate streaming
             JobEvent start_event;
             start_event.event_type = "started";
             start_event.job_id = job_id;
@@ -1284,7 +713,6 @@ public:
 
             std::cout << "⚠️  Simulated streaming for job: " << job_id << '\n';
             return events;
-#endif
         });
     }
 
@@ -1298,38 +726,9 @@ public:
         }
 
         std::cout << "Cancelling job: " << job_id << '\n';
-
-#ifdef CROUPIER_SDK_ENABLE_GRPC
-        try {
-            // Create gRPC context
-            grpc::ClientContext context;
-            context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(30));
-
-            // Create request
-            sdkv1::CancelJobRequest request;
-            request.set_job_id(job_id);
-
-            // Send request
-            sdkv1::StartJobResponse response;
-            grpc::Status status = stub_->CancelJob(&context, request, &response);
-
-            if (!status.ok()) {
-                std::cerr << "❌ CancelJob failed: " << status.error_message() << '\n';
-                return false;
-            }
-
-            std::cout << "✅ Job cancelled successfully: " << job_id << '\n';
-            return true;
-
-        } catch (const std::exception& e) {
-            std::cerr << "❌ CancelJob failed: " << e.what() << '\n';
-            return false;
-        }
-#else
-        // Fallback simulation when gRPC is not enabled
+        // gRPC support has been removed - simulate cancellation
         std::cout << "⚠️  Simulated job cancellation: " << job_id << '\n';
         return true;
-#endif
     }
 
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
@@ -1450,7 +849,7 @@ public:
         });
     }
 
-    // Check if error is retryable based on gRPC status code
+    // Check if error is retryable based on status code
     bool IsRetryableError(int grpc_status_code) const {
         for (int code : retry_config_.retryable_status_codes) {
             if (code == grpc_status_code) {

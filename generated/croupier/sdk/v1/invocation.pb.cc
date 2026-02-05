@@ -294,24 +294,16 @@ const char descriptor_table_protodef_croupier_2fsdk_2fv1_2finvocation_2eproto[] 
     "bEvent\022\022\n\004type\030\001 \001(\tR\004type\022\030\n\007message\030\002 "
     "\001(\tR\007message\022\032\n\010progress\030\003 \001(\005R\010progress"
     "\022\030\n\007payload\030\004 \001(\014R\007payload\")\n\020CancelJobR"
-    "equest\022\025\n\006job_id\030\001 \001(\tR\005jobId2\312\002\n\016Invoke"
-    "rService\022I\n\006Invoke\022\036.croupier.sdk.v1.Inv"
-    "okeRequest\032\037.croupier.sdk.v1.InvokeRespo"
-    "nse\022M\n\010StartJob\022\036.croupier.sdk.v1.Invoke"
-    "Request\032!.croupier.sdk.v1.StartJobRespon"
-    "se\022K\n\tStreamJob\022!.croupier.sdk.v1.JobStr"
-    "eamRequest\032\031.croupier.sdk.v1.JobEvent0\001\022"
-    "Q\n\tCancelJob\022!.croupier.sdk.v1.CancelJob"
-    "Request\032!.croupier.sdk.v1.StartJobRespon"
-    "seBa\n\"io.github.cuihairu.croupier.sdk.v1"
-    "P\001Z9github.com/cuihairu/croupier/pkg/pb/"
-    "croupier/sdk/v1;sdkv1b\006proto3"
+    "equest\022\025\n\006job_id\030\001 \001(\tR\005jobIdBa\n\"io.gith"
+    "ub.cuihairu.croupier.sdk.v1P\001Z9github.co"
+    "m/cuihairu/croupier/pkg/pb/croupier/sdk/"
+    "v1;sdkv1b\006proto3"
 };
 static ::absl::once_flag descriptor_table_croupier_2fsdk_2fv1_2finvocation_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_croupier_2fsdk_2fv1_2finvocation_2eproto = {
     false,
     false,
-    1029,
+    696,
     descriptor_table_protodef_croupier_2fsdk_2fv1_2finvocation_2eproto,
     "croupier/sdk/v1/invocation.proto",
     &descriptor_table_croupier_2fsdk_2fv1_2finvocation_2eproto_once,
