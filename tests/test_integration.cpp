@@ -118,7 +118,7 @@ TEST_F(IntegrationTest, ComponentRegistration) {
     EXPECT_TRUE(found);
 }
 
-// 测试连接尝试（模拟环境下）
+// 测试连接尝试（HTTP/JSON 模式）
 TEST_F(IntegrationTest, ConnectionAttempt) {
     // 注册一些功能
     FunctionDescriptor desc;
@@ -131,12 +131,10 @@ TEST_F(IntegrationTest, ConnectionAttempt) {
 
     client->RegisterFunction(desc, handler);
 
-    // 尝试连接（HTTP/JSON implementation pending）
+    // HTTP/JSON 模式下 Connect() 返回 true（连接状态在 Invoke 时验证）
     bool connected = client->Connect();
-
-    // Connection not yet implemented
-    EXPECT_FALSE(connected);
-    std::cout << "ℹ️ Agent 连接测试（HTTP/JSON 实现待完成）" << std::endl;
+    EXPECT_TRUE(connected);
+    std::cout << "ℹ️ Agent 连接测试（HTTP/JSON 模式）" << '\n';
 }
 
 // 测试错误处理
