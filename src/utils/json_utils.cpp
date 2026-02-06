@@ -561,7 +561,7 @@ bool JsonUtils::ValidateJsonSchema(const std::string& json_content, const std::s
 #endif
 
     } catch (const std::exception& e) {
-        std::cerr << "Schema validation error: " << e.what() << std::endl;
+        std::cerr << "Schema validation error: " << e.what() << '\n';
         return false;
     }
 }

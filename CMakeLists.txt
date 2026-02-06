@@ -351,6 +351,8 @@ if(BUILD_SHARED_LIBS)
             target_link_libraries(croupier-sdk-shared PRIVATE sol2)
         endif()
         target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_ENABLE_LUA)
+        # Define version macro for Lua binding
+        target_compile_definitions(croupier-sdk-shared PRIVATE "CROUPIER_SDK_VERSION=\"${PROJECT_VERSION}\"")
     endif()
 
 
