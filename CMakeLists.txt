@@ -371,7 +371,7 @@ endif()
 if(BUILD_STATIC_LIBS)
     add_library(croupier-sdk-static STATIC ${SDK_SOURCES} ${SDK_HEADERS})
     set_target_properties(croupier-sdk-static PROPERTIES
-        OUTPUT_NAME "croupier-sdk"
+        OUTPUT_NAME "croupier-sdk-static"
         EXPORT_NAME "croupier-sdk"
         # vcpkg-style: Release in lib/, Debug in debug/lib/
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
