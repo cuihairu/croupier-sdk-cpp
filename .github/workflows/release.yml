@@ -220,8 +220,8 @@ jobs:
         find package-install -name "*.dll" -exec cp {} package-dynamic/lib/ \; 2>/dev/null || true
 
         if [ "$RUNNER_OS" = "Windows" ]; then
-          powershell Compress-Archive -Path package-static/* -DestinationPath "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
-          powershell Compress-Archive -Path package-dynamic/* -DestinationPath "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip"
+          powershell -Command "Compress-Archive -Path 'package-static/*' -DestinationPath 'croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip' -Force"
+          powershell -Command "Compress-Archive -Path 'package-dynamic/*' -DestinationPath 'croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.zip' -Force"
         else
           tar -czf "croupier-cpp-sdk-static-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-static .
           tar -czf "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-dynamic .
