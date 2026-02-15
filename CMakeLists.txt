@@ -65,8 +65,8 @@ else()
     setup_ci_build()
 endif()
 
-# gRPC support has been removed - using HTTP/JSON only
-message(STATUS "Building with HTTP/JSON client (gRPC removed)")
+# gRPC support has been removed - using NNG transport
+message(STATUS "Building with NNG transport (gRPC removed)")
 
 # ========== vcpkg Integration ==========
 if(ENABLE_VCPKG)
@@ -111,6 +111,21 @@ endif()
 
 # ========== Dependencies ==========
 find_package(Threads REQUIRED)
+
+# NNG library for nanomsg-next-gen transport
+find_package(nng CONFIG)
+if(nng_FOUND)
+    message(STATUS "Found nng: ${nng_VERSION}")
+else()
+    message(WARNING "nng not found, NNG transport will not be available")
+endif()
+
+# Protobuf for message serialization
+find_package(Protobuf CONFIG)
+if(NOT Protobuf_FOUND)
+    find_package(Protobuf REQUIRED)
+endif()
+message(STATUS "Found protobuf: ${Protobuf_VERSION}")
 
 # JSON library for better JSON support (via vcpkg)
 find_package(nlohmann_json CONFIG)
@@ -261,6 +276,7 @@ set(SDK_SOURCES
     src/utils/file_utils.cpp
     src/config/client_config_loader.cpp
     src/plugin/dynamic_loader.cpp
+    src/nng_transport.cpp
 )
 
 set(SDK_HEADERS
@@ -327,6 +343,20 @@ if(BUILD_SHARED_LIBS)
             Threads::Threads
     )
 
+    # Link NNG for transport
+    if(nng_FOUND)
+        target_link_libraries(croupier-sdk-shared
+            PUBLIC
+                nng::nng
+        )
+    endif()
+
+    # Link Protobuf for message serialization
+    target_link_libraries(croupier-sdk-shared
+        PUBLIC
+            protobuf::libprotobuf
+    )
+
     if(JSON_LIBRARY)
         target_link_libraries(croupier-sdk-shared
             PUBLIC
@@ -391,6 +421,20 @@ if(BUILD_STATIC_LIBS)
     target_link_libraries(croupier-sdk-static
         PUBLIC
             Threads::Threads
+    )
+
+    # Link NNG for transport
+    if(nng_FOUND)
+        target_link_libraries(croupier-sdk-static
+            PUBLIC
+                nng::nng
+        )
+    endif()
+
+    # Link Protobuf for message serialization
+    target_link_libraries(croupier-sdk-static
+        PUBLIC
+            protobuf::libprotobuf
     )
 
     if(JSON_LIBRARY)

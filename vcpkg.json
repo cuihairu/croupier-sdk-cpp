@@ -1,13 +1,19 @@
 {
   "name": "croupier-cpp-sdk",
   "version-string": "0.1.0",
-  "description": "Croupier C++ SDK for Virtual Object Registration and gRPC Integration",
+  "description": "Croupier C++ SDK for Virtual Object Registration and NNG Integration",
   "homepage": "https://github.com/cuihairu/croupier-sdk-cpp",
   "builtin-baseline": "096e0079c53538058fac0a6d1e0994db230352a4",
   "supports": "windows | linux | osx",
   "dependencies": [
     {
       "name": "nlohmann-json"
+    },
+    {
+      "name": "nng"
+    },
+    {
+      "name": "protobuf"
     }
   ],
   "overrides": [
