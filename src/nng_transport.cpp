@@ -173,8 +173,9 @@ void NNGServer::Start() {
         throw std::runtime_error("Failed to create socket: " + std::string(nng_strerror(rv)));
     }
 
-    // Set receive timeout for responsive shutdown
-    nng_socket_set_ms(socket_, NNG_OPT_RECVTIMEO, 1000);
+    // Set receive timeout for responsive shutdown (use smaller of configured or 1000ms)
+    int recv_timeout = (timeout_ms_ > 1000) ? 1000 : timeout_ms_;
+    nng_socket_set_ms(socket_, NNG_OPT_RECVTIMEO, recv_timeout);
 
     // Listen on address
     rv = nng_listen(socket_, address_.c_str(), nullptr, 0);
