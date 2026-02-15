@@ -8,9 +8,18 @@
 
 #include <chrono>
 #include <cstring>
+#include <sstream>
+#include <iomanip>
 
 namespace croupier {
 namespace sdk {
+
+// Helper function to format hex values
+static std::string formatHex(uint32_t value) {
+    std::stringstream ss;
+    ss << "0x" << std::hex << value;
+    return ss.str();
+}
 
 // ========== NNGTransport Implementation ==========
 
@@ -20,7 +29,7 @@ NNGTransport::NNGTransport(const std::string& address, int timeout_ms)
       socket_(NNG_SOCKET_INITIALIZER),
       connected_(false),
       request_id_(0) {
-    SDK_LOG_INFO("NNGTransport created for address: " << address_);
+    CROUPIER_LOG_INFO("NNGTransport", "NNGTransport created for address: " + address);
 }
 
 NNGTransport::~NNGTransport() {
@@ -34,7 +43,7 @@ void NNGTransport::Connect() {
         return;
     }
 
-    SDK_LOG_INFO("Connecting to NNG server at: " << address_);
+    CROUPIER_LOG_INFO("NNGTransport", "Connecting to NNG server at: " + address_);
 
     // Create REQ socket
     int rv = nng_req0_open(&socket_);
@@ -55,7 +64,7 @@ void NNGTransport::Connect() {
     }
 
     connected_ = true;
-    SDK_LOG_INFO("Connected to: " << address_);
+    CROUPIER_LOG_INFO("NNGTransport", "Connected to: " + address_);
 }
 
 void NNGTransport::Close() {
@@ -69,7 +78,7 @@ void NNGTransport::Close() {
     socket_ = NNG_SOCKET_INITIALIZER;
     connected_ = false;
 
-    SDK_LOG_INFO("NNG transport closed");
+    CROUPIER_LOG_INFO("NNGTransport", "NNG transport closed");
 }
 
 bool NNGTransport::IsConnected() const {
@@ -91,8 +100,8 @@ std::pair<uint32_t, std::vector<uint8_t>> NNGTransport::Call(
     // Build message with protocol header
     auto message = protocol::NewMessage(msg_type, request_id_, data);
 
-    SDK_LOG_DEBUG("Sending message type=0x" << std::hex << msg_type
-                  << ", req_id=" << std::dec << request_id_);
+    CROUPIER_LOG_DEBUG("NNGTransport", "Sending message type=" + formatHex(msg_type) +
+                      ", req_id=" + std::to_string(request_id_));
 
     // Send request
     int rv = nng_send(socket_, message.data(), message.size(), 0);
@@ -114,21 +123,20 @@ std::pair<uint32_t, std::vector<uint8_t>> NNGTransport::Call(
 
     auto parsed = protocol::ParseMessage(response_data);
 
-    SDK_LOG_DEBUG("Received response type=0x" << std::hex << parsed.msg_id
-                  << ", req_id=" << std::dec << parsed.req_id);
+    CROUPIER_LOG_DEBUG("NNGTransport", "Received response type=" + formatHex(parsed.msg_id) +
+                      ", req_id=" + std::to_string(parsed.req_id));
 
     // Verify request ID matches
     if (parsed.req_id != request_id_) {
-        SDK_LOG_WARN("Request ID mismatch: expected " << request_id_
-                     << ", got " << parsed.req_id);
+        CROUPIER_LOG_WARN("NNGTransport", "Request ID mismatch: expected " +
+                         std::to_string(request_id_) + ", got " + std::to_string(parsed.req_id));
     }
 
     // Verify response type
     uint32_t expected_resp_type = protocol::GetResponseMsgID(msg_type);
     if (parsed.msg_id != expected_resp_type) {
-        throw std::runtime_error("Unexpected response type: expected 0x" +
-                                 std::to_string(expected_resp_type) + ", got 0x" +
-                                 std::to_string(parsed.msg_id));
+        throw std::runtime_error("Unexpected response type: expected " +
+                                 formatHex(expected_resp_type) + ", got " + formatHex(parsed.msg_id));
     }
 
     return {parsed.msg_id, parsed.body};
@@ -141,7 +149,7 @@ NNGServer::NNGServer(const std::string& address, int timeout_ms)
       timeout_ms_(timeout_ms),
       socket_(NNG_SOCKET_INITIALIZER),
       running_(false) {
-    SDK_LOG_INFO("NNGServer created for address: " << address_);
+    CROUPIER_LOG_INFO("NNGServer", "NNGServer created for address: " + address);
 }
 
 NNGServer::~NNGServer() {
@@ -157,7 +165,7 @@ void NNGServer::Start() {
         return;
     }
 
-    SDK_LOG_INFO("Starting NNG server on: " << address_);
+    CROUPIER_LOG_INFO("NNGServer", "Starting NNG server on: " + address_);
 
     // Create REP socket
     int rv = nng_rep0_open(&socket_);
@@ -178,7 +186,7 @@ void NNGServer::Start() {
     running_ = true;
     server_thread_ = std::thread(&NNGServer::ServeLoop, this);
 
-    SDK_LOG_INFO("NNG server started on: " << address_);
+    CROUPIER_LOG_INFO("NNGServer", "NNG server started on: " + address_);
 }
 
 void NNGServer::Stop() {
@@ -186,7 +194,7 @@ void NNGServer::Stop() {
         return;
     }
 
-    SDK_LOG_INFO("Stopping NNG server...");
+    CROUPIER_LOG_INFO("NNGServer", "Stopping NNG server...");
     running_ = false;
 
     if (server_thread_.joinable()) {
@@ -196,7 +204,7 @@ void NNGServer::Stop() {
     nng_close(socket_);
     socket_ = NNG_SOCKET_INITIALIZER;
 
-    SDK_LOG_INFO("NNG server stopped");
+    CROUPIER_LOG_INFO("NNGServer", "NNG server stopped");
 }
 
 bool NNGServer::IsRunning() const {
@@ -215,7 +223,7 @@ void NNGServer::ServeLoop() {
                 continue;
             }
             if (running_) {
-                SDK_LOG_DEBUG("Server receive error: " << nng_strerror(rv));
+                CROUPIER_LOG_DEBUG("NNGServer", "Server receive error: " + std::string(nng_strerror(rv)));
             }
             continue;
         }
@@ -228,12 +236,12 @@ void NNGServer::ServeLoop() {
         try {
             parsed = protocol::ParseMessage(request_data);
         } catch (const std::exception& e) {
-            SDK_LOG_ERROR("Failed to parse message: " << e.what());
+            CROUPIER_LOG_ERROR("NNGServer", "Failed to parse message: " + std::string(e.what()));
             continue;
         }
 
-        SDK_LOG_DEBUG("Received request type=0x" << std::hex << parsed.msg_id
-                      << ", req_id=" << std::dec << parsed.req_id);
+        CROUPIER_LOG_DEBUG("NNGServer", "Received request type=" + formatHex(parsed.msg_id) +
+                          ", req_id=" + std::to_string(parsed.req_id));
 
         // Handle request
         std::vector<uint8_t> response_body;
@@ -241,7 +249,7 @@ void NNGServer::ServeLoop() {
             try {
                 response_body = handler_(parsed.msg_id, parsed.req_id, parsed.body);
             } catch (const std::exception& e) {
-                SDK_LOG_ERROR("Handler error: " << e.what());
+                CROUPIER_LOG_ERROR("NNGServer", "Handler error: " + std::string(e.what()));
                 response_body.clear();
             }
         }
@@ -253,11 +261,11 @@ void NNGServer::ServeLoop() {
         // Send response
         rv = nng_send(socket_, response.data(), response.size(), 0);
         if (rv != 0) {
-            SDK_LOG_ERROR("Failed to send response: " << nng_strerror(rv));
+            CROUPIER_LOG_ERROR("NNGServer", "Failed to send response: " + std::string(nng_strerror(rv)));
         }
 
-        SDK_LOG_DEBUG("Sent response type=0x" << std::hex << resp_msg_type
-                      << ", req_id=" << std::dec << parsed.req_id);
+        CROUPIER_LOG_DEBUG("NNGServer", "Sent response type=" + formatHex(resp_msg_type) +
+                          ", req_id=" + std::to_string(parsed.req_id));
     }
 }
 
