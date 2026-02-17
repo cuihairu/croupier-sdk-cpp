@@ -110,8 +110,8 @@ TEST_F(PluginRegistryTest, GetAllPluginsEmpty) {
     // Just verify that GetAllPlugins doesn't crash and returns a vector
     std::vector<PluginInfo> allPlugins = PluginRegistry::GetAllPlugins();
 
-    // Should at least return an empty vector (or some plugins from other tests)
-    EXPECT_TRUE(allPlugins.size() >= 0);
+    // Should return a vector (size is unsigned, so it's always >= 0)
+    EXPECT_TRUE(allPlugins.empty() || allPlugins.size() > 0);
 }
 
 TEST_F(PluginRegistryTest, IsPluginRegistered) {

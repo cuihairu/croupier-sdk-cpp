@@ -655,6 +655,7 @@ if(BUILD_TESTS)
             tests/test_client_connection.cpp
             tests/test_client_lifecycle.cpp
             tests/test_plugin_registry.cpp
+            tests/test_edge_cases.cpp
         )
 
         if(TARGET GTest::gtest_main)
