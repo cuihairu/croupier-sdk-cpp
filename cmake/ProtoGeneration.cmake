@@ -17,7 +17,7 @@ function(download_proto_files PROTO_SOURCE_DIR PROTO_DEST_DIR)
     endif()
 
     # Download proto files from main repository
-    set(PROTO_BASE_URL "https://raw.githubusercontent.com/cuihairu/croupier-proto/${CROUPIER_PROTO_BRANCH}")
+    set(PROTO_BASE_URL "https://raw.githubusercontent.com/cuihairu/croupier/${CROUPIER_PROTO_BRANCH}/proto")
 
     # List of proto files to download
     set(PROTO_FILES
@@ -207,8 +207,8 @@ function(setup_ci_build)
             message(STATUS "🏠 Using main repo proto directory at ${PROJECT_ROOT_DIR}/proto")
             generate_grpc_code("${PROJECT_ROOT_DIR}/proto" ${PROTO_GENERATED_DIR})
         else()
-            # Fallback: download from proto repository
-            message(STATUS "⬇️  Proto files not found locally, downloading from croupier-proto...")
+            # Fallback: download from main repository
+            message(STATUS "⬇️  Proto files not found locally, downloading from croupier repo...")
             set(PROTO_DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloaded_proto")
             download_proto_files("${PROJECT_ROOT_DIR}/proto" ${PROTO_DOWNLOAD_DIR})
             generate_grpc_code(${PROTO_DOWNLOAD_DIR} ${PROTO_GENERATED_DIR})
