@@ -197,7 +197,7 @@ int main() {
 ### 创建钱包
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/wallet.create/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.create/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123"}'
@@ -215,7 +215,7 @@ curl -X POST http://localhost:8080/api/v1/functions/wallet.create/invoke \
 ### 查询钱包
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/wallet.get/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.get/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123"}'
@@ -238,7 +238,7 @@ curl -X POST http://localhost:8080/api/v1/functions/wallet.get/invoke \
 ### 转账
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/wallet.transfer/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.transfer/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{

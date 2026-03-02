@@ -106,13 +106,13 @@ cmake --build build
 
 ```bash
 # 调用 hello.world
-curl -X POST http://localhost:8080/api/v1/functions/hello.world/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/hello.world/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"name": "Croupier"}'
 
 # 调用 math.add
-curl -X POST http://localhost:8080/api/v1/functions/math.add/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/math.add/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"a": 5, "b": 3}'

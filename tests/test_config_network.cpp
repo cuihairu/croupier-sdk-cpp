@@ -194,12 +194,12 @@ TEST_F(ConfigNetworkTest, LocalhostAddressValidation) {
     // RED: 测试 localhost 地址变体
     std::string localhost_config = R"({
         "game_id": "test-game",
-        "agent_addr": "localhost:8080"
+        "agent_addr": "localhost:18780"
     })";
 
     EXPECT_NO_THROW({
         ClientConfig config = loader->LoadFromJson(localhost_config);
-        EXPECT_EQ(config.agent_addr, "localhost:8080");
+        EXPECT_EQ(config.agent_addr, "localhost:18780");
     });
 }
 

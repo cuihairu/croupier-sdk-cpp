@@ -302,7 +302,7 @@ import unittest
 class E2ETest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://localhost:8080"
+        cls.base_url = "http://localhost:18780"
 
     def test_invoke_function(self):
         response = requests.post(

@@ -196,7 +196,7 @@ plugin-demo/
 ./build/plugin-demo
 
 # 在另一个终端调用插件函数
-curl -X POST http://localhost:8080/api/v1/functions/logging.write/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/logging.write/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{

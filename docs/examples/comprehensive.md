@@ -294,7 +294,7 @@ target_link_libraries(comprehensive_demo PRIVATE croupier-sdk::croupier-sdk)
 ### 创建玩家
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/player.create/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/player.create/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123", "name": "Alice"}'
@@ -303,7 +303,7 @@ curl -X POST http://localhost:8080/api/v1/functions/player.create/invoke \
 ### 创建钱包
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/wallet.create/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.create/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123"}'
@@ -312,7 +312,7 @@ curl -X POST http://localhost:8080/api/v1/functions/wallet.create/invoke \
 ### 查询玩家
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/player.get/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/player.get/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123"}'
@@ -321,7 +321,7 @@ curl -X POST http://localhost:8080/api/v1/functions/player.get/invoke \
 ### 查询钱包
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/wallet.get/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.get/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player123"}'
@@ -331,18 +331,18 @@ curl -X POST http://localhost:8080/api/v1/functions/wallet.get/invoke \
 
 ```bash
 # 先创建第二个玩家和钱包
-curl -X POST http://localhost:8080/api/v1/functions/player.create/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/player.create/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player456", "name": "Bob"}'
 
-curl -X POST http://localhost:8080/api/v1/functions/wallet.create/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.create/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{"player_id": "player456"}'
 
 # 转账
-curl -X POST http://localhost:8080/api/v1/functions/wallet.transfer/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/wallet.transfer/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{
@@ -356,7 +356,7 @@ curl -X POST http://localhost:8080/api/v1/functions/wallet.transfer/invoke \
 ### 获取服务器信息
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/functions/server.info/invoke \
+curl -X POST http://localhost:18780/api/v1/functions/server.info/invoke \
   -H "Content-Type: application/json" \
   -H "X-Game-ID: demo-game" \
   -d '{}'
