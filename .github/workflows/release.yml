@@ -22,7 +22,7 @@ jobs:
       version_tag: ${{ steps.version.outputs.version_tag }}
       is_tagged_release: ${{ steps.version.outputs.is_tagged_release }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
@@ -95,7 +95,7 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
@@ -251,7 +251,7 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Download All Static Artifacts
       uses: actions/download-artifact@v4
@@ -322,3 +322,4 @@ jobs:
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
