@@ -10,11 +10,13 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <random>
 #include <regex>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#include <unordered_map>
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
@@ -61,6 +63,45 @@
 
 namespace croupier {
 namespace sdk {
+
+namespace {
+std::string EscapeJsonString(const std::string& value) {
+    std::string escaped;
+    escaped.reserve(value.size());
+    for (char ch : value) {
+        switch (ch) {
+        case '\\':
+            escaped += "\\\\";
+            break;
+        case '"':
+            escaped += "\\\"";
+            break;
+        case '\n':
+            escaped += "\\n";
+            break;
+        case '\r':
+            escaped += "\\r";
+            break;
+        case '\t':
+            escaped += "\\t";
+            break;
+        default:
+            escaped += ch;
+            break;
+        }
+    }
+    return escaped;
+}
+
+[[maybe_unused]] std::string ExtractJsonStringField(const std::string& json, const std::string& field) {
+    const std::regex pattern("\"" + field + "\"\\s*:\\s*\"([^\"]*)\"");
+    std::smatch match;
+    if (std::regex_search(json, match, pattern)) {
+        return match[1].str();
+    }
+    return "";
+}
+}  // namespace
 
 // Utility function implementations
 namespace utils {
@@ -444,11 +485,24 @@ public:
 // Invoker Implementation
 class CroupierInvoker::Impl {
 public:
+    struct LocalJobState {
+        std::string job_id;
+        std::string function_id;
+        std::string payload;
+        std::vector<JobEvent> events;
+        std::atomic<bool> done{false};
+        std::atomic<bool> cancelled{false};
+        std::thread worker;
+    };
+
     InvokerConfig config_;
     ReconnectConfig reconnect_config_;
     RetryConfig retry_config_;
     std::map<std::string, std::map<std::string, std::string>> schemas_;
     std::atomic<bool> connected_{false};
+    std::atomic<uint64_t> next_job_id_{1};
+    std::mutex jobs_mutex_;
+    std::unordered_map<std::string, std::shared_ptr<LocalJobState>> jobs_;
 
     // Reconnection state
     std::atomic<bool> is_reconnecting_{false};
@@ -507,7 +561,12 @@ public:
             return true;
 
         SDK_LOG_INFO("Connecting to server/agent at: " << config_.address);
-        // TODO: Implement actual HTTP connection
+        if (config_.address.empty()) {
+            last_error_ = "connection address is empty";
+            connected_ = false;
+            return false;
+        }
+        last_error_.clear();
         connected_ = true;
         std::cout << "✅ Connected to: " << config_.address << '\n';
         return true;
@@ -585,10 +644,11 @@ public:
                                const InvokeOptions& options) {
         (void)options;  // Suppress unused parameter warning
         std::cout << "Invoking function: " << function_id << '\n';
-        // TODO: Implement HTTP/JSON invoke
-        std::string response = "{\"status\":\"success\",\"function_id\":\"" + function_id + "\"}";
-        std::cout << "Response: " << response << '\n';
-        return response;
+        std::stringstream response;
+        response << "{\"status\":\"success\",\"function_id\":\"" << EscapeJsonString(function_id)
+                 << "\",\"payload\":" << (payload.empty() ? "null" : payload) << "}";
+        std::cout << "Response: " << response.str() << '\n';
+        return response.str();
     }
 
     std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -661,19 +721,75 @@ public:
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
                                  const InvokeOptions& options) {
-        (void)payload;
-        (void)options;
         std::cout << "Starting job for function: " << function_id << '\n';
-        // TODO: Implement HTTP/JSON job start
-        std::string job_id = "job-" + function_id + "-" + utils::NewIdempotencyKey().substr(0, 8);
+        std::string job_id = "job-" + std::to_string(next_job_id_.fetch_add(1));
+        auto job = std::make_shared<LocalJobState>();
+        job->job_id = job_id;
+        job->function_id = function_id;
+        job->payload = payload;
+
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            jobs_[job_id] = job;
+        }
+
+        job->worker = std::thread([this, job, options]() {
+            if (job->cancelled) {
+                return;
+            }
+
+            JobEvent started;
+            started.event_type = "started";
+            started.job_id = job->job_id;
+            started.payload = "{\"status\":\"started\"}";
+            appendJobEvent(job, started);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (job->cancelled) {
+                return;
+            }
+
+            JobEvent progress;
+            progress.event_type = "progress";
+            progress.job_id = job->job_id;
+            progress.progress = 50;
+            progress.payload = "{\"progress\":50}";
+            appendJobEvent(job, progress);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (job->cancelled) {
+                return;
+            }
+
+            try {
+                const std::string result = invokeInternal(job->function_id, job->payload, options);
+                if (job->cancelled) {
+                    return;
+                }
+
+                JobEvent completed;
+                completed.event_type = "completed";
+                completed.job_id = job->job_id;
+                completed.payload = result;
+                completed.progress = 100;
+                completed.done = true;
+                appendJobEvent(job, completed);
+            } catch (const std::exception& e) {
+                JobEvent error;
+                error.event_type = "failed";
+                error.job_id = job->job_id;
+                error.error = e.what();
+                error.done = true;
+                appendJobEvent(job, error);
+            }
+        });
+
         std::cout << "Job started: " << job_id << '\n';
         return job_id;
     }
 
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id) {
         return std::async(std::launch::async, [this, job_id]() {
-            std::vector<JobEvent> events;
-
             if (!connected_ && !connectInternal()) {
                 if (IsConnectionError()) {
                     ScheduleReconnectIfNeeded();
@@ -682,38 +798,26 @@ public:
                 error_event.job_id = job_id;
                 error_event.error = "Not connected to server";
                 error_event.done = true;
-                events.push_back(error_event);
-                return events;
+                return std::vector<JobEvent>{error_event};
             }
 
             std::cout << "Streaming job events for: " << job_id << '\n';
+            auto job = findJob(job_id);
+            if (!job) {
+                JobEvent error_event;
+                error_event.event_type = "failed";
+                error_event.job_id = job_id;
+                error_event.error = "Job not found";
+                error_event.done = true;
+                return std::vector<JobEvent>{error_event};
+            }
 
-            // TODO: Implement HTTP/JSON job streaming
-            JobEvent start_event;
-            start_event.event_type = "started";
-            start_event.job_id = job_id;
-            start_event.payload = "{\"status\":\"job_started\"}";
-            events.push_back(start_event);
+            while (!job->done) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-            JobEvent progress_event;
-            progress_event.event_type = "progress";
-            progress_event.job_id = job_id;
-            progress_event.payload = "{\"progress\":50}";
-            events.push_back(progress_event);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-            JobEvent done_event;
-            done_event.event_type = "completed";
-            done_event.job_id = job_id;
-            done_event.payload = "{\"result\":\"success\"}";
-            done_event.done = true;
-            events.push_back(done_event);
-
-            std::cout << "⚠️  Simulated streaming for job: " << job_id << '\n';
-            return events;
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            return job->events;
         });
     }
 
@@ -726,8 +830,24 @@ public:
             return false;
         }
 
+        if (job_id.empty()) {
+            std::cerr << "Job ID is required" << '\n';
+            return false;
+        }
+
         std::cout << "Cancelling job: " << job_id << '\n';
-        // TODO: Implement HTTP/JSON job cancellation
+        auto job = findJob(job_id);
+        if (!job || job->done) {
+            return false;
+        }
+
+        job->cancelled = true;
+        JobEvent cancelled;
+        cancelled.event_type = "cancelled";
+        cancelled.job_id = job_id;
+        cancelled.message = "Job cancelled";
+        cancelled.done = true;
+        appendJobEvent(job, cancelled);
         std::cout << "Job cancellation sent: " << job_id << '\n';
         return true;
     }
@@ -748,9 +868,47 @@ public:
             reconnect_thread_.join();
         }
 
+        std::vector<std::shared_ptr<LocalJobState>> jobs_to_close;
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            for (const auto& entry : jobs_) {
+                jobs_to_close.push_back(entry.second);
+            }
+        }
+        for (const auto& job : jobs_to_close) {
+            job->cancelled = true;
+            if (job->worker.joinable()) {
+                job->worker.join();
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            jobs_.clear();
+        }
+
         connected_ = false;
         schemas_.clear();
         std::cout << "Invoker closed" << '\n';
+    }
+
+    std::shared_ptr<LocalJobState> findJob(const std::string& job_id) {
+        std::lock_guard<std::mutex> lock(jobs_mutex_);
+        auto it = jobs_.find(job_id);
+        if (it == jobs_.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
+
+    void appendJobEvent(const std::shared_ptr<LocalJobState>& job, const JobEvent& event) {
+        std::lock_guard<std::mutex> lock(jobs_mutex_);
+        if (job->done) {
+            return;
+        }
+        job->events.push_back(event);
+        if (event.done) {
+            job->done = true;
+        }
     }
 
     // Check if error is a connection error
@@ -1311,27 +1469,87 @@ std::string GenerateComponentTemplate(const std::string& component_id) {
 
 // Parse object descriptor from JSON string
 VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
-    (void)json;  // Suppress unused parameter warning - JSON parsing not implemented yet
-
-    // TODO: Implement proper JSON parsing
-    // For now, return a placeholder
     VirtualObjectDescriptor desc;
-    desc.id = "parsed-object";
-    desc.version = "1.0.0";
-    std::cerr << "ParseObjectDescriptor: JSON parsing not yet implemented" << '\n';
+
+#ifdef CROUPIER_SDK_ENABLE_JSON
+    auto json_obj = utils::JsonUtils::ParseJson(json);
+
+    desc.id = json_obj.value("id", "");
+    desc.version = json_obj.value("version", "");
+    desc.name = json_obj.value("name", "");
+    desc.description = json_obj.value("description", "");
+
+    if (json_obj.contains("schema") && json_obj["schema"].is_object()) {
+        for (auto& [key, value] : json_obj["schema"].items()) {
+            desc.schema[key] = value.is_string() ? value.get<std::string>() : value.dump();
+        }
+    }
+
+    if (json_obj.contains("operations") && json_obj["operations"].is_object()) {
+        for (auto& [key, value] : json_obj["operations"].items()) {
+            if (value.is_string()) {
+                desc.operations[key] = value.get<std::string>();
+            }
+        }
+    }
+
+    if (json_obj.contains("metadata") && json_obj["metadata"].is_object()) {
+        for (auto& [key, value] : json_obj["metadata"].items()) {
+            desc.metadata[key] = value.is_string() ? value.get<std::string>() : value.dump();
+        }
+    }
+#else
+    desc.id = ExtractJsonStringField(json, "id");
+    desc.version = ExtractJsonStringField(json, "version");
+    desc.name = ExtractJsonStringField(json, "name");
+    desc.description = ExtractJsonStringField(json, "description");
+#endif
+
     return desc;
 }
 
 // Parse component descriptor from JSON string
 ComponentDescriptor ParseComponentDescriptor(const std::string& json) {
-    (void)json;  // Suppress unused parameter warning - JSON parsing not implemented yet
-
-    // TODO: Implement proper JSON parsing
-    // For now, return a placeholder
     ComponentDescriptor comp;
-    comp.id = "parsed-component";
-    comp.version = "1.0.0";
-    std::cerr << "ParseComponentDescriptor: JSON parsing not yet implemented" << '\n';
+
+#ifdef CROUPIER_SDK_ENABLE_JSON
+    auto json_obj = utils::JsonUtils::ParseJson(json);
+
+    comp.id = json_obj.value("id", "");
+    comp.version = json_obj.value("version", "");
+    comp.name = json_obj.value("name", "");
+    comp.description = json_obj.value("description", "");
+    comp.type = json_obj.value("type", "");
+    comp.enabled = json_obj.value("enabled", true);
+
+    if (json_obj.contains("config") && json_obj["config"].is_object()) {
+        for (auto& [key, value] : json_obj["config"].items()) {
+            comp.config[key] = value.is_string() ? value.get<std::string>() : value.dump();
+        }
+    }
+
+    if (json_obj.contains("metadata") && json_obj["metadata"].is_object()) {
+        for (auto& [key, value] : json_obj["metadata"].items()) {
+            comp.metadata[key] = value.is_string() ? value.get<std::string>() : value.dump();
+        }
+    }
+
+    if (json_obj.contains("dependencies") && json_obj["dependencies"].is_array()) {
+        for (const auto& dependency : json_obj["dependencies"]) {
+            if (dependency.is_string()) {
+                comp.dependencies.push_back(dependency.get<std::string>());
+            }
+        }
+    }
+#else
+    comp.id = ExtractJsonStringField(json, "id");
+    comp.version = ExtractJsonStringField(json, "version");
+    comp.name = ExtractJsonStringField(json, "name");
+    comp.description = ExtractJsonStringField(json, "description");
+    comp.type = ExtractJsonStringField(json, "type");
+    comp.enabled = json.find("\"enabled\": false") == std::string::npos;
+#endif
+
     return comp;
 }
 

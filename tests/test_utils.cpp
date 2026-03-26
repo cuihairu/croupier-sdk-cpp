@@ -300,3 +300,101 @@ TEST_F(UtilsTest, IdempotencyKeyGeneration) {
     EXPECT_TRUE(std::all_of(key1.begin(), key1.end(), is_hex));
     EXPECT_TRUE(std::all_of(key2.begin(), key2.end(), is_hex));
 }
+
+TEST_F(UtilsTest, InvokerRequiresAddress) {
+    InvokerConfig config;
+    config.address = "";
+    config.retry.enabled = false;
+
+    CroupierInvoker invoker(config);
+    EXPECT_FALSE(invoker.Connect());
+    invoker.Close();
+}
+
+TEST_F(UtilsTest, InvokerStartJobStreamsCompletedEvent) {
+    InvokerConfig config;
+    config.address = "http://127.0.0.1:8080";
+    config.retry.enabled = false;
+
+    CroupierInvoker invoker(config);
+    ASSERT_TRUE(invoker.Connect());
+
+    const std::string job_id = invoker.StartJob("wallet.get", R"({"player_id":"u1"})");
+    EXPECT_FALSE(job_id.empty());
+
+    const auto events = invoker.StreamJob(job_id).get();
+    ASSERT_GE(events.size(), 3U);
+    EXPECT_EQ(events.front().event_type, "started");
+    EXPECT_EQ(events[1].event_type, "progress");
+    EXPECT_EQ(events.back().event_type, "completed");
+    EXPECT_TRUE(events.back().done);
+    EXPECT_NE(events.back().payload.find("\"function_id\":\"wallet.get\""), std::string::npos);
+
+    invoker.Close();
+}
+
+TEST_F(UtilsTest, InvokerCancelJobEmitsCancelledEvent) {
+    InvokerConfig config;
+    config.address = "http://127.0.0.1:8080";
+    config.retry.enabled = false;
+
+    CroupierInvoker invoker(config);
+    ASSERT_TRUE(invoker.Connect());
+
+    const std::string job_id = invoker.StartJob("wallet.transfer", R"({"amount":10})");
+    ASSERT_FALSE(job_id.empty());
+    EXPECT_TRUE(invoker.CancelJob(job_id));
+
+    const auto events = invoker.StreamJob(job_id).get();
+    ASSERT_FALSE(events.empty());
+    EXPECT_EQ(events.back().event_type, "cancelled");
+    EXPECT_TRUE(events.back().done);
+    EXPECT_FALSE(invoker.CancelJob(job_id));
+
+    invoker.Close();
+}
+
+TEST_F(UtilsTest, ParseObjectDescriptorFromJson) {
+    const std::string json = R"({
+        "id": "wallet.entity",
+        "version": "1.2.3",
+        "name": "Wallet",
+        "description": "Player wallet",
+        "operations": {
+            "read": "wallet.get",
+            "update": "wallet.update"
+        },
+        "metadata": {
+            "domain": "economy"
+        }
+    })";
+
+    const auto desc = utils::ParseObjectDescriptor(json);
+    EXPECT_EQ(desc.id, "wallet.entity");
+    EXPECT_EQ(desc.version, "1.2.3");
+    EXPECT_EQ(desc.name, "Wallet");
+    EXPECT_EQ(desc.operations.at("read"), "wallet.get");
+}
+
+TEST_F(UtilsTest, ParseComponentDescriptorFromJson) {
+    const std::string json = R"({
+        "id": "economy-system",
+        "version": "2.0.0",
+        "name": "Economy",
+        "description": "Economy module",
+        "type": "gameplay",
+        "enabled": true,
+        "dependencies": ["player-system"],
+        "config": {
+            "currency": "gold"
+        }
+    })";
+
+    const auto desc = utils::ParseComponentDescriptor(json);
+    EXPECT_EQ(desc.id, "economy-system");
+    EXPECT_EQ(desc.version, "2.0.0");
+    EXPECT_EQ(desc.type, "gameplay");
+    ASSERT_EQ(desc.dependencies.size(), 1U);
+    EXPECT_EQ(desc.dependencies.front(), "player-system");
+    EXPECT_EQ(desc.config.at("currency"), "gold");
+}
