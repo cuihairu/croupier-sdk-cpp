@@ -296,6 +296,14 @@ if(ENABLE_LUA_BINDING)
     message(STATUS "Added Lua binding source files (sol2)")
 endif()
 
+if(DEFINED GENERATED_PROTO_SOURCES AND GENERATED_PROTO_SOURCES)
+    list(APPEND SDK_SOURCES ${GENERATED_PROTO_SOURCES})
+endif()
+
+if(DEFINED GENERATED_PROTO_HEADERS AND GENERATED_PROTO_HEADERS)
+    list(APPEND SDK_HEADERS ${GENERATED_PROTO_HEADERS})
+endif()
+
 
 # ========== Library Targets ==========
 
@@ -334,8 +342,12 @@ if(BUILD_SHARED_LIBS)
     target_include_directories(croupier-sdk-shared
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:include>
     )
+    if(DEFINED PROTO_GENERATED_DIR AND PROTO_GENERATED_DIR)
+        target_include_directories(croupier-sdk-shared PUBLIC ${PROTO_GENERATED_DIR})
+    endif()
 
     # Link dependencies
     target_link_libraries(croupier-sdk-shared
@@ -349,6 +361,7 @@ if(BUILD_SHARED_LIBS)
             PUBLIC
                 nng::nng
         )
+        target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_HAS_NNG)
     endif()
 
     # Link Protobuf for message serialization
@@ -414,8 +427,12 @@ if(BUILD_STATIC_LIBS)
     target_include_directories(croupier-sdk-static
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:include>
     )
+    if(DEFINED PROTO_GENERATED_DIR AND PROTO_GENERATED_DIR)
+        target_include_directories(croupier-sdk-static PUBLIC ${PROTO_GENERATED_DIR})
+    endif()
 
     # For static library, we still link dependencies publicly for user projects
     target_link_libraries(croupier-sdk-static
@@ -429,6 +446,7 @@ if(BUILD_STATIC_LIBS)
             PUBLIC
                 nng::nng
         )
+        target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_HAS_NNG)
     endif()
 
     # Link Protobuf for message serialization
@@ -634,7 +652,7 @@ if(BUILD_TESTS)
 
     # Targets are available either from `find_package(GTest)` (vcpkg/system) or FetchContent.
     if(TARGET GTest::gtest_main OR TARGET gtest_main)
-        add_executable(croupier-sdk-tests
+        set(CROUPIER_TEST_SOURCES
             tests/test_virtual_objects.cpp
             tests/test_utils.cpp
             tests/test_integration.cpp
@@ -654,7 +672,19 @@ if(BUILD_TESTS)
             tests/test_client_components.cpp
             tests/test_client_connection.cpp
             tests/test_client_lifecycle.cpp
+            tests/test_invoker_fallback.cpp
             tests/test_plugin_registry.cpp
+        )
+
+        if(nng_FOUND)
+            list(APPEND CROUPIER_TEST_SOURCES
+                tests/test_nng_transport.cpp
+                tests/test_invoker.cpp
+            )
+        endif()
+
+        add_executable(croupier-sdk-tests
+            ${CROUPIER_TEST_SOURCES}
         )
 
         if(TARGET GTest::gtest_main)

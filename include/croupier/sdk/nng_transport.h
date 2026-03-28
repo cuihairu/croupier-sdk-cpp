@@ -17,9 +17,11 @@
 #include <thread>
 #include <vector>
 
+#ifdef CROUPIER_SDK_HAS_NNG
 #include <nng/nng.h>
 #include <nng/protocol/reqrep0/rep.h>
 #include <nng/protocol/reqrep0/req.h>
+#endif
 
 #include "protocol.h"
 
@@ -78,11 +80,16 @@ public:
 
 private:
     std::string address_;
+#ifdef CROUPIER_SDK_HAS_NNG
     int timeout_ms_;
     nng_socket socket_;
     bool connected_;
     std::mutex mutex_;
     uint32_t request_id_;
+#else
+    bool connected_;
+    std::mutex mutex_;
+#endif
 };
 
 /**
@@ -137,11 +144,17 @@ private:
     void ServeLoop();
 
     std::string address_;
+#ifdef CROUPIER_SDK_HAS_NNG
     int timeout_ms_;
     nng_socket socket_;
     bool running_;
     Handler handler_;
     std::thread server_thread_;
+#else
+    bool running_;
+    Handler handler_;
+    std::thread server_thread_;
+#endif
 };
 
 }  // namespace sdk

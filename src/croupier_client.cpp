@@ -1,7 +1,11 @@
 #include "croupier/sdk/croupier_client.h"
 
 #include "croupier/sdk/logger.h"
+#include "croupier/sdk/nng_transport.h"
 #include "croupier/sdk/utils/json_utils.h"
+#ifdef CROUPIER_SDK_HAS_NNG
+#include "generated/croupier/sdk/v1/invocation.pb.h"
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -102,6 +106,65 @@ std::string EscapeJsonString(const std::string& value) {
     return "";
 }
 }  // namespace
+
+#ifdef CROUPIER_SDK_HAS_NNG
+namespace {
+
+std::string NormalizeNNGAddress(const std::string& address) {
+    if (address.empty()) {
+        return address;
+    }
+    if (address.find("://") != std::string::npos) {
+        return address;
+    }
+    return "tcp://" + address;
+}
+
+std::vector<uint8_t> SerializeMessage(const google::protobuf::Message& message) {
+    std::string bytes;
+    if (!message.SerializeToString(&bytes)) {
+        throw std::runtime_error("failed to serialize protobuf message");
+    }
+    return std::vector<uint8_t>(bytes.begin(), bytes.end());
+}
+
+template <typename T>
+T ParseMessage(const std::vector<uint8_t>& bytes, const std::string& type_name) {
+    T message;
+    if (!message.ParseFromArray(bytes.data(), static_cast<int>(bytes.size()))) {
+        throw std::runtime_error("failed to parse protobuf message: " + type_name);
+    }
+    return message;
+}
+
+JobEvent ToJobEvent(const std::string& job_id, const croupier::sdk::v1::JobEvent& event) {
+    JobEvent result;
+    result.event_type = event.type();
+    result.job_id = job_id;
+    result.message = event.message();
+    result.progress = event.progress();
+    result.payload = event.payload();
+    result.done =
+        result.event_type == "done" || result.event_type == "completed" || result.event_type == "error";
+    if (result.event_type == "error") {
+        result.error = event.message();
+    }
+    return result;
+}
+
+bool IsTerminalJobEvent(const JobEvent& event) {
+    return event.done || event.event_type == "done" || event.event_type == "completed" ||
+           event.event_type == "error" || event.event_type == "cancelled";
+}
+
+bool SameJobEvent(const JobEvent& lhs, const JobEvent& rhs) {
+    return lhs.event_type == rhs.event_type && lhs.job_id == rhs.job_id && lhs.message == rhs.message &&
+           lhs.progress == rhs.progress && lhs.payload == rhs.payload && lhs.error == rhs.error &&
+           lhs.done == rhs.done;
+}
+
+}  // namespace
+#endif
 
 // Utility function implementations
 namespace utils {
@@ -499,8 +562,10 @@ public:
     ReconnectConfig reconnect_config_;
     RetryConfig retry_config_;
     std::map<std::string, std::map<std::string, std::string>> schemas_;
+    std::unique_ptr<NNGTransport> transport_;
     std::atomic<bool> connected_{false};
     std::atomic<uint64_t> next_job_id_{1};
+    std::mutex transport_mutex_;
     std::mutex jobs_mutex_;
     std::unordered_map<std::string, std::shared_ptr<LocalJobState>> jobs_;
 
@@ -566,10 +631,31 @@ public:
             connected_ = false;
             return false;
         }
+#ifndef CROUPIER_SDK_HAS_NNG
         last_error_.clear();
         connected_ = true;
         std::cout << "✅ Connected to: " << config_.address << '\n';
         return true;
+#else
+        try {
+            auto transport = std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.address),
+                                                            config_.timeout_seconds * 1000);
+            transport->Connect();
+            {
+                std::lock_guard<std::mutex> lock(transport_mutex_);
+                transport_ = std::move(transport);
+            }
+            last_error_.clear();
+            connected_ = true;
+            SDK_LOG_INFO("Connected to: " << NormalizeNNGAddress(config_.address));
+            return true;
+        } catch (const std::exception& e) {
+            last_error_ = e.what();
+            connected_ = false;
+            SDK_LOG_ERROR("Failed to connect: " << last_error_);
+            return false;
+        }
+#endif
     }
 
     std::string Invoke(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -642,6 +728,7 @@ public:
 
     std::string invokeInternal(const std::string& function_id, const std::string& payload,
                                const InvokeOptions& options) {
+#ifndef CROUPIER_SDK_HAS_NNG
         (void)options;  // Suppress unused parameter warning
         std::cout << "Invoking function: " << function_id << '\n';
         std::stringstream response;
@@ -649,6 +736,49 @@ public:
                  << "\",\"payload\":" << (payload.empty() ? "null" : payload) << "}";
         std::cout << "Response: " << response.str() << '\n';
         return response.str();
+#else
+        croupier::sdk::v1::InvokeRequest req;
+        req.set_function_id(function_id);
+        req.set_idempotency_key(options.idempotency_key.empty() ? utils::NewIdempotencyKey() : options.idempotency_key);
+        req.set_payload(payload);
+
+        for (const auto& [key, value] : config_.headers) {
+            (*req.mutable_metadata())[key] = value;
+        }
+        for (const auto& [key, value] : options.metadata) {
+            (*req.mutable_metadata())[key] = value;
+        }
+        if (!config_.auth_token.empty() && req.metadata().find("Authorization") == req.metadata().end()) {
+            (*req.mutable_metadata())["Authorization"] = "Bearer " + config_.auth_token;
+        }
+        if (!config_.game_id.empty()) {
+            (*req.mutable_metadata())["X-Game-ID"] = config_.game_id;
+        }
+        if (!config_.env.empty()) {
+            (*req.mutable_metadata())["X-Env"] = config_.env;
+        }
+        if (!options.route.empty()) {
+            (*req.mutable_metadata())["route"] = options.route;
+        }
+        if (!options.target_service_id.empty()) {
+            (*req.mutable_metadata())["target_service_id"] = options.target_service_id;
+        }
+        if (!options.hash_key.empty()) {
+            (*req.mutable_metadata())["hash_key"] = options.hash_key;
+        }
+        if (!options.trace_id.empty()) {
+            (*req.mutable_metadata())["trace_id"] = options.trace_id;
+        }
+
+        std::lock_guard<std::mutex> lock(transport_mutex_);
+        if (!transport_ || !transport_->IsConnected()) {
+            throw std::runtime_error("Not connected to server");
+        }
+
+        auto [_, response_body] = transport_->Call(protocol::MSG_INVOKE_REQUEST, SerializeMessage(req));
+        auto response = ParseMessage<croupier::sdk::v1::InvokeResponse>(response_body, "InvokeResponse");
+        return response.payload();
+#endif
     }
 
     std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -721,6 +851,7 @@ public:
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
                                  const InvokeOptions& options) {
+#ifndef CROUPIER_SDK_HAS_NNG
         std::cout << "Starting job for function: " << function_id << '\n';
         std::string job_id = "job-" + std::to_string(next_job_id_.fetch_add(1));
         auto job = std::make_shared<LocalJobState>();
@@ -786,6 +917,61 @@ public:
 
         std::cout << "Job started: " << job_id << '\n';
         return job_id;
+#else
+        croupier::sdk::v1::InvokeRequest req;
+        req.set_function_id(function_id);
+        req.set_idempotency_key(options.idempotency_key.empty() ? utils::NewIdempotencyKey() : options.idempotency_key);
+        req.set_payload(payload);
+
+        for (const auto& [key, value] : config_.headers) {
+            (*req.mutable_metadata())[key] = value;
+        }
+        for (const auto& [key, value] : options.metadata) {
+            (*req.mutable_metadata())[key] = value;
+        }
+        if (!config_.auth_token.empty() && req.metadata().find("Authorization") == req.metadata().end()) {
+            (*req.mutable_metadata())["Authorization"] = "Bearer " + config_.auth_token;
+        }
+        if (!config_.game_id.empty()) {
+            (*req.mutable_metadata())["X-Game-ID"] = config_.game_id;
+        }
+        if (!config_.env.empty()) {
+            (*req.mutable_metadata())["X-Env"] = config_.env;
+        }
+
+        std::vector<uint8_t> response_body;
+        {
+            std::lock_guard<std::mutex> lock(transport_mutex_);
+            if (!transport_ || !transport_->IsConnected()) {
+                throw std::runtime_error("Not connected to server");
+            }
+            auto response = transport_->Call(protocol::MSG_START_JOB_REQUEST, SerializeMessage(req));
+            response_body = std::move(response.second);
+        }
+
+        auto response = ParseMessage<croupier::sdk::v1::StartJobResponse>(response_body, "StartJobResponse");
+        if (response.job_id().empty()) {
+            throw std::runtime_error("StartJob response did not include job ID");
+        }
+
+        auto state = std::make_shared<LocalJobState>();
+        state->job_id = response.job_id();
+        state->function_id = function_id;
+        state->payload = payload;
+        JobEvent started_event;
+        started_event.event_type = "started";
+        started_event.job_id = response.job_id();
+        started_event.message = "Job started";
+        started_event.progress = 0;
+        started_event.done = false;
+        state->events.push_back(started_event);
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            jobs_[state->job_id] = state;
+        }
+
+        return response.job_id();
+#endif
     }
 
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id) {
@@ -795,12 +981,15 @@ public:
                     ScheduleReconnectIfNeeded();
                 }
                 JobEvent error_event;
+                error_event.event_type = "error";
                 error_event.job_id = job_id;
                 error_event.error = "Not connected to server";
+                error_event.message = error_event.error;
                 error_event.done = true;
                 return std::vector<JobEvent>{error_event};
             }
 
+#ifndef CROUPIER_SDK_HAS_NNG
             std::cout << "Streaming job events for: " << job_id << '\n';
             auto job = findJob(job_id);
             if (!job) {
@@ -818,18 +1007,80 @@ public:
 
             std::lock_guard<std::mutex> lock(jobs_mutex_);
             return job->events;
+#else
+            {
+                std::lock_guard<std::mutex> lock(jobs_mutex_);
+                auto it = jobs_.find(job_id);
+                if (it != jobs_.end()) {
+                    events.insert(events.end(), it->second->events.begin(), it->second->events.end());
+                    if (!events.empty() && IsTerminalJobEvent(events.back())) {
+                        jobs_.erase(it);
+                        return events;
+                    }
+                }
+            }
+
+            for (int attempt = 0; attempt < 120; ++attempt) {
+                croupier::sdk::v1::JobStreamRequest req;
+                req.set_job_id(job_id);
+
+                std::vector<uint8_t> response_body;
+                {
+                    std::lock_guard<std::mutex> lock(transport_mutex_);
+                    if (!transport_ || !transport_->IsConnected()) {
+                        JobEvent error_event;
+                        error_event.job_id = job_id;
+                        error_event.error = "Connection lost while streaming job";
+                        error_event.done = true;
+                        events.push_back(error_event);
+                        return events;
+                    }
+                    auto response = transport_->Call(protocol::MSG_STREAM_JOB_REQUEST, SerializeMessage(req));
+                    response_body = std::move(response.second);
+                }
+
+                auto proto_event = ParseMessage<croupier::sdk::v1::JobEvent>(response_body, "JobEvent");
+                JobEvent event = ToJobEvent(job_id, proto_event);
+                if (events.empty() || !SameJobEvent(events.back(), event)) {
+                    events.push_back(event);
+                }
+
+                {
+                    std::lock_guard<std::mutex> lock(jobs_mutex_);
+                    auto& state = jobs_[job_id];
+                    if (!state) {
+                        state = std::make_shared<LocalJobState>();
+                        state->job_id = job_id;
+                    }
+                    state->events = events;
+                    if (IsTerminalJobEvent(event)) {
+                        state->done = true;
+                    }
+                }
+
+                if (IsTerminalJobEvent(event)) {
+                    std::lock_guard<std::mutex> lock(jobs_mutex_);
+                    jobs_.erase(job_id);
+                    return events;
+                }
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }
+
+            JobEvent timeout_event;
+            timeout_event.event_type = "error";
+            timeout_event.job_id = job_id;
+            timeout_event.error = "Timed out waiting for job completion";
+            timeout_event.message = timeout_event.error;
+            timeout_event.done = true;
+            events.push_back(timeout_event);
+            return events;
+#endif
         });
     }
 
     bool CancelJob(const std::string& job_id) {
-        if (!connected_ && !connectInternal()) {
-            if (IsConnectionError()) {
-                ScheduleReconnectIfNeeded();
-            }
-            std::cerr << "Not connected to server" << '\n';
-            return false;
-        }
-
+#ifndef CROUPIER_SDK_HAS_NNG
         if (job_id.empty()) {
             std::cerr << "Job ID is required" << '\n';
             return false;
@@ -850,6 +1101,40 @@ public:
         appendJobEvent(job, cancelled);
         std::cout << "Job cancellation sent: " << job_id << '\n';
         return true;
+#else
+        if (!connected_ && !connectInternal()) {
+            if (IsConnectionError()) {
+                ScheduleReconnectIfNeeded();
+            }
+            std::cerr << "Not connected to server" << '\n';
+            return false;
+        }
+        croupier::sdk::v1::CancelJobRequest req;
+        req.set_job_id(job_id);
+
+        {
+            std::lock_guard<std::mutex> lock(transport_mutex_);
+            if (!transport_ || !transport_->IsConnected()) {
+                std::cerr << "Not connected to server" << '\n';
+                return false;
+            }
+            transport_->Call(protocol::MSG_CANCEL_JOB_REQUEST, SerializeMessage(req));
+        }
+
+        std::lock_guard<std::mutex> lock(jobs_mutex_);
+        auto it = jobs_.find(job_id);
+        if (it != jobs_.end()) {
+            JobEvent cancelled_event;
+            cancelled_event.event_type = "cancelled";
+            cancelled_event.job_id = job_id;
+            cancelled_event.message = "Job cancelled";
+            cancelled_event.done = true;
+            it->second->events.push_back(cancelled_event);
+            it->second->cancelled = true;
+            it->second->done = true;
+        }
+        return true;
+#endif
     }
 
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
@@ -887,8 +1172,19 @@ public:
         }
 
         connected_ = false;
+        {
+            std::lock_guard<std::mutex> lock(transport_mutex_);
+            if (transport_) {
+                transport_->Close();
+                transport_.reset();
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            jobs_.clear();
+        }
         schemas_.clear();
-        std::cout << "Invoker closed" << '\n';
+        SDK_LOG_INFO("Invoker closed");
     }
 
     std::shared_ptr<LocalJobState> findJob(const std::string& job_id) {

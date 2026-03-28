@@ -14,12 +14,66 @@
 namespace croupier {
 namespace sdk {
 
+#ifdef CROUPIER_SDK_HAS_NNG
 // Helper function to format hex values
 static std::string formatHex(uint32_t value) {
     std::stringstream ss;
     ss << "0x" << std::hex << value;
     return ss.str();
 }
+#endif
+
+#ifndef CROUPIER_SDK_HAS_NNG
+
+NNGTransport::NNGTransport(const std::string& address, int timeout_ms)
+    : address_(address), connected_(false) {
+    (void)timeout_ms;
+}
+
+NNGTransport::~NNGTransport() = default;
+
+void NNGTransport::Connect() {
+    throw std::runtime_error("NNG transport is unavailable: SDK was built without nng");
+}
+
+void NNGTransport::Close() {
+    connected_ = false;
+}
+
+bool NNGTransport::IsConnected() const {
+    return false;
+}
+
+std::pair<uint32_t, std::vector<uint8_t>> NNGTransport::Call(uint32_t, const std::vector<uint8_t>&) {
+    throw std::runtime_error("NNG transport is unavailable: SDK was built without nng");
+}
+
+NNGServer::NNGServer(const std::string& address, int timeout_ms)
+    : address_(address), running_(false) {
+    (void)timeout_ms;
+}
+
+NNGServer::~NNGServer() = default;
+
+void NNGServer::SetHandler(Handler handler) {
+    handler_ = std::move(handler);
+}
+
+void NNGServer::Start() {
+    throw std::runtime_error("NNG server is unavailable: SDK was built without nng");
+}
+
+void NNGServer::Stop() {
+    running_ = false;
+}
+
+bool NNGServer::IsRunning() const {
+    return false;
+}
+
+void NNGServer::ServeLoop() {}
+
+#else
 
 // ========== NNGTransport Implementation ==========
 
@@ -269,6 +323,8 @@ void NNGServer::ServeLoop() {
                           ", req_id=" + std::to_string(parsed.req_id));
     }
 }
+
+#endif
 
 }  // namespace sdk
 }  // namespace croupier
