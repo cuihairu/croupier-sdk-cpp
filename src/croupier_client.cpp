@@ -69,7 +69,7 @@ namespace croupier {
 namespace sdk {
 
 namespace {
-std::string EscapeJsonString(const std::string& value) {
+[[maybe_unused]] std::string EscapeJsonString(const std::string& value) {
     std::string escaped;
     escaped.reserve(value.size());
     for (char ch : value) {
@@ -1008,6 +1008,7 @@ public:
             std::lock_guard<std::mutex> lock(jobs_mutex_);
             return job->events;
 #else
+            std::vector<JobEvent> events;
             {
                 std::lock_guard<std::mutex> lock(jobs_mutex_);
                 auto it = jobs_.find(job_id);
