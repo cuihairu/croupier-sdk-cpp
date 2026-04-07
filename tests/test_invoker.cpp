@@ -3,7 +3,7 @@
 #include "croupier/sdk/croupier_client.h"
 #include "croupier/sdk/nng_transport.h"
 #include "croupier/sdk/protocol.h"
-#include "generated/croupier/sdk/v1/invocation.pb.h"
+#include "croupier/sdk/v1/invocation.pb.h"
 
 #include <chrono>
 #include <random>

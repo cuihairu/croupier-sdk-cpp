@@ -4,7 +4,7 @@
 #include "croupier/sdk/nng_transport.h"
 #include "croupier/sdk/utils/json_utils.h"
 #ifdef CROUPIER_SDK_HAS_NNG
-#include "generated/croupier/sdk/v1/invocation.pb.h"
+#include "croupier/sdk/v1/invocation.pb.h"
 #endif
 
 #include <algorithm>

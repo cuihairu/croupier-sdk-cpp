@@ -137,6 +137,22 @@ else()
     set(JSON_LIBRARY "")
 endif()
 
+# The NNG-backed invoker path depends on protobuf message implementations.
+# In current HTTP/JSON mode we do not regenerate proto sources in CI, so fall
+# back to the checked-in generated invocation bindings when they were not
+# populated by ProtoGeneration.cmake.
+if(nng_FOUND AND (NOT DEFINED GENERATED_PROTO_SOURCES OR NOT GENERATED_PROTO_SOURCES))
+    set(_sdk_generated_proto_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
+    set(_sdk_generated_invocation_cc "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.cc")
+    set(_sdk_generated_invocation_h "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.h")
+    if(EXISTS "${_sdk_generated_invocation_cc}" AND EXISTS "${_sdk_generated_invocation_h}")
+        set(PROTO_GENERATED_DIR "${_sdk_generated_proto_dir}")
+        set(GENERATED_PROTO_SOURCES "${_sdk_generated_invocation_cc}")
+        set(GENERATED_PROTO_HEADERS "${_sdk_generated_invocation_h}")
+        message(STATUS "Using checked-in generated invocation protobuf sources")
+    endif()
+endif()
+
 # ========== Lua Binding ==========
 if(ENABLE_LUA_BINDING)
     # Set up search paths for vcpkg-installed packages when using manifest mode
