@@ -18,6 +18,8 @@
 
 #include <cstdint>
 #include <cstring>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -239,7 +241,11 @@ inline std::string MsgIDString(uint32_t msg_id) {
         case MSG_HEARTBEAT_LOCAL_RESPONSE: return "HeartbeatLocalResponse";
         case MSG_LIST_LOCAL_REQUEST: return "ListLocalRequest";
         case MSG_LIST_LOCAL_RESPONSE: return "ListLocalResponse";
-        default: return "Unknown(0x" + std::to_string(msg_id) + ")";
+        default: {
+            std::ostringstream stream;
+            stream << "Unknown(0x" << std::uppercase << std::hex << msg_id << ")";
+            return stream.str();
+        }
     }
 }
 

@@ -311,6 +311,7 @@ TEST_F(UtilsTest, InvokerRequiresAddress) {
     invoker.Close();
 }
 
+#ifndef CROUPIER_SDK_HAS_NNG
 TEST_F(UtilsTest, InvokerStartJobStreamsCompletedEvent) {
     InvokerConfig config;
     config.address = "http://127.0.0.1:8080";
@@ -353,6 +354,7 @@ TEST_F(UtilsTest, InvokerCancelJobEmitsCancelledEvent) {
 
     invoker.Close();
 }
+#endif
 
 TEST_F(UtilsTest, ParseObjectDescriptorFromJson) {
     const std::string json = R"({
