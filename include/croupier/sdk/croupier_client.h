@@ -20,8 +20,17 @@ using FunctionHandler = std::function<std::string(const std::string& context, co
 
 // Function descriptor matching proto definition (control.proto)
 struct FunctionDescriptor {
-    std::string id;         // function id, e.g. "player.ban"
-    std::string version;    // semver, e.g. "1.2.0"
+    std::string id;                // function id, e.g. "player.ban"
+    std::string version;           // semver, e.g. "1.2.0"
+    std::vector<std::string> tags; // function tags
+    std::string summary;           // short summary
+    std::string description;       // long description
+    std::string operation_id;      // stable operation identifier
+    bool deprecated = false;       // whether this function is deprecated
+    std::string input_schema;      // JSON schema for input payload
+    std::string output_schema;     // JSON schema for output payload
+
+    // Legacy fields kept for backward compatibility with existing examples/tests.
     std::string category;   // grouping category
     std::string risk;       // "low"|"medium"|"high"
     std::string entity;     // entity type, e.g. "item", "player"

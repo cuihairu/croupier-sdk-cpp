@@ -145,11 +145,18 @@ if(nng_FOUND AND (NOT DEFINED GENERATED_PROTO_SOURCES OR NOT GENERATED_PROTO_SOU
     set(_sdk_generated_proto_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
     set(_sdk_generated_invocation_cc "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.cc")
     set(_sdk_generated_invocation_h "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.h")
-    if(EXISTS "${_sdk_generated_invocation_cc}" AND EXISTS "${_sdk_generated_invocation_h}")
+    set(_sdk_generated_provider_cc "${_sdk_generated_proto_dir}/croupier/sdk/v1/provider.pb.cc")
+    set(_sdk_generated_provider_h "${_sdk_generated_proto_dir}/croupier/sdk/v1/provider.pb.h")
+    if(EXISTS "${_sdk_generated_invocation_cc}" AND EXISTS "${_sdk_generated_invocation_h}" AND
+       EXISTS "${_sdk_generated_provider_cc}" AND EXISTS "${_sdk_generated_provider_h}")
         set(PROTO_GENERATED_DIR "${_sdk_generated_proto_dir}")
-        set(GENERATED_PROTO_SOURCES "${_sdk_generated_invocation_cc}")
-        set(GENERATED_PROTO_HEADERS "${_sdk_generated_invocation_h}")
-        message(STATUS "Using checked-in generated invocation protobuf sources")
+        set(GENERATED_PROTO_SOURCES
+            "${_sdk_generated_invocation_cc}"
+            "${_sdk_generated_provider_cc}")
+        set(GENERATED_PROTO_HEADERS
+            "${_sdk_generated_invocation_h}"
+            "${_sdk_generated_provider_h}")
+        message(STATUS "Using checked-in generated invocation/provider protobuf sources")
     endif()
 endif()
 

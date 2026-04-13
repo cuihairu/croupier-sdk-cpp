@@ -5,6 +5,7 @@
 #include "croupier/sdk/utils/json_utils.h"
 #ifdef CROUPIER_SDK_HAS_NNG
 #include "croupier/sdk/v1/invocation.pb.h"
+#include "croupier/sdk/v1/provider.pb.h"
 #endif
 
 #include <algorithm>
@@ -120,6 +121,53 @@ std::string NormalizeNNGAddress(const std::string& address) {
     return "tcp://" + address;
 }
 
+bool EndsWith(const std::string& value, const std::string& suffix) {
+    return value.size() >= suffix.size() &&
+           value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string ResolveLocalListenAddress(const std::string& address) {
+    std::string normalized = NormalizeNNGAddress(address.empty() ? "127.0.0.1:0" : address);
+    if (!EndsWith(normalized, ":0")) {
+        return normalized;
+    }
+
+    const auto prefix = normalized.substr(0, normalized.size() - 1);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis(20000, 45000);
+    return prefix + std::to_string(dis(gen));
+}
+
+std::string SerializeMetadataToJson(const google::protobuf::Map<std::string, std::string>& metadata) {
+    std::ostringstream json;
+    json << "{";
+    bool first = true;
+    for (const auto& entry : metadata) {
+        if (!first) {
+            json << ",";
+        }
+        json << "\"" << EscapeJsonString(entry.first) << "\":\"" << EscapeJsonString(entry.second) << "\"";
+        first = false;
+    }
+    json << "}";
+    return json.str();
+}
+
+std::string NormalizeProviderJobEventType(const croupier::sdk::v1::JobEvent& event) {
+    if (event.type() == "done") {
+        return "completed";
+    }
+    if (event.type() == "error") {
+        std::string message = event.message();
+        std::transform(message.begin(), message.end(), message.begin(), ::tolower);
+        if (message.find("cancel") != std::string::npos) {
+            return "cancelled";
+        }
+    }
+    return event.type();
+}
+
 std::vector<uint8_t> SerializeMessage(const google::protobuf::Message& message) {
     std::string bytes;
     if (!message.SerializeToString(&bytes)) {
@@ -139,22 +187,22 @@ T ParseMessage(const std::vector<uint8_t>& bytes, const std::string& type_name) 
 
 JobEvent ToJobEvent(const std::string& job_id, const croupier::sdk::v1::JobEvent& event) {
     JobEvent result;
-    result.event_type = event.type();
+    result.event_type = NormalizeProviderJobEventType(event);
     result.job_id = job_id;
     result.message = event.message();
     result.progress = event.progress();
     result.payload = event.payload();
-    result.done =
-        result.event_type == "done" || result.event_type == "completed" || result.event_type == "error";
-    if (result.event_type == "error") {
+    result.done = result.event_type == "completed" || result.event_type == "error" ||
+                  result.event_type == "cancelled";
+    if (result.event_type == "error" || result.event_type == "cancelled") {
         result.error = event.message();
     }
     return result;
 }
 
 bool IsTerminalJobEvent(const JobEvent& event) {
-    return event.done || event.event_type == "done" || event.event_type == "completed" ||
-           event.event_type == "error" || event.event_type == "cancelled";
+    return event.done || event.event_type == "completed" || event.event_type == "error" ||
+           event.event_type == "cancelled";
 }
 
 bool SameJobEvent(const JobEvent& lhs, const JobEvent& rhs) {
@@ -248,6 +296,16 @@ std::string ToJSON(const std::map<std::string, std::string>& data) {
 // Client Implementation
 class CroupierClient::Impl {
 public:
+#ifdef CROUPIER_SDK_HAS_NNG
+    struct LocalJobState {
+        std::string job_id;
+        std::vector<JobEvent> events;
+        std::atomic<bool> done{false};
+        std::atomic<bool> cancelled{false};
+        std::thread worker;
+    };
+#endif
+
     ClientConfig config_;
     std::map<std::string, FunctionHandler> handlers_;
     std::map<std::string, FunctionDescriptor> descriptors_;
@@ -260,6 +318,17 @@ public:
     std::atomic<bool> connected_{false};
     std::thread server_thread_;
     std::string local_address_;
+#ifdef CROUPIER_SDK_HAS_NNG
+    std::unique_ptr<NNGTransport> transport_;
+    std::unique_ptr<NNGServer> server_;
+    std::mutex transport_mutex_;
+    std::mutex jobs_mutex_;
+    std::unordered_map<std::string, std::shared_ptr<LocalJobState>> jobs_;
+    std::string session_id_;
+    std::thread heartbeat_thread_;
+    std::atomic<bool> should_stop_heartbeat_{false};
+    std::string last_error_;
+#endif
 
     // Reconnection state
     std::atomic<bool> is_reconnecting_{false};
@@ -286,6 +355,10 @@ public:
         // Validate environment
         if (config_.env != "development" && config_.env != "staging" && config_.env != "production") {
             SDK_LOG_WARN("Unknown environment '" << config_.env << "'. Valid values: development, staging, production");
+        }
+
+        if (config_.service_id.empty()) {
+            config_.service_id = "cpp-sdk-" + utils::NewIdempotencyKey().substr(0, 8);
         }
 
         SDK_LOG_INFO("Initialized CroupierClient for game '" << config_.game_id << "' in '" << config_.env
@@ -481,20 +554,84 @@ public:
 
     // Re-register all functions
     void RegisterAllFunctions() {
-        // Functions are auto-registered via HTTP/JSON API
+        if (!connected_) {
+            return;
+        }
+#ifdef CROUPIER_SDK_HAS_NNG
+        try {
+            std::unique_ptr<NNGTransport> replacement =
+                std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.agent_addr), config_.timeout_seconds * 1000);
+            replacement->Connect();
+            std::string session_id = registerWithAgent(*replacement);
+
+            std::lock_guard<std::mutex> lock(transport_mutex_);
+            if (transport_) {
+                transport_->Close();
+            }
+            transport_ = std::move(replacement);
+            session_id_ = std::move(session_id);
+        } catch (const std::exception& e) {
+            last_error_ = e.what();
+            connected_ = false;
+            SDK_LOG_ERROR("Failed to re-register local functions: " << last_error_);
+        }
+#endif
     }
 
     bool Connect() {
         if (connected_)
             return true;
 
+#ifndef CROUPIER_SDK_HAS_NNG
         SDK_LOG_INFO("Connecting to server via HTTP/JSON");
-        // TODO: Implement actual HTTP connection check
         connected_ = true;
         return true;
+#else
+        if (handlers_.empty()) {
+            SDK_LOG_ERROR("Register at least one function before connecting");
+            return false;
+        }
+
+        try {
+            startLocalServer();
+
+            auto transport =
+                std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.agent_addr), config_.timeout_seconds * 1000);
+            transport->Connect();
+            std::string session_id = registerWithAgent(*transport);
+
+            {
+                std::lock_guard<std::mutex> lock(transport_mutex_);
+                if (transport_) {
+                    transport_->Close();
+                }
+                transport_ = std::move(transport);
+                session_id_ = std::move(session_id);
+            }
+
+            connected_ = true;
+            running_ = true;
+            last_error_.clear();
+            startHeartbeatLoop();
+            SDK_LOG_INFO("Connected to agent at " << NormalizeNNGAddress(config_.agent_addr)
+                                                  << " and registered local endpoint " << local_address_);
+            return true;
+        } catch (const std::exception& e) {
+            last_error_ = e.what();
+            connected_ = false;
+            stopHeartbeatLoop();
+            closeTransport();
+            stopLocalServer();
+            SDK_LOG_ERROR("Failed to connect/register client: " << last_error_);
+            return false;
+        }
+#endif
     }
 
     void Serve() {
+        if (!connected_) {
+            Connect();
+        }
         running_ = true;
         SDK_LOG_INFO("Croupier client service started");
         SDK_LOG_INFO("Registered functions: " << handlers_.size());
@@ -517,6 +654,8 @@ public:
 
         SDK_LOG_INFO("Stopping Croupier client...");
 
+        stopHeartbeatLoop();
+
         // Signal reconnection thread to stop
         should_stop_reconnecting_ = true;
 
@@ -531,11 +670,33 @@ public:
             server_thread_.join();
         }
 
+#ifdef CROUPIER_SDK_HAS_NNG
+        closeTransport();
+        stopLocalServer();
+        session_id_.clear();
+#endif
+
         SDK_LOG_INFO("Client fully stopped");
     }
 
     void Close() {
         Stop();
+#ifdef CROUPIER_SDK_HAS_NNG
+        std::vector<std::shared_ptr<LocalJobState>> jobs_to_close;
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            for (const auto& entry : jobs_) {
+                jobs_to_close.push_back(entry.second);
+            }
+            jobs_.clear();
+        }
+        for (const auto& job : jobs_to_close) {
+            job->cancelled = true;
+            if (job->worker.joinable()) {
+                job->worker.join();
+            }
+        }
+#endif
         handlers_.clear();
         descriptors_.clear();
     }
@@ -543,6 +704,265 @@ public:
     std::string GetLocalAddress() const { return local_address_; }
 
     bool IsConnected() const { return connected_; }
+
+#ifdef CROUPIER_SDK_HAS_NNG
+    void startLocalServer() {
+        if (server_ && server_->IsRunning()) {
+            return;
+        }
+
+        local_address_ = ResolveLocalListenAddress(config_.local_listen);
+        auto server = std::make_unique<NNGServer>(local_address_, config_.timeout_seconds * 1000);
+        server->SetHandler([this](uint32_t msg_type, uint32_t /*req_id*/, const std::vector<uint8_t>& body) {
+            switch (msg_type) {
+            case protocol::MSG_INVOKE_REQUEST:
+                return handleInvoke(body);
+            case protocol::MSG_START_JOB_REQUEST:
+                return handleStartJob(body);
+            case protocol::MSG_STREAM_JOB_REQUEST:
+                return handleStreamJob(body);
+            case protocol::MSG_CANCEL_JOB_REQUEST:
+                return handleCancelJob(body);
+            default:
+                throw std::runtime_error("unsupported local RPC message: " + protocol::MsgIDString(msg_type));
+            }
+        });
+        server->Start();
+        server_ = std::move(server);
+    }
+
+    void stopLocalServer() {
+        if (server_) {
+            server_->Stop();
+            server_.reset();
+        }
+    }
+
+    void closeTransport() {
+        std::lock_guard<std::mutex> lock(transport_mutex_);
+        if (transport_) {
+            transport_->Close();
+            transport_.reset();
+        }
+    }
+
+    std::string registerWithAgent(NNGTransport& transport) {
+        croupier::sdk::v1::RegisterLocalRequest request;
+        request.set_service_id(config_.service_id);
+        request.set_version(config_.service_version);
+        request.set_rpc_addr(local_address_);
+
+        for (const auto& [function_id, desc] : descriptors_) {
+            auto* fn = request.add_functions();
+            fn->set_id(function_id);
+            fn->set_version(desc.version);
+            for (const auto& tag : desc.tags) {
+                fn->add_tags(tag);
+            }
+            if (!desc.summary.empty()) {
+                fn->set_summary(desc.summary);
+            }
+            if (!desc.description.empty()) {
+                fn->set_description(desc.description);
+            }
+            if (!desc.operation_id.empty()) {
+                fn->set_operation_id(desc.operation_id);
+            }
+            fn->set_deprecated(desc.deprecated);
+            if (!desc.input_schema.empty()) {
+                fn->set_input_schema(desc.input_schema);
+            }
+            if (!desc.output_schema.empty()) {
+                fn->set_output_schema(desc.output_schema);
+            }
+        }
+
+        auto [_, response_body] = transport.Call(protocol::MSG_REGISTER_LOCAL_REQUEST, SerializeMessage(request));
+        auto response =
+            ParseMessage<croupier::sdk::v1::RegisterLocalResponse>(response_body, "RegisterLocalResponse");
+        if (response.session_id().empty()) {
+            throw std::runtime_error("RegisterLocal returned empty session_id");
+        }
+        return response.session_id();
+    }
+
+    void startHeartbeatLoop() {
+        stopHeartbeatLoop();
+        should_stop_heartbeat_ = false;
+        heartbeat_thread_ = std::thread([this]() {
+            const auto interval = std::max(1, config_.heartbeat_interval);
+            while (!should_stop_heartbeat_) {
+                for (int elapsed = 0; elapsed < interval * 10 && !should_stop_heartbeat_; ++elapsed) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+                if (should_stop_heartbeat_) {
+                    break;
+                }
+
+                try {
+                    sendHeartbeat();
+                } catch (const std::exception& e) {
+                    last_error_ = e.what();
+                    connected_ = false;
+                    SDK_LOG_WARN("Heartbeat failed: " << last_error_);
+                    break;
+                }
+            }
+        });
+    }
+
+    void stopHeartbeatLoop() {
+        should_stop_heartbeat_ = true;
+        if (heartbeat_thread_.joinable()) {
+            heartbeat_thread_.join();
+        }
+    }
+
+    void sendHeartbeat() {
+        croupier::sdk::v1::HeartbeatRequest request;
+        request.set_service_id(config_.service_id);
+        request.set_session_id(session_id_);
+
+        std::lock_guard<std::mutex> lock(transport_mutex_);
+        if (!transport_ || !transport_->IsConnected()) {
+            throw std::runtime_error("heartbeat transport is not connected");
+        }
+        transport_->Call(protocol::MSG_HEARTBEAT_LOCAL_REQUEST, SerializeMessage(request));
+    }
+
+    std::vector<uint8_t> handleInvoke(const std::vector<uint8_t>& body) {
+        auto request = ParseMessage<croupier::sdk::v1::InvokeRequest>(body, "InvokeRequest");
+        auto handler_it = handlers_.find(request.function_id());
+        if (handler_it == handlers_.end()) {
+            throw std::runtime_error("function not found: " + request.function_id());
+        }
+
+        croupier::sdk::v1::InvokeResponse response;
+        response.set_payload(handler_it->second(SerializeMetadataToJson(request.metadata()), request.payload()));
+        return SerializeMessage(response);
+    }
+
+    std::vector<uint8_t> handleStartJob(const std::vector<uint8_t>& body) {
+        auto request = ParseMessage<croupier::sdk::v1::InvokeRequest>(body, "InvokeRequest");
+        auto handler_it = handlers_.find(request.function_id());
+        if (handler_it == handlers_.end()) {
+            throw std::runtime_error("function not found: " + request.function_id());
+        }
+
+        auto job = std::make_shared<LocalJobState>();
+        job->job_id = request.function_id() + "-" + utils::NewIdempotencyKey().substr(0, 12);
+
+        JobEvent started;
+        started.event_type = "started";
+        started.job_id = job->job_id;
+        started.message = "job started";
+        started.progress = 0;
+        appendProviderJobEvent(job, started);
+
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            jobs_[job->job_id] = job;
+        }
+
+        const std::string metadata_json = SerializeMetadataToJson(request.metadata());
+        const std::string payload = request.payload();
+        auto handler = handler_it->second;
+        job->worker = std::thread([this, job, handler, metadata_json, payload]() {
+            try {
+                const std::string result = handler(metadata_json, payload);
+                if (job->cancelled) {
+                    return;
+                }
+
+                JobEvent completed;
+                completed.event_type = "completed";
+                completed.job_id = job->job_id;
+                completed.message = "job completed";
+                completed.progress = 100;
+                completed.payload = result;
+                completed.done = true;
+                appendProviderJobEvent(job, completed);
+            } catch (const std::exception& e) {
+                if (job->cancelled) {
+                    return;
+                }
+
+                JobEvent error;
+                error.event_type = "error";
+                error.job_id = job->job_id;
+                error.message = e.what();
+                error.error = e.what();
+                error.done = true;
+                appendProviderJobEvent(job, error);
+            }
+        });
+
+        croupier::sdk::v1::StartJobResponse response;
+        response.set_job_id(job->job_id);
+        return SerializeMessage(response);
+    }
+
+    std::vector<uint8_t> handleStreamJob(const std::vector<uint8_t>& body) {
+        auto request = ParseMessage<croupier::sdk::v1::JobStreamRequest>(body, "JobStreamRequest");
+        croupier::sdk::v1::JobEvent response;
+
+        auto job = findProviderJob(request.job_id());
+        if (!job) {
+            response.set_type("error");
+            response.set_message("job not found");
+            return SerializeMessage(response);
+        }
+
+        JobEvent latest;
+        {
+            std::lock_guard<std::mutex> lock(jobs_mutex_);
+            if (!job->events.empty()) {
+                latest = job->events.back();
+            }
+        }
+
+        response.set_type(latest.event_type);
+        response.set_message(latest.error.empty() ? latest.message : latest.error);
+        response.set_progress(latest.progress);
+        response.set_payload(latest.payload);
+        return SerializeMessage(response);
+    }
+
+    std::vector<uint8_t> handleCancelJob(const std::vector<uint8_t>& body) {
+        auto request = ParseMessage<croupier::sdk::v1::CancelJobRequest>(body, "CancelJobRequest");
+        auto job = findProviderJob(request.job_id());
+
+        if (job && !job->done) {
+            job->cancelled = true;
+            JobEvent cancelled;
+            cancelled.event_type = "cancelled";
+            cancelled.job_id = request.job_id();
+            cancelled.message = "job cancelled";
+            cancelled.error = cancelled.message;
+            cancelled.done = true;
+            appendProviderJobEvent(job, cancelled);
+        }
+
+        return {};
+    }
+
+    std::shared_ptr<LocalJobState> findProviderJob(const std::string& job_id) {
+        std::lock_guard<std::mutex> lock(jobs_mutex_);
+        auto it = jobs_.find(job_id);
+        if (it == jobs_.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
+
+    void appendProviderJobEvent(const std::shared_ptr<LocalJobState>& job, const JobEvent& event) {
+        std::lock_guard<std::mutex> lock(jobs_mutex_);
+        job->events.push_back(event);
+        if (event.done) {
+            job->done = true;
+        }
+    }
+#endif
 };
 
 // Invoker Implementation
@@ -1496,6 +1916,40 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
                 }
                 if (func.contains("version")) {
                     func_desc.version = func["version"];
+                }
+                if (func.contains("tags") && func["tags"].is_array()) {
+                    for (const auto& tag : func["tags"]) {
+                        if (tag.is_string()) {
+                            func_desc.tags.push_back(tag.get<std::string>());
+                        }
+                    }
+                }
+                if (func.contains("summary")) {
+                    func_desc.summary = func["summary"];
+                }
+                if (func.contains("description")) {
+                    func_desc.description = func["description"];
+                }
+                if (func.contains("operation_id")) {
+                    func_desc.operation_id = func["operation_id"];
+                }
+                if (func.contains("operationId")) {
+                    func_desc.operation_id = func["operationId"];
+                }
+                if (func.contains("deprecated")) {
+                    func_desc.deprecated = func["deprecated"];
+                }
+                if (func.contains("input_schema")) {
+                    func_desc.input_schema = func["input_schema"];
+                }
+                if (func.contains("inputSchema")) {
+                    func_desc.input_schema = func["inputSchema"];
+                }
+                if (func.contains("output_schema")) {
+                    func_desc.output_schema = func["output_schema"];
+                }
+                if (func.contains("outputSchema")) {
+                    func_desc.output_schema = func["outputSchema"];
                 }
                 if (func.contains("category")) {
                     func_desc.category = func["category"];
