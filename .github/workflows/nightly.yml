@@ -14,20 +14,24 @@ env:
   BUILD_TYPE: Release
   SDK_VERSION_BASE: "0.1"
   VCPKG_BUILD_TYPE: release
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   version:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       version: ${{ steps.version.outputs.version }}
       version_tag: ${{ steps.version.outputs.version_tag }}
     steps:
-    - uses: actions/checkout@v5
+    - timeout-minutes: 3
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
     - name: Generate Version
       id: version
+      timeout-minutes: 2
       run: |
         DATE=$(date +%Y%m%d)
         TIME=$(date +%H%M)
@@ -85,15 +89,18 @@ jobs:
             display_name: "macOS ARM64"
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Setup Windows Environment
       if: runner.os == 'Windows'
+      timeout-minutes: 5
       run: |
         choco install ninja
         ninja --version
@@ -101,28 +108,33 @@ jobs:
 
     - name: Setup MSVC Developer Command Prompt
       if: runner.os == 'Windows'
+      timeout-minutes: 3
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{ matrix.arch }}
 
     - name: Setup Linux Environment
       if: runner.os == 'Linux'
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build
 
     - name: Setup Linux Cross-compilation
       if: matrix.cross_compile && runner.os == 'Linux'
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
     - name: Setup macOS Environment
       if: runner.os == 'macOS'
+      timeout-minutes: 5
       run: |
         brew install ninja
 
     - name: Setup vcpkg
+      timeout-minutes: 5
       uses: lukka/run-vcpkg@v11
       env:
         VCPKG_FORCE_SYSTEM_BINARIES: 1
@@ -131,22 +143,17 @@ jobs:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
         vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: false
-
-    - name: Export GitHub Actions cache environment variables
-      uses: actions/github-script@v7
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+        doNotCache: true
 
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
+      timeout-minutes: 15
       run: |
         cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_OVERLAY_PORTS="${{ github.workspace }}/vcpkg-overlays" -DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}" -DVCPKG_BUILD_TYPE="${{ env.VCPKG_BUILD_TYPE }}" -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
+      timeout-minutes: 15
       run: |
         BUILD_TESTS=ON
         BUILD_EXAMPLES=ON
@@ -179,10 +186,12 @@ jobs:
           -DCPACK_PACKAGE_VERSION="${{ needs.version.outputs.version }}"
 
     - name: Build SDK
+      timeout-minutes: 15
       run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
     - name: Run Tests
       if: matrix.arch == 'x64' && !matrix.cross_compile
+      timeout-minutes: 10
       run: |
         if [ "$RUNNER_OS" = "Windows" ]; then
           # Add build output directory and vcpkg bin directory to PATH for DLL discovery
@@ -192,6 +201,7 @@ jobs:
       shell: bash
 
     - name: Create Separate Static and Dynamic Packages
+      timeout-minutes: 10
       run: |
         mkdir -p package-static package-dynamic
         cmake --install build --prefix package-install
@@ -220,19 +230,21 @@ jobs:
           tar -czf "croupier-cpp-sdk-dynamic-${{ needs.version.outputs.version }}-${{ matrix.artifact_name }}.tar.gz" -C package-dynamic .
         fi
 
-        echo "📦 Package files created:"
+        echo "Package files created:"
         ls -la croupier-cpp-sdk-*-${{ matrix.artifact_name }}.*
       shell: bash
 
     - name: Upload Static Library Artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-cpp-sdk-static-${{ matrix.artifact_name }}
         path: croupier-cpp-sdk-static-*-${{ matrix.artifact_name }}.*
         retention-days: 30
 
     - name: Upload Dynamic Library Artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-cpp-sdk-dynamic-${{ matrix.artifact_name }}
         path: croupier-cpp-sdk-dynamic-*-${{ matrix.artifact_name }}.*
@@ -241,12 +253,15 @@ jobs:
   release:
     needs: [version, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
 
     - name: Delete existing nightly release and tag
+      timeout-minutes: 2
       run: |
         # Delete existing release if it exists
         gh release delete nightly --yes || true
@@ -256,18 +271,21 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Download All Static Artifacts
-      uses: actions/download-artifact@v4
+      timeout-minutes: 3
+      uses: actions/download-artifact@v8
       with:
         pattern: croupier-cpp-sdk-static-*
         path: static-artifacts/
 
     - name: Download All Dynamic Artifacts
-      uses: actions/download-artifact@v4
+      timeout-minutes: 3
+      uses: actions/download-artifact@v8
       with:
         pattern: croupier-cpp-sdk-dynamic-*
         path: dynamic-artifacts/
 
     - name: Prepare Release Assets
+      timeout-minutes: 5
       run: |
         mkdir -p release_assets
 
@@ -279,44 +297,46 @@ jobs:
           cp "$file" release_assets/
         done
 
-        echo "📦 Release assets:"
+        echo "Release assets:"
         ls -la release_assets/
         echo ""
-        echo "📊 Package summary:"
+        echo "Package summary:"
         echo "Static packages: $(ls release_assets/*static* 2>/dev/null | wc -l)"
         echo "Dynamic packages: $(ls release_assets/*dynamic* 2>/dev/null | wc -l)"
         echo "Total packages: $(ls release_assets/*.* 2>/dev/null | wc -l)"
 
     - name: Generate Release Notes
+      timeout-minutes: 2
       run: |
         cat << EOF > RELEASE_NOTES.md
         # Croupier C++ SDK Nightly Build ${{ needs.version.outputs.version }}
 
-        ## 📦 Available Packages
+        ## Available Packages
 
         ### Static Library Packages
-        - 🪟 Windows: \`croupier-cpp-sdk-static-*-windows-x64.zip\`
-        - 🐧 Linux: \`croupier-cpp-sdk-static-*-linux-x64.tar.gz\`
-        - 🍎 macOS: \`croupier-cpp-sdk-static-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-static-*-macos-arm64.tar.gz\`
+        - Windows: `croupier-cpp-sdk-static-*-windows-x64.zip`
+        - Linux: `croupier-cpp-sdk-static-*-linux-x64.tar.gz`
+        - macOS: `croupier-cpp-sdk-static-*-macos-x64.tar.gz`, `croupier-cpp-sdk-static-*-macos-arm64.tar.gz`
 
         ### Dynamic Library Packages
-        - 🪟 Windows: \`croupier-cpp-sdk-dynamic-*-windows-x64.zip\`
-        - 🐧 Linux: \`croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz\`
-        - 🍎 macOS: \`croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz\`, \`croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz\`
+        - Windows: `croupier-cpp-sdk-dynamic-*-windows-x64.zip`
+        - Linux: `croupier-cpp-sdk-dynamic-*-linux-x64.tar.gz`
+        - macOS: `croupier-cpp-sdk-dynamic-*-macos-x64.tar.gz`, `croupier-cpp-sdk-dynamic-*-macos-arm64.tar.gz`
 
-        ## 🛠️ Build Information
+        ## Build Information
         - Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
         - Commit: ${{ github.sha }}
         - Workflow: ${{ github.run_id }}
         - Version Tag: ${{ needs.version.outputs.version_tag }}
 
         ---
-        ⚠️ **This is a nightly build and may be unstable.** For stable releases, please use the official tagged releases.
+        **This is a nightly build and may be unstable.** For stable releases, please use the official tagged releases.
 
         EOF
 
     - name: Create Nightly Release
-      uses: softprops/action-gh-release@v2
+      timeout-minutes: 10
+      uses: softprops/action-gh-release@v3
       with:
         tag_name: ${{ needs.version.outputs.version_tag }}
         name: "Croupier C++ SDK Nightly ${{ needs.version.outputs.version }}"
@@ -327,4 +347,3 @@ jobs:
         generate_release_notes: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

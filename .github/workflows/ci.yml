@@ -9,17 +9,23 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # Code quality checks (format + static analysis)
   code-quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true  # 仅警告，不阻止合并
 
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
 
     - name: Install clang tools
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y clang-format-17 clang-tidy-17
@@ -27,21 +33,24 @@ jobs:
         sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 100
 
     - name: Check code formatting
+      timeout-minutes: 10
       run: |
         echo "::group::Checking code formatting with clang-format"
         find src include examples tests -name '*.cpp' -o -name '*.h' | head -100 | while read file; do
           if ! clang-format --dry-run --Werror "$file" 2>/dev/null; then
-            echo "::warning file=$file::Code formatting issues detected"
+            echo "Code formatting issues detected: $file"
           fi
         done
         echo "::endgroup::"
 
     - name: Run clang-format diff
+      timeout-minutes: 10
       run: |
         echo "Files with formatting differences:"
         find src include examples tests -name '*.cpp' -o -name '*.h' | head -100 | xargs -I {} sh -c 'diff -u {} <(clang-format {}) || true' 2>/dev/null | head -200 || true
 
     - name: Run clang-tidy (basic checks)
+      timeout-minutes: 10
       run: |
         echo "::group::Running clang-tidy static analysis"
         # 只检查主要源文件，跳过生成的代码
@@ -51,13 +60,14 @@ jobs:
             clang-tidy "$file" \
               --checks='-*,bugprone-*,clang-analyzer-*,performance-*,modernize-use-nullptr,modernize-use-override' \
               --quiet \
-              -- -std=c++17 -I include -I src 2>/dev/null || echo "::warning file=$file::clang-tidy found issues"
+              -- -std=c++17 -I include -I src 2>/dev/null || echo "clang-tidy found issues: $file"
           fi
         done
         echo "::endgroup::"
 
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false  # 允许一个构建失败时其他继续
       max-parallel: 1   # 串行构建避免 vcpkg 并行配置问题
@@ -66,27 +76,30 @@ jobs:
 
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Install system dependencies
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-        VCPKG_DEFAULT_TRIPLET: x64-linux
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: false  # 启用缓存以避免重复构建
+    - name: Bootstrap vcpkg
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
+        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
+        echo "VCPKG_DEFAULT_TRIPLET=x64-linux" >> "$GITHUB_ENV"
+        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
 
     - name: Configure CMake
+      timeout-minutes: 15
       env:
         VCPKG_MAX_CONCURRENCY: 1  # 限制 vcpkg 内部并行度
       run: |
@@ -100,13 +113,16 @@ jobs:
           -DBUILD_TESTS=ON
 
     - name: Build
+      timeout-minutes: 15
       run: cmake --build build --config ${{ matrix.build-type }} --parallel
 
     - name: Test
+      timeout-minutes: 10
       run: cd build && ctest --build-config ${{ matrix.build-type }} --output-on-failure
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-cpp-sdk-${{ matrix.build-type }}
         path: |
@@ -115,6 +131,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -123,33 +140,51 @@ jobs:
 
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Setup MSVC environment
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
+      timeout-minutes: 3
+      shell: pwsh
+      run: |
+        $vsWhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio/Installer/vswhere.exe"
+        $installPath = & $vsWhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $installPath) {
+          throw "Visual Studio with C++ tools was not found."
+        }
+
+        $vsDevCmd = Join-Path $installPath "Common7/Tools/VsDevCmd.bat"
+        $env:VSCMD_SKIP_SENDTELEMETRY = "1"
+
+        cmd /c "`"$vsDevCmd`" -no_logo -arch=x64 -host_arch=x64 && set" |
+          ForEach-Object {
+            if ($_ -match '^[^=]+=') {
+              Add-Content -Path $env:GITHUB_ENV -Value $_
+            }
+          }
 
     - name: Install Ninja
-      run: choco install ninja -y
+      timeout-minutes: 5
+      shell: pwsh
+      run: |
+        if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) {
+          choco install ninja -y
+        }
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: false  # 启用缓存
-        extraCacheKeys: ${{ matrix.runtime }} ${{ matrix.build-type }}
-      env:
-        # 防止 VS2022 自带的 vcpkg 干扰我们的 vcpkg 检测
-        # 确保 vcpkg 使用我们的实例，而不是 VS2022 自带的副本
-        VCPKG_ROOT: '${{ github.workspace }}/vcpkg'
+    - name: Bootstrap vcpkg
+      timeout-minutes: 5
+      shell: pwsh
+      run: |
+        $vcpkgRoot = "${{ github.workspace }}/vcpkg"
+        & "$vcpkgRoot/bootstrap-vcpkg.bat" -disableMetrics
+        "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        $vcpkgRoot | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Configure CMake (Static Runtime)
       if: matrix.runtime == 'static'
+      timeout-minutes: 15
       shell: pwsh
       run: |
         $env:CC = ''
@@ -169,6 +204,7 @@ jobs:
 
     - name: Configure CMake (Dynamic Runtime)
       if: matrix.runtime == 'dynamic'
+      timeout-minutes: 15
       shell: pwsh
       run: |
         $env:CC = ''
@@ -187,9 +223,11 @@ jobs:
           -DBUILD_TESTS=OFF
 
     - name: Build
+      timeout-minutes: 15
       run: cmake --build build --config ${{ matrix.build-type }} --parallel
 
     - name: Prepare artifacts
+      timeout-minutes: 5
       shell: pwsh
       run: |
         $runtimeSuffix = if ("${{ matrix.runtime }}" -eq "static") { "mt" } else { "md" }
@@ -257,35 +295,40 @@ jobs:
         "@ | Out-File -FilePath "artifacts/$artifactName/README.txt" -Encoding UTF8
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-sdk-windows-x64-${{ matrix.build-type }}-${{ matrix.runtime }}
         path: artifacts/
 
   coverage:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Install system dependencies
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build gcovr
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: false
+    - name: Bootstrap vcpkg
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
+        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
+        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
 
     - name: Configure CMake (coverage)
+      timeout-minutes: 15
       env:
         VCPKG_MAX_CONCURRENCY: 1
       run: |
@@ -302,12 +345,15 @@ jobs:
           -DCMAKE_EXE_LINKER_FLAGS="--coverage"
 
     - name: Build (coverage)
+      timeout-minutes: 15
       run: cmake --build build-coverage --config Debug --parallel
 
     - name: Test (coverage)
+      timeout-minutes: 10
       run: cd build-coverage && ctest --build-config Debug --output-on-failure
 
     - name: Generate coverage report
+      timeout-minutes: 5
       run: |
         gcovr -r . \
           --xml-pretty -o coverage.xml \
@@ -319,7 +365,8 @@ jobs:
           --gcov-ignore-parse-errors=negative_hits.warn
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
+      timeout-minutes: 3
+      uses: codecov/codecov-action@v6
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: coverage.xml
@@ -330,28 +377,32 @@ jobs:
     name: Lua Binding Test
     if: false  # TEMPORARILY DISABLED: Lua binding feature not yet implemented
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Install system dependencies
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build lua5.5 liblua5.5-dev || sudo apt-get install -y lua5.4 liblua5.4-dev
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        vcpkgConfigurationArgs: '--feature lua'
+    - name: Bootstrap vcpkg
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
+        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
+        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
 
     - name: Configure CMake with Lua binding
+      timeout-minutes: 15
       env:
         VCPKG_MAX_CONCURRENCY: 1
       run: |
@@ -367,9 +418,11 @@ jobs:
           -DENABLE_LUA_BINDING=ON
 
     - name: Build
+      timeout-minutes: 15
       run: cmake --build build --config Release --parallel
 
     - name: Test Lua binding (basic)
+      timeout-minutes: 10
       run: |
         # Create a simple Lua test script
         cat > test_lua.lua << 'EOF'
@@ -383,11 +436,11 @@ jobs:
         end)
 
         if client then
-          print("✓ Lua binding: Client creation successful")
-          print("✓ Lua binding: Module loaded correctly")
+          print("Lua binding: Client creation successful")
+          print("Lua binding: Module loaded correctly")
           return 0
         else
-          print("✗ Lua binding: Client creation failed")
+          print("Lua binding: Client creation failed")
           print("Error:", err)
           return 1
         end
@@ -396,6 +449,7 @@ jobs:
         lua5.5 test_lua.lua || lua5.4 test_lua.lua
 
     - name: Test Lua binding examples
+      timeout-minutes: 10
       run: |
         if [ -f "lua/examples/standalone_example.lua" ]; then
           echo "Testing Lua example file..."
@@ -403,7 +457,8 @@ jobs:
         fi
 
     - name: Upload Lua artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-sdk-lua-binding
         path: |
@@ -414,28 +469,32 @@ jobs:
   skynet-so:
     name: Skynet .so Build Test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - name: Checkout Repository
+      timeout-minutes: 3
       uses: actions/checkout@v5
       with:
         submodules: 'recursive'
 
     - name: Install system dependencies
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build lua5.5 liblua5.5-dev || sudo apt-get install -y lua5.4 liblua5.4-dev git
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        vcpkgConfigurationArgs: '--feature lua'
+    - name: Bootstrap vcpkg
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
+        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
+        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
 
     - name: Clone Skynet
+      timeout-minutes: 5
       run: |
         cd /tmp
         git clone https://github.com/cloudwu/skynet.git
@@ -444,6 +503,7 @@ jobs:
         git checkout tags/${SKYNET_VERSION} 2>/dev/null || echo "Using default branch"
 
     - name: Configure CMake for Skynet .so
+      timeout-minutes: 15
       env:
         VCPKG_MAX_CONCURRENCY: 1
         SKYNET_VERSION: "5.0"
@@ -462,20 +522,23 @@ jobs:
           -DCROUPIER_SKYNET_SO=ON
 
     - name: Build Skynet .so
+      timeout-minutes: 15
       run: cmake --build build-skynet --config Release --parallel
 
     - name: Verify Skynet service files
+      timeout-minutes: 2
       run: |
         echo "Checking Skynet service files..."
         if [ -f "skynet/service/croupier_service.lua" ]; then
-          echo "✓ Skynet service file found"
+          echo "Skynet service file found"
           head -20 skynet/service/croupier_service.lua
         else
-          echo "✗ Skynet service file not found"
+          echo "Skynet service file not found"
           exit 1
         fi
 
     - name: Create Skynet integration package
+      timeout-minutes: 5
       run: |
         mkdir -p skynet-package/cservice
         mkdir -p skynet-package/lua
@@ -484,25 +547,25 @@ jobs:
         # Copy the .so file (Skynet C service)
         if [ -f "build-skynet/lib/libcroupier-sdk.so" ]; then
           cp build-skynet/lib/libcroupier-sdk.so skynet-package/cservice/
-          echo "✓ Copied libcroupier-sdk.so to cservice/"
+          echo "Copied libcroupier-sdk.so to cservice/"
         fi
 
         # Copy Lua bindings
         if [ -d "lua" ]; then
           cp -r lua/* skynet-package/lua/
-          echo "✓ Copied Lua bindings"
+          echo "Copied Lua bindings"
         fi
 
         # Copy Skynet service
         if [ -f "skynet/service/croupier_service.lua" ]; then
           cp skynet/service/croupier_service.lua skynet-package/lua/
-          echo "✓ Copied croupier_service.lua"
+          echo "Copied croupier_service.lua"
         fi
 
         # Copy examples
         if [ -d "skynet/examples" ]; then
           cp -r skynet/examples/* skynet-package/examples/
-          echo "✓ Copied Skynet examples"
+          echo "Copied Skynet examples"
         fi
 
         # Create README
@@ -539,8 +602,8 @@ jobs:
         echo "Skynet package created successfully"
 
     - name: Upload Skynet artifacts
-      uses: actions/upload-artifact@v4
+      timeout-minutes: 3
+      uses: actions/upload-artifact@v7
       with:
         name: croupier-sdk-skynet-so
         path: skynet-package/
-
