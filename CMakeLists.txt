@@ -251,13 +251,15 @@ if(MSVC)
 
     if(CROUPIER_USE_STATIC_RUNTIME)
         # Use static runtime: MT for Release, MTd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+        set(_CROUPIER_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
         message(STATUS "Croupier SDK: Using static runtime library (MT/MTd)")
     else()
         # Use dynamic runtime: MD for Release, MDd for Debug
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+        set(_CROUPIER_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
         message(STATUS "Croupier SDK: Using dynamic runtime library (MD/MDd)")
     endif()
+
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "${_CROUPIER_MSVC_RUNTIME_LIBRARY}")
 endif()
 
 # ========== Compiler Settings ==========
@@ -360,6 +362,11 @@ if(BUILD_SHARED_LIBS)
         ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/lib
     )
+
+    if(MSVC)
+        set_property(TARGET croupier-sdk-shared PROPERTY
+            MSVC_RUNTIME_LIBRARY "${_CROUPIER_MSVC_RUNTIME_LIBRARY}")
+    endif()
 
 
     target_include_directories(croupier-sdk-shared
@@ -514,13 +521,8 @@ if(BUILD_STATIC_LIBS)
 
     # Apply MSVC runtime library setting to static library target
     if(MSVC)
-        if(CROUPIER_USE_STATIC_RUNTIME)
-            set_property(TARGET croupier-sdk-static PROPERTY
-                MSVC_RUNTIME_LIBRARY "MultiThreaded")
-        else()
-            set_property(TARGET croupier-sdk-static PROPERTY
-                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-        endif()
+        set_property(TARGET croupier-sdk-static PROPERTY
+            MSVC_RUNTIME_LIBRARY "${_CROUPIER_MSVC_RUNTIME_LIBRARY}")
     endif()
 
     # On Windows, we do NOT merge static libraries

@@ -137,7 +137,7 @@ TEST_F(InvokerTest, StartJobAndStreamJobPollsRemoteEvents) {
     ASSERT_GE(events.size(), 3U);
     EXPECT_EQ(events.front().event_type, "started");
     EXPECT_EQ(events[1].event_type, "progress");
-    EXPECT_EQ(events.back().event_type, "done");
+    EXPECT_EQ(events.back().event_type, "completed");
     EXPECT_TRUE(events.back().done);
     EXPECT_EQ(events.back().payload, R"({"ok":true})");
 

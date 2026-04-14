@@ -108,17 +108,34 @@ jobs:
     - name: Setup Windows Environment
       if: runner.os == 'Windows'
       timeout-minutes: 5
+      shell: pwsh
       run: |
-        choco install ninja
+        if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) {
+          choco install ninja -y
+        }
         ninja --version
         cmake --version
 
     - name: Setup MSVC Developer Command Prompt
       if: runner.os == 'Windows'
       timeout-minutes: 3
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{ matrix.arch }}
+      shell: pwsh
+      run: |
+        $vsWhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio/Installer/vswhere.exe"
+        $installPath = & $vsWhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $installPath) {
+          throw "Visual Studio with C++ tools was not found."
+        }
+
+        $vsDevCmd = Join-Path $installPath "Common7/Tools/VsDevCmd.bat"
+        $env:VSCMD_SKIP_SENDTELEMETRY = "1"
+
+        cmd /c "`"$vsDevCmd`" -no_logo -arch=${{ matrix.arch }} -host_arch=x64 && set" |
+          ForEach-Object {
+            if ($_ -match '^[^=]+=') {
+              Add-Content -Path $env:GITHUB_ENV -Value $_
+            }
+          }
 
     - name: Setup Linux Environment
       if: runner.os == 'Linux'
@@ -138,19 +155,32 @@ jobs:
       if: runner.os == 'macOS'
       timeout-minutes: 5
       run: |
-        brew install ninja
+        if ! command -v ninja >/dev/null 2>&1; then
+          brew install ninja
+        fi
 
-    - name: Setup vcpkg
+    - name: Bootstrap vcpkg (Windows)
+      if: runner.os == 'Windows'
       timeout-minutes: 5
-      uses: lukka/run-vcpkg@v11
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-        VCPKG_BUILD_TYPE: ${{ env.VCPKG_BUILD_TYPE }}
-      with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        vcpkgGitCommitId: '594ad8871e1e8e45f8e626c015fd611163430207'
-        vcpkgJsonGlob: 'vcpkg.json'
-        doNotCache: true
+      shell: pwsh
+      run: |
+        $vcpkgRoot = "${{ github.workspace }}/vcpkg"
+        & "$vcpkgRoot/bootstrap-vcpkg.bat" -disableMetrics
+        "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "VCPKG_BUILD_TYPE=${{ env.VCPKG_BUILD_TYPE }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        $vcpkgRoot | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Bootstrap vcpkg (Unix)
+      if: runner.os != 'Windows'
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
+        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
+        echo "VCPKG_BUILD_TYPE=${{ env.VCPKG_BUILD_TYPE }}" >> "$GITHUB_ENV"
+        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
 
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
