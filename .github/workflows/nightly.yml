@@ -157,23 +157,18 @@ jobs:
       timeout-minutes: 5
       shell: pwsh
       run: |
-        $vcpkgRoot = "${{ github.workspace }}/vcpkg"
-        & "$vcpkgRoot/bootstrap-vcpkg.bat" -disableMetrics
-        "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        "VCPKG_BUILD_TYPE=${{ env.VCPKG_BUILD_TYPE }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        $vcpkgRoot | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        $scriptPath = Join-Path "${{ github.workspace }}" "scripts/bootstrap-vcpkg.ps1"
+        $vcpkgRoot = Join-Path "${{ github.workspace }}" "vcpkg"
+        & $scriptPath -VcpkgRoot $vcpkgRoot -VcpkgCommit "594ad8871e1e8e45f8e626c015fd611163430207"
 
     - name: Bootstrap vcpkg (Unix)
       if: runner.os != 'Windows'
       timeout-minutes: 5
       shell: bash
       run: |
-        chmod +x "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh"
-        "${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-        echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> "$GITHUB_ENV"
-        echo "VCPKG_FORCE_SYSTEM_BINARIES=1" >> "$GITHUB_ENV"
-        echo "VCPKG_BUILD_TYPE=${{ env.VCPKG_BUILD_TYPE }}" >> "$GITHUB_ENV"
-        echo "${{ github.workspace }}/vcpkg" >> "$GITHUB_PATH"
+        bash "${{ github.workspace }}/scripts/bootstrap-vcpkg.sh" \
+          "${{ github.workspace }}/vcpkg" \
+          "594ad8871e1e8e45f8e626c015fd611163430207"
 
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
