@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package croupier.agent.v1;
+option java_package = "io.github.cuihairu.croupier.agent.v1";
+option java_multiple_files = true;
+
+option go_package = "github.com/cuihairu/croupier/pkg/pb/croupier/agent/v1;agentv1";
+
+// Function Descriptor - Complete definition for a function
+message FunctionDefinition {
+  string id = 1;        // function id, e.g. "player.ban"
+  string version = 2;   // semver, e.g. "1.2.0"
+  string category = 3;  // grouping
+  string risk = 4;      // "low"|"medium"|"high"
+  string entity = 5;    // entity type, e.g. "item", "player"
+  string operation = 6; // operation type, e.g. "create", "read", "update", "delete"
+  bool enabled = 7;     // whether this function is currently enabled
+}
+
+// Service Configuration for SDK clients
+message ServiceConfig {
+  string service_id = 1;
+  string version = 2;
+  string game_id = 3;
+  string env = 4;           // environment: dev, staging, prod
+  string local_addr = 5;    // local listening address
+  int32 timeout_seconds = 6;
+}
+
+// Task Status enumeration
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_QUEUED = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_SUCCEEDED = 3;
+  TASK_STATUS_FAILED = 4;
+  TASK_STATUS_CANCELLED = 5;
+  TASK_STATUS_CANCEL_REQUESTED = 6;
+  TASK_STATUS_TIMED_OUT = 7;
+}
+
+// Task Information
+message TaskInfo {
+  string task_id = 1;
+  string function_id = 2;
+  TaskStatus status = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+  string error = 6;
+  int32 progress = 7;       // 0-100
+}
+
+// Error information for SDK responses
+message ErrorInfo {
+  string code = 1;          // error code
+  string message = 2;       // error message
+  map<string, string> details = 3; // additional error context
+}
