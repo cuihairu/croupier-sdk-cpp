@@ -19,7 +19,7 @@ proto/
 │   └── v1/
 │       ├── register.proto          # Agent 注册
 │       ├── ops.proto               # 运维操作
-│       └── job.proto               # 任务类型（JobStatus, JobEvent）
+│       └── task.proto              # 任务类型（TaskStatus, TaskEvent）
 │
 ├── external/                      # Server → 第三方服务通信
 │   └── v1/

@@ -84,7 +84,7 @@
    - 客户端配置验证
    - InvokeOptions 创建
    - 路由验证
-   - JobEvent 创建
+   - TaskEvent 创建
    - 函数描述符创建
    - 关系验证
    - 复杂数据结构
