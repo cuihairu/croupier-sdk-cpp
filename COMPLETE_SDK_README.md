@@ -175,7 +175,6 @@ config.service_id = "game-backend-01";
 
 // 网络配置
 config.agent_addr = "croupier-agent.internal:19090";
-config.local_listen = "0.0.0.0:0";  // 自动分配端口
 config.timeout_seconds = 60;
 
 // 安全配置
@@ -262,7 +261,6 @@ Game Server (C++ SDK)    ←→    Croupier Agent    ←→    Croupier Server
 | `env` | string | `development` | 环境：development/staging/production |
 | `service_id` | string | `cpp-service` | 服务标识符 |
 | `agent_addr` | string | `127.0.0.1:19090` | Croupier Agent 地址 |
-| `local_listen` | string | `127.0.0.1:0` | 本地服务监听地址 |
 | `insecure` | bool | `true` | 是否使用非安全连接 |
 | `timeout_seconds` | int | `30` | 请求超时时间 |
 

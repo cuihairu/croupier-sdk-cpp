@@ -303,9 +303,9 @@ component.functions.push_back(trade_function);
 |------|------|
 | `Connect()` | 连接到服务器 |
 | `Invoke(function_id, payload, options)` | 同步调用 |
-| `StartJob(function_id, payload, options)` | 启动异步作业 |
-| `StreamJob(job_id)` | 流式获取作业事件 |
-| `CancelJob(job_id)` | 取消作业 |
+| `StartTask(function_id, payload, options)` | 启动异步任务 |
+| `StreamTask(task_id)` | 流式获取任务事件 |
+| `CancelTask(task_id)` | 取消任务 |
 | `SetSchema(function_id, schema)` | 设置验证模式 |
 | `Close()` | 关闭连接 |
 
@@ -319,7 +319,6 @@ component.functions.push_back(trade_function);
 struct ClientConfig {
     // === 连接配置 ===
     std::string agent_addr = "127.0.0.1:19090";  // Agent 地址
-    std::string local_listen = "127.0.0.1:0";    // 本地监听地址
     bool insecure = true;                         // 是否禁用 TLS
 
     // === 连接模式 ===

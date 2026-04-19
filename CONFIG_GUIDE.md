@@ -89,7 +89,6 @@ configs/
   "env": "development",
   "service_id": "backend-dev",
   "agent_addr": "127.0.0.1:19090",
-  "local_listen": "0.0.0.0:0",
   "insecure": true,
   "timeout_seconds": 30,
   "auth": {
@@ -109,7 +108,6 @@ configs/
   "env": "production",
   "service_id": "backend-prod-01",
   "agent_addr": "croupier-agent.internal:19090",
-  "local_listen": "0.0.0.0:0",
   "insecure": false,
   "timeout_seconds": 60,
   "security": {

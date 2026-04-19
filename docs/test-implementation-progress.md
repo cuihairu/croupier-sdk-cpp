@@ -294,7 +294,6 @@
 - **reconnect_max_attempts:** 0 (无限重试)
 - **provider_lang:** cpp
 - **provider_sdk:** croupier-cpp-sdk
-- **local_listen_addr:** 0.0.0.0:0
 
 **里程碑：** 🎉 Config Loader 模块 100% 完成（7/7 文件，88 个测试用例）
 

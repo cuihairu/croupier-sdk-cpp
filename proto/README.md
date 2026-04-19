@@ -82,7 +82,7 @@ Agent 与中央 Server 的通信协议。
 |-----|------|
 | `register.proto` | Agent 向 Server 注册、心跳、能力注册 |
 | `ops.proto` | 运维操作：指标上报、进程管理、系统信息查询 |
-| `job.proto` | 任务类型定义（JobStatus, JobEvent） |
+| `task.proto` | 任务类型定义（TaskStatus, TaskEvent） |
 
 **通信方向**：
 ```
