@@ -1,12 +1,10 @@
 #include "croupier/sdk/croupier_client.h"
 
 #include "croupier/sdk/logger.h"
-#include "croupier/sdk/nng_transport.h"
+#include "croupier/sdk/tcp_transport.h"
 #include "croupier/sdk/utils/json_utils.h"
-#ifdef CROUPIER_SDK_HAS_NNG
 #include "croupier/sdk/v1/invocation.pb.h"
 #include "croupier/sdk/v1/provider.pb.h"
-#endif
 
 #include <algorithm>
 #include <atomic>
@@ -25,7 +23,6 @@
 
 #ifdef CROUPIER_SDK_ENABLE_JSON
 #include <nlohmann/json.hpp>
-#endif
 
 // Logging macros with configuration support
 // These check the global logger configuration before outputting
@@ -108,10 +105,9 @@ namespace {
 }
 }  // namespace
 
-#ifdef CROUPIER_SDK_HAS_NNG
 namespace {
 
-std::string NormalizeNNGAddress(const std::string& address) {
+std::string NormalizeTCPAddress(const std::string& address) {
     if (address.empty()) {
         return address;
     }
@@ -127,7 +123,7 @@ bool EndsWith(const std::string& value, const std::string& suffix) {
 }
 
 std::string ResolveLocalListenAddress(const std::string& address) {
-    std::string normalized = NormalizeNNGAddress(address.empty() ? "127.0.0.1:0" : address);
+    std::string normalized = NormalizeTCPAddress(address.empty() ? "127.0.0.1:0" : address);
     if (!EndsWith(normalized, ":0")) {
         return normalized;
     }
@@ -212,7 +208,6 @@ bool SameJobEvent(const JobEvent& lhs, const JobEvent& rhs) {
 }
 
 }  // namespace
-#endif
 
 // Utility function implementations
 namespace utils {
@@ -296,7 +291,6 @@ std::string ToJSON(const std::map<std::string, std::string>& data) {
 // Client Implementation
 class CroupierClient::Impl {
 public:
-#ifdef CROUPIER_SDK_HAS_NNG
     struct LocalJobState {
         std::string job_id;
         std::vector<JobEvent> events;
@@ -304,7 +298,6 @@ public:
         std::atomic<bool> cancelled{false};
         std::thread worker;
     };
-#endif
 
     ClientConfig config_;
     std::map<std::string, FunctionHandler> handlers_;
@@ -318,9 +311,8 @@ public:
     std::atomic<bool> connected_{false};
     std::thread server_thread_;
     std::string local_address_;
-#ifdef CROUPIER_SDK_HAS_NNG
-    std::unique_ptr<NNGTransport> transport_;
-    std::unique_ptr<NNGServer> server_;
+    std::unique_ptr<TCPTransport> transport_;
+    std::unique_ptr<TCPServer> server_;
     std::mutex transport_mutex_;
     std::mutex jobs_mutex_;
     std::unordered_map<std::string, std::shared_ptr<LocalJobState>> jobs_;
@@ -328,7 +320,6 @@ public:
     std::thread heartbeat_thread_;
     std::atomic<bool> should_stop_heartbeat_{false};
     std::string last_error_;
-#endif
 
     // Reconnection state
     std::atomic<bool> is_reconnecting_{false};
@@ -557,10 +548,9 @@ public:
         if (!connected_) {
             return;
         }
-#ifdef CROUPIER_SDK_HAS_NNG
         try {
-            std::unique_ptr<NNGTransport> replacement =
-                std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.agent_addr), config_.timeout_seconds * 1000);
+            std::unique_ptr<TCPTransport> replacement =
+                std::make_unique<TCPTransport>(NormalizeTCPAddress(config_.agent_addr), config_.timeout_seconds * 1000);
             replacement->Connect();
             std::string session_id = registerWithAgent(*replacement);
 
@@ -575,18 +565,16 @@ public:
             connected_ = false;
             SDK_LOG_ERROR("Failed to re-register local functions: " << last_error_);
         }
-#endif
     }
 
     bool Connect() {
         if (connected_)
             return true;
 
-#ifndef CROUPIER_SDK_HAS_NNG
+
         SDK_LOG_INFO("Connecting to server via HTTP/JSON");
         connected_ = true;
         return true;
-#else
         if (handlers_.empty()) {
             SDK_LOG_ERROR("Register at least one function before connecting");
             return false;
@@ -596,7 +584,7 @@ public:
             startLocalServer();
 
             auto transport =
-                std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.agent_addr), config_.timeout_seconds * 1000);
+                std::make_unique<TCPTransport>(NormalizeTCPAddress(config_.agent_addr), config_.timeout_seconds * 1000);
             transport->Connect();
             std::string session_id = registerWithAgent(*transport);
 
@@ -613,7 +601,7 @@ public:
             running_ = true;
             last_error_.clear();
             startHeartbeatLoop();
-            SDK_LOG_INFO("Connected to agent at " << NormalizeNNGAddress(config_.agent_addr)
+            SDK_LOG_INFO("Connected to agent at " << NormalizeTCPAddress(config_.agent_addr)
                                                   << " and registered local endpoint " << local_address_);
             return true;
         } catch (const std::exception& e) {
@@ -625,7 +613,6 @@ public:
             SDK_LOG_ERROR("Failed to connect/register client: " << last_error_);
             return false;
         }
-#endif
     }
 
     void Serve() {
@@ -670,18 +657,15 @@ public:
             server_thread_.join();
         }
 
-#ifdef CROUPIER_SDK_HAS_NNG
         closeTransport();
         stopLocalServer();
         session_id_.clear();
-#endif
 
         SDK_LOG_INFO("Client fully stopped");
     }
 
     void Close() {
         Stop();
-#ifdef CROUPIER_SDK_HAS_NNG
         std::vector<std::shared_ptr<LocalJobState>> jobs_to_close;
         {
             std::lock_guard<std::mutex> lock(jobs_mutex_);
@@ -696,7 +680,6 @@ public:
                 job->worker.join();
             }
         }
-#endif
         handlers_.clear();
         descriptors_.clear();
     }
@@ -705,14 +688,13 @@ public:
 
     bool IsConnected() const { return connected_; }
 
-#ifdef CROUPIER_SDK_HAS_NNG
     void startLocalServer() {
         if (server_ && server_->IsRunning()) {
             return;
         }
 
         local_address_ = ResolveLocalListenAddress(config_.local_listen);
-        auto server = std::make_unique<NNGServer>(local_address_, config_.timeout_seconds * 1000);
+        auto server = std::make_unique<TCPServer>(local_address_, config_.timeout_seconds * 1000);
         server->SetHandler([this](uint32_t msg_type, uint32_t /*req_id*/, const std::vector<uint8_t>& body) {
             switch (msg_type) {
             case protocol::MSG_INVOKE_REQUEST:
@@ -746,7 +728,7 @@ public:
         }
     }
 
-    std::string registerWithAgent(NNGTransport& transport) {
+    std::string registerWithAgent(TCPTransport& transport) {
         croupier::sdk::v1::RegisterLocalRequest request;
         request.set_service_id(config_.service_id);
         request.set_version(config_.service_version);
@@ -962,7 +944,6 @@ public:
             job->done = true;
         }
     }
-#endif
 };
 
 // Invoker Implementation
@@ -982,7 +963,7 @@ public:
     ReconnectConfig reconnect_config_;
     RetryConfig retry_config_;
     std::map<std::string, std::map<std::string, std::string>> schemas_;
-    std::unique_ptr<NNGTransport> transport_;
+    std::unique_ptr<TCPTransport> transport_;
     std::atomic<bool> connected_{false};
     std::atomic<uint64_t> next_job_id_{1};
     std::mutex transport_mutex_;
@@ -1051,14 +1032,13 @@ public:
             connected_ = false;
             return false;
         }
-#ifndef CROUPIER_SDK_HAS_NNG
+
         last_error_.clear();
         connected_ = true;
         std::cout << "✅ Connected to: " << config_.address << '\n';
         return true;
-#else
         try {
-            auto transport = std::make_unique<NNGTransport>(NormalizeNNGAddress(config_.address),
+            auto transport = std::make_unique<TCPTransport>(NormalizeTCPAddress(config_.address),
                                                             config_.timeout_seconds * 1000);
             transport->Connect();
             {
@@ -1067,7 +1047,7 @@ public:
             }
             last_error_.clear();
             connected_ = true;
-            SDK_LOG_INFO("Connected to: " << NormalizeNNGAddress(config_.address));
+            SDK_LOG_INFO("Connected to: " << NormalizeTCPAddress(config_.address));
             return true;
         } catch (const std::exception& e) {
             last_error_ = e.what();
@@ -1075,7 +1055,6 @@ public:
             SDK_LOG_ERROR("Failed to connect: " << last_error_);
             return false;
         }
-#endif
     }
 
     std::string Invoke(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -1148,7 +1127,7 @@ public:
 
     std::string invokeInternal(const std::string& function_id, const std::string& payload,
                                const InvokeOptions& options) {
-#ifndef CROUPIER_SDK_HAS_NNG
+
         (void)options;  // Suppress unused parameter warning
         std::cout << "Invoking function: " << function_id << '\n';
         std::stringstream response;
@@ -1156,7 +1135,6 @@ public:
                  << "\",\"payload\":" << (payload.empty() ? "null" : payload) << "}";
         std::cout << "Response: " << response.str() << '\n';
         return response.str();
-#else
         croupier::sdk::v1::InvokeRequest req;
         req.set_function_id(function_id);
         req.set_idempotency_key(options.idempotency_key.empty() ? utils::NewIdempotencyKey() : options.idempotency_key);
@@ -1198,7 +1176,6 @@ public:
         auto [_, response_body] = transport_->Call(protocol::MSG_INVOKE_REQUEST, SerializeMessage(req));
         auto response = ParseMessage<croupier::sdk::v1::InvokeResponse>(response_body, "InvokeResponse");
         return response.payload();
-#endif
     }
 
     std::string StartJob(const std::string& function_id, const std::string& payload, const InvokeOptions& options) {
@@ -1271,7 +1248,7 @@ public:
 
     std::string startJobInternal(const std::string& function_id, const std::string& payload,
                                  const InvokeOptions& options) {
-#ifndef CROUPIER_SDK_HAS_NNG
+
         std::cout << "Starting job for function: " << function_id << '\n';
         std::string job_id = "job-" + std::to_string(next_job_id_.fetch_add(1));
         auto job = std::make_shared<LocalJobState>();
@@ -1337,7 +1314,6 @@ public:
 
         std::cout << "Job started: " << job_id << '\n';
         return job_id;
-#else
         croupier::sdk::v1::InvokeRequest req;
         req.set_function_id(function_id);
         req.set_idempotency_key(options.idempotency_key.empty() ? utils::NewIdempotencyKey() : options.idempotency_key);
@@ -1391,7 +1367,6 @@ public:
         }
 
         return response.job_id();
-#endif
     }
 
     std::future<std::vector<JobEvent>> StreamJob(const std::string& job_id) {
@@ -1409,7 +1384,7 @@ public:
                 return std::vector<JobEvent>{error_event};
             }
 
-#ifndef CROUPIER_SDK_HAS_NNG
+
             std::cout << "Streaming job events for: " << job_id << '\n';
             auto job = findJob(job_id);
             if (!job) {
@@ -1427,7 +1402,6 @@ public:
 
             std::lock_guard<std::mutex> lock(jobs_mutex_);
             return job->events;
-#else
             std::vector<JobEvent> events;
             {
                 std::lock_guard<std::mutex> lock(jobs_mutex_);
@@ -1496,12 +1470,11 @@ public:
             timeout_event.done = true;
             events.push_back(timeout_event);
             return events;
-#endif
         });
     }
 
     bool CancelJob(const std::string& job_id) {
-#ifndef CROUPIER_SDK_HAS_NNG
+
         if (job_id.empty()) {
             std::cerr << "Job ID is required" << '\n';
             return false;
@@ -1522,7 +1495,6 @@ public:
         appendJobEvent(job, cancelled);
         std::cout << "Job cancellation sent: " << job_id << '\n';
         return true;
-#else
         if (!connected_ && !connectInternal()) {
             if (IsConnectionError()) {
                 ScheduleReconnectIfNeeded();
@@ -1555,7 +1527,6 @@ public:
             it->second->done = true;
         }
         return true;
-#endif
     }
 
     void SetSchema(const std::string& function_id, const std::map<std::string, std::string>& schema) {
@@ -1980,7 +1951,6 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
                 }
             }
         }
-#else
         // Fallback: use simple JSON parsing
         auto json_simple = utils::JsonUtils::ParseJson(json_content);
 
@@ -1988,7 +1958,6 @@ VirtualObjectDescriptor LoadObjectDescriptor(const std::string& file_path) {
         desc.version = json_simple.value("version", "1.0.0");
         desc.name = json_simple.value("name", "Unnamed Object");
         desc.description = json_simple.value("description", "No description");
-#endif
 
         std::cout << "✅ Successfully loaded virtual object descriptor from: " << file_path << '\n';
         return desc;
@@ -2074,7 +2043,6 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
         if (json_obj.contains("enabled")) {
             desc.enabled = json_obj["enabled"].get<bool>();
         }
-#else
         // Fallback: use simple JSON parsing
         auto json_simple = utils::JsonUtils::ParseJson(json_content);
 
@@ -2084,7 +2052,6 @@ ComponentDescriptor LoadComponentDescriptor(const std::string& file_path) {
         desc.description = json_simple.value("description", "No description");
         desc.type = json_simple.value("type", "generic");
         desc.enabled = true;  // Default to enabled
-#endif
 
         std::cout << "✅ Successfully loaded component descriptor from: " << file_path << '\n';
         return desc;
@@ -2249,12 +2216,10 @@ VirtualObjectDescriptor ParseObjectDescriptor(const std::string& json) {
             desc.metadata[key] = value.is_string() ? value.get<std::string>() : value.dump();
         }
     }
-#else
     desc.id = ExtractJsonStringField(json, "id");
     desc.version = ExtractJsonStringField(json, "version");
     desc.name = ExtractJsonStringField(json, "name");
     desc.description = ExtractJsonStringField(json, "description");
-#endif
 
     return desc;
 }
@@ -2292,14 +2257,12 @@ ComponentDescriptor ParseComponentDescriptor(const std::string& json) {
             }
         }
     }
-#else
     comp.id = ExtractJsonStringField(json, "id");
     comp.version = ExtractJsonStringField(json, "version");
     comp.name = ExtractJsonStringField(json, "name");
     comp.description = ExtractJsonStringField(json, "description");
     comp.type = ExtractJsonStringField(json, "type");
     comp.enabled = json.find("\"enabled\": false") == std::string::npos;
-#endif
 
     return comp;
 }

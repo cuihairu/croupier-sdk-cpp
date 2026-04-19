@@ -1,6 +1,6 @@
 /**
  * @file protocol.h
- * @brief Croupier wire protocol implementation for NNG transport.
+ * @brief Croupier wire protocol implementation for TCP transport.
  *
  * Message Format:
  *   Header (8 bytes):

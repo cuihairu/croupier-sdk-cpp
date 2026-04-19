@@ -65,8 +65,8 @@ else()
     setup_ci_build()
 endif()
 
-# gRPC support has been removed - using NNG transport
-message(STATUS "Building with NNG transport (gRPC removed)")
+# gRPC support has been removed - using TCP transport
+message(STATUS "Building with TCP transport (gRPC removed)")
 
 # ========== vcpkg Integration ==========
 if(ENABLE_VCPKG)
@@ -112,12 +112,8 @@ endif()
 # ========== Dependencies ==========
 find_package(Threads REQUIRED)
 
-# NNG library for nanomsg-next-gen transport
-find_package(nng CONFIG)
-if(nng_FOUND)
-    message(STATUS "Found nng: ${nng_VERSION}")
+if(tcp_ENABLED)
 else()
-    message(WARNING "nng not found, NNG transport will not be available")
 endif()
 
 # Protobuf for message serialization
@@ -137,11 +133,10 @@ else()
     set(JSON_LIBRARY "")
 endif()
 
-# The NNG-backed invoker path depends on protobuf message implementations.
 # In current HTTP/JSON mode we do not regenerate proto sources in CI, so fall
 # back to the checked-in generated invocation bindings when they were not
 # populated by ProtoGeneration.cmake.
-if(nng_FOUND AND (NOT DEFINED GENERATED_PROTO_SOURCES OR NOT GENERATED_PROTO_SOURCES))
+if(tcp_ENABLED AND (NOT DEFINED GENERATED_PROTO_SOURCES OR NOT GENERATED_PROTO_SOURCES))
     set(_sdk_generated_proto_dir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
     set(_sdk_generated_invocation_cc "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.cc")
     set(_sdk_generated_invocation_h "${_sdk_generated_proto_dir}/croupier/sdk/v1/invocation.pb.h")
@@ -301,7 +296,6 @@ set(SDK_SOURCES
     src/utils/file_utils.cpp
     src/config/client_config_loader.cpp
     src/plugin/dynamic_loader.cpp
-    src/nng_transport.cpp
 )
 
 set(SDK_HEADERS
@@ -385,13 +379,12 @@ if(BUILD_SHARED_LIBS)
             Threads::Threads
     )
 
-    # Link NNG for transport
-    if(nng_FOUND)
+    if(tcp_ENABLED)
         target_link_libraries(croupier-sdk-shared
             PUBLIC
-                nng::nng
+                
         )
-        target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_HAS_NNG)
+        target_compile_definitions(croupier-sdk-shared PUBLIC CROUPIER_SDK_HAS_TCP)
     endif()
 
     # Link Protobuf for message serialization
@@ -470,13 +463,12 @@ if(BUILD_STATIC_LIBS)
             Threads::Threads
     )
 
-    # Link NNG for transport
-    if(nng_FOUND)
+    if(tcp_ENABLED)
         target_link_libraries(croupier-sdk-static
             PUBLIC
-                nng::nng
+                
         )
-        target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_HAS_NNG)
+        target_compile_definitions(croupier-sdk-static PUBLIC CROUPIER_SDK_HAS_TCP)
     endif()
 
     # Link Protobuf for message serialization
@@ -701,9 +693,8 @@ if(BUILD_TESTS)
             tests/test_plugin_registry.cpp
         )
 
-        if(nng_FOUND)
+        if(tcp_ENABLED)
             list(APPEND CROUPIER_TEST_SOURCES
-                tests/test_nng_transport.cpp
                 tests/test_invoker.cpp
             )
         endif()

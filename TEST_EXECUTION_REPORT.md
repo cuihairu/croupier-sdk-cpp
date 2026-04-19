@@ -61,7 +61,7 @@
 | googletest | 最新 | 测试框架 |
 | abseil | 202x | C++ 基础库 |
 | protobuf | 4.x | 序列化 |
-| nng | 1.5.x | 消息传输 |
+| tcp | 1.5.x | 消息传输 |
 | nlohmann-json | 3.x | JSON 处理 |
 
 ---
@@ -325,7 +325,7 @@ cd build/debug
 5. libprotobufd.dll - Protobuf 库
 6. libprotobuf-lited.dll - Protobuf Lite
 7. libprotocd.dll - Protobuf 编译器
-8. nng.dll - Nanomsg-ng
+8. tcp.dll - Nanomsg-ng
 
 ---
 

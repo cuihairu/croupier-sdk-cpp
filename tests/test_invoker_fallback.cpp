@@ -17,20 +17,20 @@ InvokerConfig MakeConfig() {
 
 }  // namespace
 
-TEST(InvokerFallbackTest, ConnectUsesFallbackBehaviorWithoutNNG) {
+TEST(InvokerFallbackTest, ConnectUsesFallbackBehaviorWithoutTCP) {
     CroupierInvoker invoker(MakeConfig());
 
-#ifdef CROUPIER_SDK_HAS_NNG
+#ifdef CROUPIER_SDK_HAS_TCP
     SUCCEED();
 #else
     EXPECT_TRUE(invoker.Connect());
 #endif
 }
 
-TEST(InvokerFallbackTest, InvokeUsesFallbackBehaviorWithoutNNG) {
+TEST(InvokerFallbackTest, InvokeUsesFallbackBehaviorWithoutTCP) {
     CroupierInvoker invoker(MakeConfig());
 
-#ifdef CROUPIER_SDK_HAS_NNG
+#ifdef CROUPIER_SDK_HAS_TCP
     SUCCEED();
 #else
     ASSERT_TRUE(invoker.Connect());
@@ -40,10 +40,10 @@ TEST(InvokerFallbackTest, InvokeUsesFallbackBehaviorWithoutNNG) {
 #endif
 }
 
-TEST(InvokerFallbackTest, StartJobUsesFallbackBehaviorWithoutNNG) {
+TEST(InvokerFallbackTest, StartJobUsesFallbackBehaviorWithoutTCP) {
     CroupierInvoker invoker(MakeConfig());
 
-#ifdef CROUPIER_SDK_HAS_NNG
+#ifdef CROUPIER_SDK_HAS_TCP
     SUCCEED();
 #else
     ASSERT_TRUE(invoker.Connect());
@@ -51,10 +51,10 @@ TEST(InvokerFallbackTest, StartJobUsesFallbackBehaviorWithoutNNG) {
 #endif
 }
 
-TEST(InvokerFallbackTest, StreamJobUsesFallbackBehaviorWithoutNNG) {
+TEST(InvokerFallbackTest, StreamJobUsesFallbackBehaviorWithoutTCP) {
     CroupierInvoker invoker(MakeConfig());
 
-#ifdef CROUPIER_SDK_HAS_NNG
+#ifdef CROUPIER_SDK_HAS_TCP
     SUCCEED();
 #else
     ASSERT_TRUE(invoker.Connect());
@@ -68,10 +68,10 @@ TEST(InvokerFallbackTest, StreamJobUsesFallbackBehaviorWithoutNNG) {
 #endif
 }
 
-TEST(InvokerFallbackTest, CancelJobUsesFallbackBehaviorWithoutNNG) {
+TEST(InvokerFallbackTest, CancelJobUsesFallbackBehaviorWithoutTCP) {
     CroupierInvoker invoker(MakeConfig());
 
-#ifdef CROUPIER_SDK_HAS_NNG
+#ifdef CROUPIER_SDK_HAS_TCP
     SUCCEED();
 #else
     ASSERT_TRUE(invoker.Connect());

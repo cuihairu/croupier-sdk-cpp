@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "croupier/sdk/croupier_client.h"
-#include "croupier/sdk/nng_transport.h"
+#include "croupier/sdk/tcp_transport.h"
 #include "croupier/sdk/protocol.h"
 #include "croupier/sdk/v1/invocation.pb.h"
 
@@ -51,8 +51,8 @@ protected:
     std::string server_address_;
 };
 
-TEST_F(InvokerTest, InvokeUsesNNGProtocol) {
-    NNGServer server(server_address_);
+TEST_F(InvokerTest, InvokeUsesTCPProtocol) {
+    TCPServer server(server_address_);
     server.SetHandler([](uint32_t msg_type, uint32_t, const std::vector<uint8_t>& body) -> std::vector<uint8_t> {
         EXPECT_EQ(msg_type, protocol::MSG_INVOKE_REQUEST);
 
@@ -87,7 +87,7 @@ TEST_F(InvokerTest, InvokeUsesNNGProtocol) {
 }
 
 TEST_F(InvokerTest, StartJobAndStreamJobPollsRemoteEvents) {
-    NNGServer server(server_address_);
+    TCPServer server(server_address_);
     std::unordered_map<std::string, int> stream_counts;
 
     server.SetHandler([&stream_counts](uint32_t msg_type, uint32_t, const std::vector<uint8_t>& body) -> std::vector<uint8_t> {
@@ -146,7 +146,7 @@ TEST_F(InvokerTest, StartJobAndStreamJobPollsRemoteEvents) {
 }
 
 TEST_F(InvokerTest, CancelJobSendsProtocolRequest) {
-    NNGServer server(server_address_);
+    TCPServer server(server_address_);
     bool cancel_called = false;
 
     server.SetHandler([&cancel_called](uint32_t msg_type, uint32_t, const std::vector<uint8_t>& body) -> std::vector<uint8_t> {

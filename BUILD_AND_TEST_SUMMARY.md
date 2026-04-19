@@ -12,7 +12,7 @@
 $ vcpkg list
 abseil:x64-windows                                20250814.1
 nlohmann-json:x64-windows                         3.12.0#1
-nng:x64-windows                                   1.11
+tcp:x64-windows                                   1.11
 protobuf:x64-windows                              4.25.1
 gtest:x64-windows                                 1.17.0#2 (via --x-feature tests)
 utf8-range:x64-windows                            5.29.5
@@ -39,7 +39,7 @@ cmake -B build \
 ```
 
 **配置结果：**
-- ✅ Found nng: 1.11.0
+- ✅ Found tcp: 1.11.0
 - ✅ Found protobuf: 25.1.0
 - ✅ Found nlohmann_json: 3.12.0
 - ✅ GTest dependency resolved
@@ -137,7 +137,7 @@ run_tests_direct.bat
 5. libprotobufd.dll - Protocol Buffers 库
 6. libprotobuf-lited.dll - Protocol Buffers Lite
 7. libprotocd.dll - Protocol Buffers 编译器
-8. nng.dll - Nanomsg-ng 消息库
+8. tcp.dll - Nanomsg-ng 消息库
 9. utf8_range.dll (隐式依赖)
 
 ---
@@ -347,7 +347,7 @@ croupier-sdk-tests.vcxproj -> D:\croupier\croupier-sdk-cpp\build\Debug\croupier-
 17. test_main_thread_dispatcher.cpp
 18. test_utils.cpp
 19. test_virtual_objects.cpp
-20. test_nng_transport.cpp
+20. test_tcp_transport.cpp
 
 ### ✅ 依赖 DLL 复制
 
@@ -361,7 +361,7 @@ build/Debug/
 ├── libprotobufd.dll
 ├── libprotobuf-lited.dll
 ├── libprotocd.dll
-└── nng.dll
+└── tcp.dll
 ```
 
 ## ⚠️ 当前问题
